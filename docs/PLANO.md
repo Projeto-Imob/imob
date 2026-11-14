@@ -37,7 +37,7 @@ Fatias grandes ou incertas ganham uma spec própria em `docs/specs/<fatia>.md` a
 
 ## Fase 0 — Fundação de produção
 
-- [ ] **0.1 Repositório no GitHub.**
+- [x] **0.1 Repositório no GitHub.** Concluída em 14/11/2026: `Projeto-Imob/imob` público, `main` protegida (PR obrigatório, CI `qualidade`, `build` e `banco` exigido, sem force-push), hooks quebrados e do GSD removidos das configurações locais.
   - Entrega:
     - framework AIOX e GSD fora do versionamento (D14);
     - primeiro commit;
