@@ -1,0 +1,58 @@
+# Environment & Secrets (regra 17: nunca versione .env*, exceto .env.example)
+.env*
+!.env.example
+*.key
+*.pem
+
+# Dependências
+node_modules/
+.pnp
+.pnp.*
+
+# Next.js e build
+/.next/
+/out/
+/build/
+dist/
+*.tsbuildinfo
+next-env.d.ts
+.vercel
+
+# Testes
+/coverage
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+
+# Catálogo de textos gerado por npm run catalogo
+/src/i18n/catalogo.gerado.json
+
+# Logs
+*.log
+logs/
+npm-debug.log*
+
+# IDE & OS
+.DS_Store
+Thumbs.db
+.idea/
+*.swp
+
+# AIOX Local
+.aiox-core/local/
+.claude/settings.local.json
+.aiox/install-log.txt
+
+# Seed em JSON gerado por npm run seed:json
+/db/seed/seed.gerado.json
+
+# Framework de agentes e ferramentas locais: fora do repositório do produto (decisão D14).
+# Continuam no disco de quem usa; só não são versionados.
+.aiox-core/
+.aiox/
+.claude/
+.agents/
+.github/agents/
+.github/workflows/copilot-setup-steps.yml
+squads/

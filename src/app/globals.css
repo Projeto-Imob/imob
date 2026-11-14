@@ -1,0 +1,104 @@
+/* Só o código do app gera classes (o framework AIOX também fica na raiz). */
+@import "tailwindcss" source("../");
+
+/*
+ * Design tokens (CLAUDE.md, seção 12). Cores e logotipo são provisórios.
+ * Regra do lima: nas áreas claras, o lima nunca é texto, ícone, linha ou marca de gráfico.
+ * Use-o só como preenchimento atrás de texto preto, ou como texto sobre preto (.destaque-sobre-preto).
+ * O teste tests/unit/tokens.test.ts lê este arquivo e mede o contraste das combinações de texto.
+ */
+:root {
+  --cor-lima: #dbdf4a;
+  --cor-preto: #0c0c0c;
+  --cor-grafite: #262626;
+  --cor-off-white: #f4f4f0;
+  --cor-branco: #ffffff;
+  --cor-texto-secundario: #45453f;
+  --cor-texto-discreto: #5d5d55;
+  --cor-borda-controle: #85857b;
+  --cor-secundario-sobre-preto: #a8a89e;
+  --cor-sucesso: #15803d;
+  --cor-atencao: #b45309;
+  --cor-erro: #b91c1c;
+
+  /* Cores de apoio Morar/Investir: configuráveis, pendentes de C1. */
+  --cor-apoio-morar: #9c3d17;
+  --cor-apoio-investir: #1d5a85;
+
+  /* Gráficos: rampa ordinal (≥ 3:1 sobre branco) e paleta categórica. */
+  --cor-grafico-rampa-inicio: #949800;
+  --cor-grafico-rampa-fim: #242500;
+  --cor-grafico-cat-1: #7a7f00;
+  --cor-grafico-cat-2: #2a78d6;
+  --cor-grafico-cat-3: #eb6834;
+  --cor-grafico-cat-4: #6250d6;
+}
+
+@theme inline {
+  --color-lima: var(--cor-lima);
+  --color-preto: var(--cor-preto);
+  --color-grafite: var(--cor-grafite);
+  --color-off-white: var(--cor-off-white);
+  --color-texto-secundario: var(--cor-texto-secundario);
+  --color-texto-discreto: var(--cor-texto-discreto);
+  --color-borda-controle: var(--cor-borda-controle);
+  --color-secundario-sobre-preto: var(--cor-secundario-sobre-preto);
+  --color-sucesso: var(--cor-sucesso);
+  --color-atencao: var(--cor-atencao);
+  --color-erro: var(--cor-erro);
+  --color-apoio-morar: var(--cor-apoio-morar);
+  --color-apoio-investir: var(--cor-apoio-investir);
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-titulo: var(--font-inter-tight), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+}
+
+body {
+  background: var(--cor-off-white);
+  color: var(--cor-preto);
+  font-family: var(--font-sans);
+}
+
+:focus-visible {
+  outline: 3px solid var(--cor-preto);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@layer components {
+  /* Títulos de marca: caixa alta, Bold 800, tracking −3%. */
+  .titulo-marca {
+    font-family: var(--font-titulo);
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: -0.03em;
+  }
+
+  /* Etiqueta: peso 600, caixa alta, tracking 0,14em. */
+  .etiqueta {
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+  }
+
+  /* Destaque de título: bloco lima com texto preto. */
+  .destaque {
+    background: var(--cor-lima);
+    color: var(--cor-preto);
+  }
+
+  /* Sobre preto, o texto é lima. */
+  .destaque-sobre-preto {
+    background: var(--cor-preto);
+    color: var(--cor-lima);
+  }
+}

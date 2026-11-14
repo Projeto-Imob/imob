@@ -1,0 +1,8 @@
+import AxeBuilder from "@axe-core/playwright";
+import { expect, type Page } from "@playwright/test";
+
+/** Critérios WCAG 2.1 A e AA (CLAUDE.md, requisitos não funcionais: axe sem violação). */
+export async function esperarSemViolacoesAxe(page: Page) {
+  const { violations } = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"]).analyze();
+  expect(violations.map((v) => `${v.id}: ${v.help} (${v.nodes.length})`)).toEqual([]);
+}
