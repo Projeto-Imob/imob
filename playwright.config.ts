@@ -2,7 +2,7 @@ import { defineConfig, devices } from "@playwright/test";
 
 const PORTA = 3100;
 
-// E2E em modo local (sem banco). Roda contra o build de produção para medir o que vai ao ar.
+// E2E contra o build de produção, para medir o que vai ao ar.
 export default defineConfig({
   testDir: "tests/e2e",
   fullyParallel: true,
@@ -23,6 +23,5 @@ export default defineConfig({
     url: `http://localhost:${PORTA}`,
     reuseExistingServer: !process.env.CI,
     timeout: 240_000,
-    env: { NEXT_PUBLIC_DATA_SOURCE: "local" },
   },
 });

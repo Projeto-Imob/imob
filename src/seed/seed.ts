@@ -1,7 +1,7 @@
 /**
  * Seed fictício e determinístico de Porto Alegre (tarefa 2.2, design D12).
- * Fonte única do modo local (importado pelo adaptador local) e do seed do banco
- * (`npm run seed:json` gera o JSON consumido no grupo 4). Todo registro tem `exemplo: true`.
+ * Fonte única do seed do banco (`npm run db:reset` e testes) e dos testes de unidade.
+ * Todo registro tem `exemplo: true`.
  * Nomes de pessoas, empresas e empreendimentos são inventados; bairros e coordenadas são
  * referências geográficas públicas e aproximadas.
  */

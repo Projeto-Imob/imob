@@ -1,11 +1,9 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { IDBFactory } from "fake-indexeddb";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { ArquivoRecusado, TAMANHO_MAXIMO_BYTES, detectarTipo, type ArquivoStorage } from "@/data/arquivos";
-import { criarImagensPlataformaIdb } from "@/data/imagens-plataforma-idb";
-import { criarArmazenamentoEmDisco } from "@/server/storage/disco";
+import { ArquivoRecusado, TAMANHO_MAXIMO_BYTES, detectarTipo, type ArquivoStorage } from "@/server/arquivos/arquivos";
+import { criarArmazenamentoEmDisco } from "@/server/arquivos/disco";
 
 const JPG = new Uint8Array([0xff, 0xd8, 0xff, 0xe0, 1, 2, 3]);
 const PNG = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 9, 9]);
@@ -84,14 +82,8 @@ beforeEach(() => {
 });
 afterEach(() => fs.rmSync(pasta, { recursive: true, force: true }));
 
-suiteArquivos("disco local", () => criarArmazenamentoEmDisco(pasta), CHAVE_EMP.replace(".jpg", ".png"));
-suiteArquivos("IndexedDB (imagens da plataforma)", () => criarImagensPlataformaIdb(new IDBFactory()), CHAVE_PLAT);
-
-describe("IndexedDB só guarda imagens da plataforma", () => {
-  it("recusa imagem de empreendimento", async () => {
-    await recusa(criarImagensPlataformaIdb(new IDBFactory()).gravar(CHAVE_EMP, JPG, "image/jpeg"), "chave");
-  });
-});
+suiteArquivos("disco local, imagem de empreendimento", () => criarArmazenamentoEmDisco(pasta), CHAVE_EMP.replace(".jpg", ".png"));
+suiteArquivos("disco local, imagem da plataforma", () => criarArmazenamentoEmDisco(pasta), CHAVE_PLAT);
 
 describe("disco local grava por tenant e empreendimento", () => {
   it("cria o arquivo no caminho da chave", async () => {

@@ -44,9 +44,6 @@ Thumbs.db
 .claude/settings.local.json
 .aiox/install-log.txt
 
-# Seed em JSON gerado por npm run seed:json
-/db/seed/seed.gerado.json
-
 # Framework de agentes e ferramentas locais: fora do repositório do produto (decisão D14).
 # Continuam no disco de quem usa; só não são versionados.
 .aiox-core/

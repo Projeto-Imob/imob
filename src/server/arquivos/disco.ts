@@ -4,7 +4,7 @@
  */
 import fs from "node:fs/promises";
 import path from "node:path";
-import { ArquivoRecusado, validarChave, validarImagem, type ArquivoLido, type ArquivoStorage, type TipoImagem } from "@/data/arquivos";
+import { ArquivoRecusado, validarChave, validarImagem, type ArquivoLido, type ArquivoStorage, type TipoImagem } from "./arquivos";
 
 export function criarArmazenamentoEmDisco(raiz: string): ArquivoStorage {
   const raizAbsoluta = path.resolve(raiz);

@@ -1,9 +1,22 @@
 /**
- * Regras dos eventos anônimos (tarefa 2.13; spec analytics/eventos-e-engajamento), comuns aos adaptadores:
- * ID anônimo, sem IP, sem posição exata e nenhum registro em god mode ou impersonate.
+ * Regras dos eventos anônimos (spec analytics/eventos-e-engajamento):
+ * ID anônimo, sem IP, sem posição exata e nenhum registro em god mode ou impersonate (regra 12).
  */
-import { tipoEvento, type Evento } from "@/dominio/tipos";
-import type { ContextoEvento, NovoEvento } from "./port";
+import { tipoEvento, type Evento, type TipoEvento } from "@/dominio/tipos";
+
+/** Dono dos dados do comprador: a conta, se logado; senão o visitante anônimo. */
+export type Dono = { visitorId: string; contaId: string | null };
+
+export type NovoEvento = {
+  tipo: TipoEvento;
+  empreendimentoId?: string | null;
+  dados?: Record<string, unknown>;
+};
+
+export type ContextoEvento = Dono & {
+  /** God mode ou impersonate: navegação privilegiada não gera evento (regra 12). */
+  privilegiado: boolean;
+};
 
 /** Chaves que nunca são gravadas: IP e posição exata (regra 9). */
 const CHAVES_PROIBIDAS = /^(ip|ips|endereco_?ip|ip_?address|x_?forwarded_?for|lat|lng|lon|long|latitude|longitude|posicao|coords?|coordenadas|geo|localizacao|accuracy|precisao)$/i;

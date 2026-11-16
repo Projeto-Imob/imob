@@ -1,7 +1,6 @@
 /**
- * Porta ArquivoStorage e validação comum de arquivos (tarefa 2.14; design D15).
- * Adaptadores: disco local (src/server/storage/disco.ts, desenvolvimento e e2e), S3 compatível
- * (grupo 6) e IndexedDB para imagens da plataforma no modo local (imagens-plataforma-idb.ts).
+ * Porta ArquivoStorage e validação comum de arquivos (design D15). Só roda no servidor.
+ * Adaptadores: disco local (./disco.ts, desenvolvimento e e2e) e, na fatia 1.8, o R2 (S3 compatível).
  * Imagens: só JPG, PNG e WebP, até 10 MB; SVG nunca. O tipo é conferido pelos bytes.
  */
 
