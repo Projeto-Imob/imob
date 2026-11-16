@@ -1,7 +1,7 @@
 # Perfis, papéis, visibilidade e segurança de acesso
 
 > **Origem:** SPEC 1.0, §3 Perfis, tenants e papéis e §13 (Segurança em três camadas; Testes de banco) — texto da 1.0 preservado abaixo, só convertido para Markdown.
-> **Fase na SPEC 2.0:** v1 (contas, papéis, convites, MFA, RLS, auditoria); impersonate e god mode na fase 2.
+> **Fase na SPEC 2.0:** v1 (contas, papéis, convites, MFA, RLS, auditoria; god mode só com leitura); impersonate e personalização do god mode na fase 2.
 
 ### Esclarecimentos e mudanças da 2.0
 
@@ -10,6 +10,7 @@ Aprovados pelo Matheus em 13/11/2026 (decisões em `docs/PLANO.md`).
 - Modelo de segurança mantido integralmente: RLS como fonte da verdade, `exigirContexto()`, papéis de banco separados e auditoria imutável.
 - Acrescentado: cabeçalhos de segurança e CSP em todas as respostas, e limite de tentativas (rate limit) em login, cadastro, contato e contagem do questionário.
 - Testes de banco rodam contra Postgres real (local e CI) e podem ser escritos em Vitest; não há mais variante de função "só para teste".
+- Fatia 0.2: `app.current_role()` passou a se chamar `app.current_papel()`, porque `current_role` é palavra reservada do Postgres. A conta de comprador (e-mail de login) não é lida pela equipe nem pelo god mode; o contato do comprador chega a eles pelo lead, com consentimento ativo, como na matriz abaixo.
 
 ---
 

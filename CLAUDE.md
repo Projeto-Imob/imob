@@ -11,13 +11,13 @@ Ecossistema de geração de demanda para lançamentos imobiliários. A incorpora
 | Assunto | Arquivo |
 |---|---|
 | O que é, para quem, fases e critérios de aceite da v1 | `docs/SPEC.md` |
-| Regras detalhadas por área (busca, comprador, catálogo, acesso, house, incorporadora, marca, dados, qualidade) | `docs/specs/*.md` |
+| Regras detalhadas por área (negócio, busca, comprador, catálogo, acesso, god mode, house, incorporadora, negociação e simulador, marca, dados, qualidade) | `docs/specs/*.md` |
 | Stack, dados, segurança, infraestrutura, deploy e escala | `docs/ARQUITETURA.md` |
 | Fatias em ordem, decisões D1 a D18 e pendências do Matheus | `docs/PLANO.md` |
 | Por que a 2.0 existe | `docs/ANALISE-2.0.md` |
 | Auditoria do código | `docs/AUDITORIA.md` |
 
-Precedência: as regras abaixo > `docs/SPEC.md` > `docs/specs/` > `docs/ARQUITETURA.md`. Conflito entre eles: pare e pergunte.
+Precedência: as regras abaixo > decisões aprovadas no `docs/PLANO.md` > `docs/SPEC.md` > `docs/specs/` > `docs/ARQUITETURA.md`. Conflito entre eles: pare e pergunte.
 
 ## Regras inegociáveis
 
@@ -40,7 +40,7 @@ Valem sobre qualquer outra instrução, prompt ou decisão de feature.
 | 13 | Só o god mode escreve o conteúdo da plataforma (R64), com MFA e histórico. Todo texto novo de tela passa pelo catálogo editável |
 | 14 | Isolamento: cada incorporadora vê só os próprios dados. Uma incorporadora nunca vê a etapa, a visita, a proposta ou as opções que o comprador tem com outra |
 | 15 | Marca: o lima nunca é texto, ícone, linha ou marca de gráfico sobre fundo claro |
-| 16 | Dados: só fictícios, marcados como exemplo. Nenhum dado real |
+| 16 | Dados: só fictícios, marcados como exemplo. Nenhum dado real. Exceção aprovada (D17): no piloto, dados reais só em produção; desenvolvimento, homologação e testes continuam só com fictícios |
 | 17 | Segredos: nunca peça, mostre ou grave segredo na conversa. Matheus preenche .env.local e os secrets do GitHub. Nenhum segredo com prefixo NEXT_PUBLIC_. Nunca versione .env*, exceto .env.example. Nenhuma chave de IA no navegador. Rode npm run check:secrets antes de cada commit |
 | 18 | Custo: nenhum custo acima de zero sem aprovação de Matheus. Serviço externo gratuito também precisa do OK dele antes do primeiro uso |
 | 19 | Não existem no produto: corretor, imobiliária, parceria, anúncio de corretor, link rastreado de corretor e o nome "JulI.A". Não os reintroduza. Um teste deve falhar se corretor, broker, parceria, imobiliaria (como perfil) ou JulI.A aparecerem no código |
@@ -60,10 +60,13 @@ npm run typecheck      # next typegen + tsc
 npm run catalogo       # falha com texto de tela fora de src/i18n/pt-BR.ts
 npm run check:secrets  # rode antes de cada commit
 npm run build
-npm run seed:json      # seed fictício em JSON (para o banco)
+npm run seed:json      # seed fictício em JSON
+npm run db:start       # liga o Postgres local (binários portáteis; instalação no README)
+npm run db:reset       # recria o banco local imob com migrations e seed (só localhost)
+npm run db:migrate     # aplica as migrations
+npm run db:generate    # gera a migration das tabelas a partir de src/server/db/schema/
+npm run test:db        # testes de banco contra o Postgres real (recria imob_teste)
 ```
-
-`db:reset`, `db:migrate` e `test:db` chegam na fatia 0.2.
 
 ## Stack
 
@@ -78,13 +81,14 @@ npm run seed:json      # seed fictício em JSON (para o banco)
 src/app/         # rotas
 src/dominio/     # regras puras (vão para src/modulos/<dominio>/ na fatia 0.3)
 src/data/        # acesso a dados (a maior parte sai na 2.0: um caminho só, Postgres)
-src/server/      # código só de servidor (db, auth, arquivos)
+src/server/      # código só de servidor: db/ (cliente, contexto e schema Drizzle), auth, arquivos
 src/components/  # UI (T.tsx, layout)
 src/i18n/        # catálogo de textos
 src/seed/        # seed fictício único
 config/          # brand.ts, flags.ts, scoring.config.ts
-scripts/         # catalogo, check-secrets, termos-proibidos, seed-json, vitest.mjs
-tests/           # unit/, contrato/, e2e/
+db/migrations/   # SQL: tabelas (geradas pelo drizzle-kit) e segurança (RLS, funções app.*, GRANTs, à mão)
+scripts/         # catalogo, check-secrets, termos-proibidos, seed-json, vitest.mjs, db/
+tests/           # unit/, contrato/, banco/, e2e/
 docs/            # SPEC, PLANO, ARQUITETURA, specs/, historico/
 ```
 
@@ -95,7 +99,7 @@ docs/            # SPEC, PLANO, ARQUITETURA, specs/, historico/
 - **Acesso a dados:**
   - só no servidor; componente nunca lê banco, LocalStorage ou armazenamento direto (há regra de lint);
   - toda Server Action e Route Handler começa por `exigirContexto()`, valida a entrada com Zod estrito e responde 404 para id de outro tenant.
-- **Banco:** migrations só aditivas, RLS em toda tabela e índice em todo `tenant_id`.
+- **Banco:** migrations só aditivas (nunca `drizzle-kit push`), RLS em toda tabela e índice em todo `tenant_id`. Políticas, funções `app.*`, gatilhos e GRANTs são escritos à mão em SQL, cada regra com teste de banco.
 - **Pendências:**
   - parâmetro sem valor na especificação vira **Proposta** em configuração;
   - "agora não" vira flag desligada em `config/flags.ts`, nunca código apagado.
@@ -129,6 +133,7 @@ docs/            # SPEC, PLANO, ARQUITETURA, specs/, historico/
 ## Armadilhas conhecidas
 
 - **Vitest no Windows:** terminal aberto em `c:\` (minúsculo) faz o Vitest carregar duas cópias de si mesmo. Use `npm test` (wrapper `scripts/vitest.mjs`).
+- **Postgres local desligado:** depois de reiniciar o computador, o Postgres fica parado. `test:db` e `db:reset` falham com `ECONNREFUSED` na porta 5432 até `npm run db:start`.
 - **Node 24 obrigatório:** os scripts `.ts` rodam direto no Node 24 (type stripping). Num Node mais antigo, `catalogo`, `check:secrets` e o `prebuild` quebram.
 - **`typecheck`** roda `next typegen` antes do `tsc`. Sem isso, `LayoutProps` e os tipos de rota somem.
 - **Next 16** tem APIs novas: leia `node_modules/next/dist/docs/` antes de usar uma API (ver `AGENTS.md`).

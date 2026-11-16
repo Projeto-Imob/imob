@@ -8,7 +8,7 @@
 Aprovados pelo Matheus em 13/11/2026 (decisões em `docs/PLANO.md`).
 
 - Pré-lançamento por subcondomínio: unidade de subcondomínio com lançamento futuro ou sem data fica fora da busca enquanto o pré-lançamento estiver desligado (hoje só sai quando todos os subcondomínios estão no futuro — achado da auditoria).
-- Studio: só tipologia residencial do tipo "Studio". Tipologias comerciais e de terreno e a finalidade "Aluguel" ficam fora da busca de compra. (Pergunta em aberto para o Matheus: Kitnet e Loft contam como studio?)
+- Studio: tipologia residencial do tipo "Studio" ou "Loft" (o Loft foi decidido pelo Matheus em 14/11/2026; Kitnet continua fora até decisão em contrário). Tipologias comerciais e de terreno e a finalidade "Aluguel" ficam fora da busca de compra.
 - Nota: soma exata (sem erro de ponto flutuante) e arredondamento para inteiro; o corte de 50 e a janela de 15 valem sobre a nota inteira exibida.
 - Localização: "pontos" usa o ponto mais próximo de cada categoria (escola, parque, hospital, academia) cadastrado no empreendimento.
 - Comportamento: fica fora da conta quando a pessoa não tem nenhuma abertura nem favorito em nenhum empreendimento.

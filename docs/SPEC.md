@@ -14,7 +14,7 @@
 | `docs/ARQUITETURA.md` | Stack, dados, segurança, infraestrutura, deploy, observabilidade e caminho de escala. | Uma decisão técnica muda |
 | `docs/PLANO.md` | Fatias verticais em ordem, decisões datadas e pendências do Matheus. | A cada fatia |
 
-Regra de precedência: `CLAUDE.md` (regras inegociáveis) > `docs/SPEC.md` > `docs/specs/*.md` > `docs/ARQUITETURA.md`. Conflito entre eles é bug de documentação: pare e pergunte.
+Regra de precedência: `CLAUDE.md` (regras inegociáveis) > decisões aprovadas no `docs/PLANO.md` > `docs/SPEC.md` > `docs/specs/*.md` > `docs/ARQUITETURA.md`. Conflito entre eles é bug de documentação: pare e pergunte. Uma decisão nova que mude a SPEC corrige o texto dela no mesmo PR.
 
 ## Problema
 
@@ -30,7 +30,7 @@ O Imob é um ecossistema de geração de demanda: a incorporadora (ou construtor
 | Analista da house de vendas | Receber o lead, qualificar, garantir a visita e passar ao gerente de produtos da incorporadora. | v1 |
 | Incorporadora (superadmin e gerente de produtos) | Ver os próprios empreendimentos, os números agregados e os atendimentos liberados. | v1 mínima; completa na fase 2 |
 | Equipe da plataforma | Cadastrar e publicar empreendimentos (com R.I.), curar, convidar usuários e administrar tenants. | v1 |
-| God mode (só o Matheus) | Ler tudo e editar o conteúdo da plataforma, sem tocar em dado de cliente. | Leitura na v1; personalização na fase 2 |
+| God mode (só o Matheus) | Ler tudo e editar o conteúdo da plataforma, sem tocar em dado de cliente. | Só leitura na v1 (conta por bootstrap com MFA na fatia 1.4; o banco garante a leitura sem escrita desde a 0.2); personalização e impersonate na fase 2 |
 | Plantão da incorporadora e gerente de contas da house | Aparecer no escritório de vendas e atender. | Fase 2 |
 
 Papéis, tenants e a matriz de visibilidade completa: `docs/specs/acesso-e-visibilidade.md`.
@@ -48,7 +48,7 @@ Papéis, tenants e a matriz de visibilidade completa: `docs/specs/acesso-e-visib
 
 | Fase | Objetivo | Conteúdo |
 |---|---|---|
-| **0. Fundação de produção** | Esqueleto que já roda de ponta a ponta no servidor de homologação | Banco com RLS, login, deploy, backup, observabilidade, uma página real lendo do banco |
+| **0. Fundação de produção** | Esqueleto que já roda de ponta a ponta no servidor de homologação | Banco com RLS, deploy, backup, observabilidade, uma página real lendo do banco. O login entra na fatia 1.4 |
 | **1. Piloto (v1)** | Uma incorporadora real com compradores reais | F1 a F12 abaixo |
 | **2. Escala de uso** | Mais incorporadoras e mais volume | Mapa, favoritos, alertas, CRM kanban, mini CRM, cadastro pela incorporadora, god mode, impersonate |
 | **3. Monetização e negociação** | Receita além da comissão | Vitrine Destacada, Mais Buscados, projeto de mídia, proposta/reserva/contrato/venda, simulador, IA |
@@ -179,7 +179,7 @@ Critérios de aceite:
 Como comprador, quero entender a proposta em segundos e começar.
 Critérios de aceite:
 - [ ] a navegação da v1 tem Início, Buscar Imóveis e Minha conta (barra inferior no celular, menu superior no desktop); Mapa e Favoritos entram na fase 2, atrás de flag.
-- [ ] a home escolhe o estado por `resolveHomeState`: no estado novo, hero do modo, "Descubra seu imóvel em 2 minutos", faixa de confiança, "Como funciona" em 3 passos e o fechamento "MIRAR NO AGORA PRA CHEGAR LONGE."; "Continue de onde parou" no estado navegou; o status da visita no estado negociando.
+- [ ] a home escolhe o estado por `resolveHomeState`: no estado novo, hero do modo, "Descubra seu imóvel em 2 minutos", faixa de confiança, "Como funciona" em 3 passos e o fechamento "MIRAR NO AGORA PRA CHEGAR LONGE."; "Continue de onde parou" no estado navegou; "Seus imóveis" e "Novos no seu perfil" no estado perfil (questionário concluído); o status da visita no estado negociando. O estado ativo (com favorito ou alerta) é da fase 2.
 - [ ] destaques (C13), indicadores de bairros (C5) e prova social (C6) ficam desligados.
 - [ ] o rodapé não tem CRECI; os dados de exemplo são indicados como tal.
 - [ ] a marca segue `docs/specs/marca-e-design.md`: lima nunca é texto, ícone, linha ou marca de gráfico sobre fundo claro.
@@ -233,11 +233,11 @@ Lista completa de entidades: `docs/specs/dados.md`. Quem lê e quem escreve: `do
 
 | Serviço | Para quê | Situação |
 |---|---|---|
-| Cloudflare R2 (S3 compatível) | Fotos, plantas, documentos e backups cifrados | Aprovado (D8); conta criada pelo Matheus |
-| Resend (e-mail transacional) | Recuperação de senha, confirmação de visita, convites | Aprovado (D9); obrigatório antes de compradores reais |
+| Cloudflare R2 (S3 compatível) | Fotos, plantas, documentos e backups cifrados | Aprovado (D8); conta Cloudflare criada pelo Matheus; ativar o R2 é pendência da 0.4 |
+| Resend (e-mail transacional) | Recuperação de senha, confirmação de visita, convites | Aprovado (D9); obrigatório antes de compradores reais; conta a criar pelo Matheus (1.5) |
 | MapLibre com OpenFreeMap | Pin no cadastro e mapa na confirmação da visita | Aprovado |
 | WhatsApp | Links `wa.me`, sem API | Sem custo |
-| Sentry e monitor de disponibilidade | Erros de produção e queda | Aprovado (D10) |
+| Sentry e monitor de disponibilidade | Erros de produção e queda | Aprovado (D10); contas a criar pelo Matheus (0.4) |
 | ViaCEP, embed do YouTube, cidade pelo IP | Conforto | Desligados por flag até o OK |
 | IA (Claude) | Motivo e requisitos | Fase 3, desligada (C2) |
 

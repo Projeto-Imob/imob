@@ -8,7 +8,7 @@
 Aprovados pelo Matheus em 13/11/2026 (decisões em `docs/PLANO.md`).
 
 - A jornada completa abaixo é a visão do produto. A v1 (piloto) cobre do cadastro à passagem ao gerente de produtos; proposta, reserva e contrato entram na fase 3, e lead de mídia na fase 3.
-- O piloto com incorporadora real exige revisar a regra 16 (dados só fictícios) para produção; desenvolvimento e homologação continuam só com dados fictícios.
+- Regra 16 revisada pela D17: no piloto, dados reais só em produção; desenvolvimento, homologação e testes continuam só com dados fictícios.
 
 ---
 
