@@ -108,6 +108,7 @@ Fatias grandes ou incertas ganham uma spec própria em `docs/specs/<fatia>.md` a
     - CSP e cabeçalhos de segurança;
     - `check:secrets` com os padrões que faltam e gitleaks no CI;
     - actions por SHA e imagem do Postgres do CI por digest;
+    - Dependabot só com versões menores e de correção. Versão maior (como TypeScript 7, ESLint 10 e `@types/node` acima do Node 24) vira decisão, com PR própria; a PR #2, que juntou as duas coisas e quebrou o CI, é fechada;
     - suíte estável na máquina local.
   - Verificar: um teste novo para cada achado; suíte verde três vezes seguidas.
 
