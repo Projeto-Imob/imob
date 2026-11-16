@@ -63,6 +63,7 @@ Fatias grandes ou incertas ganham uma spec própria em `docs/specs/<fatia>.md` a
     - pré-lançamento avaliado por subcondomínio também no banco (D15): a torre com lançamento futuro some da vitrine com as tipologias e unidades dela;
     - o nome da incorporadora só é público quando ela tem empreendimento na vitrine;
     - a conta de comprador (e-mail de login) não é lida pela equipe nem pelo god mode: o contato do comprador chega a eles pelo lead, com consentimento ativo (matriz de visibilidade);
+    - a house lê só as contas internas: a equipe de vendas da incorporadora fica fora dela (matriz de visibilidade), e o contato do plantão chega pelo escritório de vendas do empreendimento. Corrigido depois da auditoria de 16/11, antes do merge;
     - a função do papel atual chama `app.current_papel()`, porque `current_role` é palavra reservada do Postgres.
 - [ ] **0.3 Primeira fatia vertical e módulos.**
   - Entrega:
@@ -98,7 +99,7 @@ Fatias grandes ou incertas ganham uma spec própria em `docs/specs/<fatia>.md` a
   - Bloqueada por:
     - OK e janela para o endurecimento;
     - subdomínio de homologação;
-    - R2 ativado na conta Cloudflare (já criada), com os buckets e o token, e conta do Sentry, com as chaves gravadas pelo Matheus no cofre e no servidor.
+    - conta do Sentry, com a chave gravada pelo Matheus no cofre e no servidor. O R2 ficou pronto e testado em 16/11/2026: buckets `imob-hml-arquivos` e `imob-backups`, com token só de objetos nesses dois.
 - [ ] **0.5 Correções que a 2.0 mantém** (da `docs/AUDITORIA.md`).
   - Entrega:
     - pré-lançamento por subcondomínio, com os casos do D15 no seed (torre com lançamento futuro e sem data) e paridade TS × SQL;
@@ -284,7 +285,7 @@ Fatiadas quando a v1 estiver no ar, nesta ordem de valor:
 | — | Proposta e contrato continuam dentro do sistema (R5) mesmo com o fluxo Reelly no atendimento? | — | Fase 3 |
 | — | OK e janela para o endurecimento do servidor compartilhado (seção 7 da ARQUITETURA) | — | 0.4 |
 | — | Subdomínios de homologação e de produção | — | 0.4 e 1.10 |
-| — | R2 ativado na conta Cloudflare (conta já criada), com buckets e token; contas do Sentry e do Resend; chaves gravadas pelo Matheus no cofre e no servidor | — | R2 e Sentry: 0.4. Resend: 1.5 (sem ele, flag `email_real` desligada) |
+| — | Contas do Sentry e do Resend, com as chaves gravadas pelo Matheus no cofre e no servidor (o R2 ficou pronto e testado em 16/11/2026) | — | Sentry: 0.4. Resend: 1.5 (sem ele, flag `email_real` desligada) |
 | — | Kitnet conta como studio? | Não | Nada |
 | — | Hetzner Backups do servidor (cerca de +20% do plano; protege também os outros projetos) | `pg_dump` diário no R2 | Nada (recomendado) |
 | — | Memória para a produção: subir o plano ou desligar a homologação, se a medição pedir | Decidir na 1.10 | 1.10 |
