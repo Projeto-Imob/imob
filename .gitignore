@@ -21,6 +21,8 @@ next-env.d.ts
 # Testes
 /coverage
 /test-results/
+# Capturas de tela dos e2e, para o relatório da fatia
+/capturas/
 /playwright-report/
 /blob-report/
 /playwright/.cache/

@@ -5,3 +5,4 @@
 export * from "./tipos";
 export * from "./regras";
 export * from "./elegibilidade";
+export * from "./componentes/FichaEmpreendimento";

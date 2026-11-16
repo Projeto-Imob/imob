@@ -199,3 +199,22 @@ export const plano = z.strictObject({
   exemplo,
 });
 export type Plano = z.infer<typeof plano>;
+
+// ---------- Vitrine pública ----------
+
+/** Resumo público do empreendimento, lido por consultas.ts: sem dado comercial (regra 7). */
+export type EmpreendimentoPublico = {
+  slug: string;
+  nome: string;
+  bairro: string;
+  cidade: string;
+  uf: string;
+  descricao: string;
+  percentualObra: number;
+  /** Nome comercial da incorporadora, público quando ela tem empreendimento na vitrine. */
+  construtora: string | null;
+  /** Maior data de entrega entre as torres que o público vê (AAAA-MM-DD); nula se nenhuma tem data. */
+  entrega: string | null;
+  /** Registro de incorporação: todo empreendimento da vitrine tem (regra 1). */
+  ri: { numero: string; cartorio: string; dataRegistro: string; patrimonioAfetacao: boolean | null };
+};

@@ -23,7 +23,14 @@ export const AREAS: Area[] = [
  * O item ativo usa o lima como preenchimento atrás de texto preto (regra do lima).
  */
 export function NavegacaoPrincipal() {
-  const caminho = usePathname() ?? "/";
+  return <ListaNavegacao caminho={usePathname()} />;
+}
+
+/**
+ * As áreas, com a ativa marcada. Sem caminho conhecido (no shell estático de uma rota com parâmetro,
+ * antes de o caminho chegar), nenhuma área fica ativa.
+ */
+export function ListaNavegacao({ caminho }: { caminho: string | null }) {
   return (
     <nav
       aria-label={texto("nav.rotulo")}
@@ -32,7 +39,7 @@ export function NavegacaoPrincipal() {
     >
       <ul className="grid grid-cols-5 md:flex md:gap-1">
         {AREAS.map((area) => {
-          const ativa = area.ativa(caminho);
+          const ativa = caminho !== null && area.ativa(caminho);
           return (
             <li key={area.href}>
               <Link

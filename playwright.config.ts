@@ -23,5 +23,7 @@ export default defineConfig({
     url: `http://localhost:${PORTA}`,
     reuseExistingServer: !process.env.CI,
     timeout: 240_000,
+    // next start roda em produção e exige DATABASE_URL. Padrão: o Postgres local com o seed (npm run db:reset).
+    env: { DATABASE_URL: process.env.DATABASE_URL ?? "postgres://app_user@localhost:5432/imob" },
   },
 });

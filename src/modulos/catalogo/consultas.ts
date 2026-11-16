@@ -8,27 +8,10 @@ import "server-only";
 import { and, eq, sql } from "drizzle-orm";
 import { consultaPublica } from "@/server/db";
 import { empreendimentos, subcondominios, tenants } from "@/server/db/schema";
-import { empreendimento } from "./tipos";
+import { empreendimento, type EmpreendimentoPublico } from "./tipos";
 
 /** O formato de slug do cadastro, com teto de tamanho: fora dele, "não encontrado" sem ir ao banco. */
 const slugPublico = empreendimento.shape.slug.max(120);
-
-/** Resumo público do empreendimento: sem dado comercial (regra 7). */
-export type EmpreendimentoPublico = {
-  slug: string;
-  nome: string;
-  bairro: string;
-  cidade: string;
-  uf: string;
-  descricao: string;
-  percentualObra: number;
-  /** Nome comercial da incorporadora, público quando ela tem empreendimento na vitrine. */
-  construtora: string | null;
-  /** Maior data de entrega entre as torres que o público vê (AAAA-MM-DD); nula se nenhuma tem data. */
-  entrega: string | null;
-  /** Registro de incorporação: todo empreendimento da vitrine tem (regra 1). */
-  ri: { numero: string; cartorio: string; dataRegistro: string; patrimonioAfetacao: boolean | null };
-};
 
 /** Nulo para slug fora do formato, inexistente ou fora da vitrine: a página responde "não encontrado". */
 export async function lerEmpreendimentoPublico(slug: string): Promise<EmpreendimentoPublico | null> {
