@@ -182,7 +182,7 @@ Critérios de aceite:
 - [ ] a home escolhe o estado por `resolveHomeState`: no estado novo, hero do modo, "Descubra seu imóvel em 2 minutos", faixa de confiança, "Como funciona" em 3 passos e o fechamento "MIRAR NO AGORA PRA CHEGAR LONGE."; "Continue de onde parou" no estado navegou; "Seus imóveis" e "Novos no seu perfil" no estado perfil (questionário concluído); o status da visita no estado negociando. O estado ativo (com favorito ou alerta) é da fase 2.
 - [ ] destaques (C13), indicadores de bairros (C5) e prova social (C6) ficam desligados.
 - [ ] o rodapé não tem CRECI; os dados de exemplo são indicados como tal.
-- [ ] a marca segue `docs/specs/marca-e-design.md`: lima nunca é texto, ícone, linha ou marca de gráfico sobre fundo claro.
+- [ ] a marca segue `docs/specs/marca-e-design.md`: o laranja nunca é texto, ícone, linha ou marca de gráfico sobre fundo claro.
 
 ## Fora da v1
 
