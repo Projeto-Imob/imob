@@ -48,7 +48,8 @@ const eslintConfig = defineConfig([
   {
     files: ["**/*.{ts,tsx,js,jsx,mjs}"],
     // Testes montam os adaptadores diretamente para verificá-los.
-    ignores: ["src/data/**", "src/server/**", "tests/**"],
+    // Scripts de banco e configuração do drizzle-kit precisam do driver.
+    ignores: ["src/data/**", "src/server/**", "tests/**", "scripts/db/**"],
     rules: regrasAcessoDados,
   },
   globalIgnores([

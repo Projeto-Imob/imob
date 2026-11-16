@@ -37,7 +37,6 @@ jobs:
       - run: npm run typecheck
       - run: npm run catalogo
       - run: npm test
-      # npm run test:db (PGlite + pgTAP) entra aqui no grupo 4 (tarefa 4.1).
 
   build:
     name: build
@@ -79,8 +78,33 @@ jobs:
   banco:
     name: banco
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 15
+    # Mesmo Postgres da máquina local (17.12). Banco descartável do CI; as senhas abaixo só existem aqui.
+    services:
+      postgres:
+        image: postgres:17.12
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      DATABASE_URL_ADMIN: postgres://postgres:postgres@localhost:5432/postgres
+      DB_SENHA_MIGRATOR: ci-migrator
+      DB_SENHA_APP_USER: ci-app-user
+      DB_SENHA_AUTH_SERVICE: ci-auth-service
+      DB_SENHA_WORKER: ci-worker
     steps:
-      # Placeholder: no grupo 4 (tarefa 4.18) vira o contêiner postgis/postgis (Postgres 17),
-      # drizzle-kit migrate, seed e pg_prove.
-      - run: echo "Job banco ainda sem migrations (ativado na tarefa 4.18)."
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - run: npm ci
+      # Recria imob_teste, aplica as migrations, grava o seed e roda os testes de banco (RLS, papéis, R.I.).
+      - run: npm run test:db
