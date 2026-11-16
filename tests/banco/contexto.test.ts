@@ -94,6 +94,31 @@ describe("com contexto", () => {
     expect(await comContexto({ contaId: CONTAS.equipePlataforma }, (tx) => contar(tx, "select count(*) as n from contas"))).toBeGreaterThan(3);
   });
 
+  it("a house lê só as contas internas; a equipe e o god mode leem também as das incorporadoras (matriz)", async () => {
+    const contasPorPapel = (contaId: string) =>
+      comContexto({ contaId }, async (tx) =>
+        Object.fromEntries(
+          (await tx.execute(sql`select papel::text as papel, count(*)::int as n from contas group by papel`)).rows.map((r) => [
+            String(r.papel),
+            Number(r.n),
+          ]),
+        ),
+      );
+    const internas = ["internal_account_manager", "internal_admin", "internal_seller", "internal_superadmin"];
+    expect(Object.keys(await contasPorPapel(CONTAS.houseAnalista)).sort()).toEqual(internas);
+    expect(Object.keys(await contasPorPapel(CONTAS.houseGerenteDeContas)).sort()).toEqual(internas);
+
+    for (const contaId of [CONTAS.equipePlataforma, CONTAS.godMode]) {
+      const vistas = await contasPorPapel(contaId);
+      expect(vistas.client_superadmin).toBe(3);
+      expect(vistas.client_manager).toBe(1);
+      expect(vistas.god_mode).toBe(1);
+      expect(vistas.buyer).toBeUndefined();
+    }
+
+    expect(await contasPorPapel(CONTAS.horizonteSuperadmin)).toEqual({ client_superadmin: 1, client_manager: 1 });
+  });
+
   it("incorporadora vê os próprios rascunho e exclusivo, e não os de outra", async () => {
     const horizonte = await comContexto({ contaId: CONTAS.horizonteSuperadmin }, slugs);
     expect(horizonte).toContain(CASOS_EXCLUSAO.semRI);

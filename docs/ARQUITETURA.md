@@ -153,6 +153,7 @@ O modelo da 1.0 está mantido; detalhes em `docs/specs/acesso-e-visibilidade.md`
   - Não listado: só com conta ativa.
   - Comissão: o comprador nunca lê.
   - Conta de comprador: a equipe e o god mode não leem; o contato chega a eles pelo lead, com consentimento.
+  - Contas da incorporadora: a própria incorporadora, a equipe da plataforma e o god mode leem. A house lê só as contas internas: pela matriz, a equipe de vendas da incorporadora fica fora dela, e o contato do plantão chega pelo escritório de vendas do empreendimento.
   - Nome da incorporadora: só com empreendimento na vitrine.
 
 Fica para a fatia 1.4 (com o login): contexto por token de sessão validado no banco, tabela de impersonate, `audit_logs` e lint contra SQL dinâmico.

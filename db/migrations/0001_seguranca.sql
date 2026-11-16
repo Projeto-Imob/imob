@@ -190,13 +190,16 @@ create policy tenants_alteracao on public.tenants for update to app_user
   using ((select app.current_papel()) = 'internal_superadmin' and (select app.pode_escrever()))
   with check ((select app.current_papel()) = 'internal_superadmin' and (select app.pode_escrever()));--> statement-breakpoint
 
--- contas: a própria; as do mesmo tenant; house, equipe e god mode leem só contas que não são de comprador
--- (dados de comprador chegam a quem atende pelos leads, com consentimento, a partir da fatia 1.3).
--- A escrita chega com o login (fatia 1.4).
+-- contas (matriz de visibilidade): a própria; as do mesmo tenant; a equipe da plataforma e o god mode leem todas
+-- as que não são de comprador; a house lê só as contas internas — a equipe de vendas da incorporadora fica fora
+-- dela, e o contato do plantão chega pelo escritório de vendas do empreendimento. Dados de comprador chegam a quem
+-- atende pelos leads, com consentimento, a partir da fatia 1.3. A escrita chega com o login (fatia 1.4).
 create policy contas_leitura on public.contas for select to app_user using (
   id = (select app.current_conta_id())
   or (tenant_id is not null and tenant_id = (select app.current_tenant_id()))
-  or (papel <> 'buyer' and ((select app.is_internal()) or (select app.is_god_mode())))
+  or (papel <> 'buyer' and ((select app.is_equipe_plataforma()) or (select app.is_god_mode())))
+  or (papel in ('internal_seller', 'internal_account_manager', 'internal_admin', 'internal_superadmin')
+      and (select app.is_internal()))
 );--> statement-breakpoint
 
 -- empreendimentos: house, equipe e god mode leem todos; a incorporadora lê os próprios; o público, só a base

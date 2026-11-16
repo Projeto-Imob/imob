@@ -10,7 +10,7 @@ Aprovados pelo Matheus em 13/11/2026 (decisões em `docs/PLANO.md`).
 - Modelo de segurança mantido integralmente: RLS como fonte da verdade, `exigirContexto()`, papéis de banco separados e auditoria imutável.
 - Acrescentado: cabeçalhos de segurança e CSP em todas as respostas, e limite de tentativas (rate limit) em login, cadastro, contato e contagem do questionário.
 - Testes de banco rodam contra Postgres real (local e CI) e podem ser escritos em Vitest; não há mais variante de função "só para teste".
-- Fatia 0.2: `app.current_role()` passou a se chamar `app.current_papel()`, porque `current_role` é palavra reservada do Postgres. A conta de comprador (e-mail de login) não é lida pela equipe nem pelo god mode; o contato do comprador chega a eles pelo lead, com consentimento ativo, como na matriz abaixo.
+- Fatia 0.2: `app.current_role()` passou a se chamar `app.current_papel()`, porque `current_role` é palavra reservada do Postgres. A conta de comprador (e-mail de login) não é lida pela equipe nem pelo god mode; o contato do comprador chega a eles pelo lead, com consentimento ativo, como na matriz abaixo. A house lê só as contas internas: a equipe de vendas da incorporadora fica fora dela, e o contato do plantão chega pelo escritório de vendas.
 
 ---
 

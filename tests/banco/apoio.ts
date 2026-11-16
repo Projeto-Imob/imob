@@ -11,6 +11,7 @@ export const URL_BANCO = {
 /** Contas do seed e contas criadas só para os testes (tests/banco/preparar.ts). */
 export const CONTAS = {
   houseAnalista: uid(2, 1),
+  houseGerenteDeContas: uid(2, 3),
   horizonteSuperadmin: uid(2, 10),
   horizonteGerente: uid(2, 11),
   valeSuperadmin: uid(2, 20),
