@@ -74,7 +74,7 @@ Fatias grandes ou incertas ganham uma spec própria em `docs/specs/<fatia>.md` a
 - [ ] **0.4 Homologação no servidor atual, como stack isolada** (D11; `docs/ARQUITETURA.md`, seção 7).
   - Entrega, parte 1 — endurecimento do servidor compartilhado:
     - firewall de nuvem com 22, 80 e 443;
-    - SSH só por chave, com usuário `deploy` e fail2ban;
+    - SSH só por chave (a chave do Matheus já está instalada e testada), com usuário `deploy` e fail2ban;
     - swap de 2 GB;
     - rotação de logs.
 
@@ -97,7 +97,6 @@ Fatias grandes ou incertas ganham uma spec própria em `docs/specs/<fatia>.md` a
     - stacks vizinhas intactas.
   - Bloqueada por:
     - OK e janela para o endurecimento;
-    - chave SSH do Matheus (a parte pública instalada no servidor antes de fechar o acesso por senha);
     - subdomínio de homologação;
     - R2 ativado na conta Cloudflare (já criada), com os buckets e o token, e conta do Sentry, com as chaves gravadas pelo Matheus no cofre e no servidor.
 - [ ] **0.5 Correções que a 2.0 mantém** (da `docs/AUDITORIA.md`).
@@ -285,7 +284,6 @@ Fatiadas quando a v1 estiver no ar, nesta ordem de valor:
 | — | OK e janela para o endurecimento do servidor compartilhado (seção 7 da ARQUITETURA) | — | 0.4 |
 | — | Subdomínios de homologação e de produção | — | 0.4 e 1.10 |
 | — | R2 ativado na conta Cloudflare (conta já criada), com buckets e token; contas do Sentry e do Resend; chaves gravadas pelo Matheus no cofre e no servidor | — | R2 e Sentry: 0.4. Resend: 1.5 (sem ele, flag `email_real` desligada) |
-| — | Chave SSH do Matheus, com a parte pública instalada no servidor | — | 0.4 (endurecimento) |
 | — | Kitnet conta como studio? | Não | Nada |
 | — | Hetzner Backups do servidor (cerca de +20% do plano; protege também os outros projetos) | `pg_dump` diário no R2 | Nada (recomendado) |
 | — | Memória para a produção: subir o plano ou desligar a homologação, se a medição pedir | Decidir na 1.10 | 1.10 |
