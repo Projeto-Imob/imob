@@ -26,7 +26,7 @@ Fatias grandes ou incertas ganham uma spec própria em `docs/specs/<fatia>.md` a
   - CI, CODEOWNERS e dependabot;
   - layout base.
 
-  Corresponde ao grupo 1 da change OpenSpec. A 1.13 está pendente: falta ver o CI verde numa PR.
+  Corresponde ao grupo 1 da change OpenSpec. A antiga 1.13 (ver o CI verde numa PR) fechou com a 0.1: os quatro jobs passaram na PR #1.
 - [x] Regras puras da busca, com 282 testes, todas reaproveitadas na 2.0:
   - tipos Zod e seed fictício de Porto Alegre;
   - elegibilidade, filtros, exigência por plano, contagem e ampliação;
@@ -37,14 +37,14 @@ Fatias grandes ou incertas ganham uma spec própria em `docs/specs/<fatia>.md` a
 
 ## Fase 0 — Fundação de produção
 
-- [x] **0.1 Repositório no GitHub.** Concluída em 14/11/2026: `Projeto-Imob/imob` público, `main` protegida (PR obrigatório, CI `qualidade`, `build` e `banco` exigido, sem force-push), hooks quebrados e do GSD removidos das configurações locais.
+- [x] **0.1 Repositório no GitHub.** Concluída em 14/11/2026 (PR #1): `Projeto-Imob/imob` público, `main` protegida (PR obrigatório, CI `qualidade`, `build` e `banco` exigido, sem force-push), hooks quebrados e do GSD removidos das configurações locais.
   - Entrega:
     - framework AIOX e GSD fora do versionamento (D14);
     - primeiro commit;
     - repositório público novo `Projeto-Imob/imob` (o `projeto-vieza` fica intacto como histórico do protótipo);
-    - `main` protegida (PR, CI verde e revisão do Matheus).
-  - Verificar: uma PR de teste com os quatro jobs do CI verdes (fecha a antiga 1.13).
-- [ ] **0.2 Banco local e de teste.**
+    - `main` protegida (PR e CI verde). A revisão do Matheus é o próprio merge, que só ele faz: as PRs saem da conta dele e o GitHub não deixa o autor aprovar a própria PR, por isso não há aprovação obrigatória.
+  - Verificar: uma PR de teste com os quatro jobs do CI verdes (fecha a antiga 1.13). Na 0.1, o job `banco` era só um marcador; a 0.2 o liga de verdade.
+- [x] **0.2 Banco local e de teste.** Entregue na PR #2 (16/11/2026): Postgres 17.12 local com binários portáteis (`npm run db:start`), Drizzle, migrations de tabelas e de segurança, seed e 38 testes de banco, local e no CI (job `banco` com `postgres:17.12`).
   - Entrega:
     - Postgres 17 local (D4);
     - Drizzle e drizzle-kit;
@@ -57,9 +57,17 @@ Fatias grandes ou incertas ganham uma spec própria em `docs/specs/<fatia>.md` a
     - consulta como `app_user` sem contexto não retorna linha de cliente;
     - RLS e índice em todo `tenant_id`;
     - publicar sem R.I. é recusado até para o god mode.
+  - Decisões técnicas (detalhes na `docs/ARQUITETURA.md`, seções 4 e 5):
+    - o schema Drizzle fica num lugar só, `src/server/db/schema/`; os módulos da 0.3 importam dele;
+    - na v1, só a equipe da plataforma escreve no catálogo (F9); a incorporadora lê os próprios empreendimentos e passa a escrever na fase 2;
+    - pré-lançamento avaliado por subcondomínio também no banco (D15): a torre com lançamento futuro some da vitrine com as tipologias e unidades dela;
+    - o nome da incorporadora só é público quando ela tem empreendimento na vitrine;
+    - a conta de comprador (e-mail de login) não é lida pela equipe nem pelo god mode: o contato do comprador chega a eles pelo lead, com consentimento ativo (matriz de visibilidade);
+    - a house lê só as contas internas: a equipe de vendas da incorporadora fica fora dela (matriz de visibilidade), e o contato do plantão chega pelo escritório de vendas do empreendimento. Corrigido depois da auditoria de 16/11, antes do merge;
+    - a função do papel atual chama `app.current_papel()`, porque `current_role` é palavra reservada do Postgres.
 - [ ] **0.3 Primeira fatia vertical e módulos.**
   - Entrega:
-    - `src/dominio` reorganizado em `src/modulos/` (D6), com lint de fronteira;
+    - `src/dominio` reorganizado em `src/modulos/` (D6), com lint de fronteira, incluindo a lista permitida de quem importa `src/server/db` (`docs/specs/acesso-e-visibilidade.md`);
     - página `/empreendimento/{slug}` lendo do banco pelo módulo `catalogo`, com a elegibilidade aplicada no banco e no servidor.
   - Verificar:
     - e2e abre um empreendimento elegível e recebe "não encontrado" para cada caso de exclusão do seed;
@@ -67,7 +75,7 @@ Fatias grandes ou incertas ganham uma spec própria em `docs/specs/<fatia>.md` a
 - [ ] **0.4 Homologação no servidor atual, como stack isolada** (D11; `docs/ARQUITETURA.md`, seção 7).
   - Entrega, parte 1 — endurecimento do servidor compartilhado:
     - firewall de nuvem com 22, 80 e 443;
-    - SSH só por chave, com usuário `deploy` e fail2ban;
+    - SSH só por chave (a chave do Matheus já está instalada e testada), com usuário `deploy` e fail2ban;
     - swap de 2 GB;
     - rotação de logs.
 
@@ -78,7 +86,10 @@ Fatias grandes ou incertas ganham uma spec própria em `docs/specs/<fatia>.md` a
     - limites de memória;
     - imagem no GHCR por commit e deploy por Actions (D12);
     - Sentry e monitor de disponibilidade (D10);
-    - backup diário cifrado no R2 (D8).
+    - backup diário cifrado no R2 (D8);
+    - o contêiner `app` recebe só a `DATABASE_URL` do `app_user` e, ao subir, confere que conectou como `app_user`; o `migrator` só existe na tarefa de migration;
+    - `statement_timeout` e `idle_in_transaction_session_timeout` nos papéis do app e do worker;
+    - migrations só por `db:migrate` (nunca `drizzle-kit push`), com as senhas dos papéis vindas do cofre (`DB_SENHA_*`).
   - Verificar:
     - URL de homologação com a página da 0.3;
     - deploy e rollback ensaiados;
@@ -88,16 +99,17 @@ Fatias grandes ou incertas ganham uma spec própria em `docs/specs/<fatia>.md` a
   - Bloqueada por:
     - OK e janela para o endurecimento;
     - subdomínio de homologação;
-    - contas do R2, Sentry e Resend criadas pelo Matheus, com as chaves gravadas por ele no servidor.
+    - conta do Sentry, com a chave gravada pelo Matheus no cofre e no servidor. O R2 ficou pronto e testado em 16/11/2026: buckets `imob-hml-arquivos` e `imob-backups`, com token só de objetos nesses dois.
 - [ ] **0.5 Correções que a 2.0 mantém** (da `docs/AUDITORIA.md`).
   - Entrega:
-    - pré-lançamento por subcondomínio;
-    - studio e finalidade;
+    - pré-lançamento por subcondomínio, com os casos do D15 no seed (torre com lançamento futuro e sem data) e paridade TS × SQL;
+    - studio e finalidade (Studio e Loft contam como studio, decisão de 14/11/2026);
     - nota somada em inteiros;
     - motivo fiel ao que a pessoa informou;
     - CSP e cabeçalhos de segurança;
     - `check:secrets` com os padrões que faltam e gitleaks no CI;
-    - actions por SHA;
+    - actions por SHA e imagem do Postgres do CI por digest;
+    - Dependabot só com versões menores e de correção. Versão maior (como TypeScript 7, ESLint 10 e `@types/node` acima do Node 24) vira decisão, com PR própria; a PR #2, que juntou as duas coisas e quebrou o CI, é fechada;
     - suíte estável na máquina local.
   - Verificar: um teste novo para cada achado; suíte verde três vezes seguidas.
 
@@ -134,20 +146,25 @@ Fatias grandes ou incertas ganham uma spec própria em `docs/specs/<fatia>.md` a
     - cadastro público só de `buyer`;
     - convites com limites de concessão;
     - MFA para internos;
-    - bootstrap do god mode;
+    - bootstrap do god mode (na v1 ele só lê; o banco já bloqueia a escrita dele desde a 0.2);
     - retorno só para caminho interno;
-    - `merge_visitor`.
+    - `merge_visitor`;
+    - contexto do banco endurecido: a conta entra por token de sessão validado no banco, e não por `set_config` direto; o impersonate é validado numa tabela própria; o lint barra SQL dinâmico (`sql.raw`) fora dos testes; a transação fica inutilizável depois do callback;
+    - `audit_logs`;
+    - o que a conta de um tenant suspenso ou encerrado ainda vê (**Proposta:** só a vitrine pública).
   - Verificar:
     - teste de redirecionamento externo recusado;
     - fila interna não abre sem segundo fator;
-    - segunda execução do bootstrap falha.
+    - segunda execução do bootstrap falha;
+    - teste de banco: `set_config` com outra conta, sem token válido, não abre dado nenhum.
 - [ ] **1.5 Visita em 3 toques (F5).**
   - Entrega:
     - dia, horário e confirmar, com consentimento versionado;
     - confirmação com mapa, gerente, "o que levar", perguntas, `.ics` e lembrete simulado;
     - liberação de contato só à incorporadora do empreendimento;
-    - e-mail real de confirmação, se D9 aprovada.
+    - e-mail real de confirmação (D9).
   - Verificar: e2e do questionário até a visita; teste de banco da liberação e da revogação.
+  - Depende de: conta do Resend, com a chave gravada pelo Matheus no cofre e no servidor. Sem ela, a fatia entra com a flag `email_real` desligada.
 - [ ] **1.6 Fila da house (F7).**
   - Entrega:
     - rodízio, fila sem analista, checklist de qualificação;
@@ -189,7 +206,7 @@ Fatias grandes ou incertas ganham uma spec própria em `docs/specs/<fatia>.md` a
     - checklist do `/forja:ship`;
     - fluxo principal testado na URL de produção;
     - logs dos primeiros dias lidos.
-  - Bloqueada por: P5, C15 e D17.
+  - Bloqueada por: P5, C14, C15, subdomínio de produção e a decisão sobre a memória da produção (medida na 0.4). A D17 já está aprovada: dados reais só em produção.
 
 ## Fase 2 e Fase 3
 
@@ -203,7 +220,8 @@ Fatiadas quando a v1 estiver no ar, nesta ordem de valor:
   5. cadastro pela incorporadora e equipe de vendas com CSV;
   6. god mode de personalização;
   7. impersonate;
-  8. home no estado ativo e comparador.
+  8. home no estado ativo e comparador;
+  9. ainda sem lugar na ordem (estão na SPEC): listas, selo "Novidade", carteira do gerente de contas, dashboards completos, usuários da incorporadora, tela interna de notificações e e-mails simulados e login com Google (flag).
 - **Fase 3:** Mais Buscados e Vitrine Destacada; projeto de mídia; proposta, reserva, contrato e venda; simulador; IA.
 
 ## Decisões
@@ -216,6 +234,7 @@ Fatiadas quando a v1 estiver no ar, nesta ordem de valor:
 - 2026-11-13: GitHub na conta `iaraaivendas`, integrado ao `gh` e ao `git`.
 - 2026-11-13: **SPEC 2.0 aprovada**, com as decisões D1 a D18 abaixo. Na D11, o Matheus escolheu usar o servidor atual (Nuremberg), que ainda tem espaço, em vez de uma VPS dedicada.
 - 2026-11-14: repositório **público** `Projeto-Imob/imob`, para ter a `main` protegida sem custo (no plano gratuito, repositório privado de organização não tem proteção de branch). A estratégia de negócio fica pública; o diagnóstico de segurança do servidor fica fora do repositório, na pasta protegida de credenciais.
+- 2026-11-14: **Loft conta como studio** na busca (esclarecimento do D15, entra na fatia 0.5). Kitnet continua fora até decisão em contrário.
 
 **Decisões da 2.0 (aprovadas em 13/11/2026)**
 
@@ -266,6 +285,7 @@ Fatiadas quando a v1 estiver no ar, nesta ordem de valor:
 | — | Proposta e contrato continuam dentro do sistema (R5) mesmo com o fluxo Reelly no atendimento? | — | Fase 3 |
 | — | OK e janela para o endurecimento do servidor compartilhado (seção 7 da ARQUITETURA) | — | 0.4 |
 | — | Subdomínios de homologação e de produção | — | 0.4 e 1.10 |
-| — | Contas no R2, Sentry e Resend, com as chaves gravadas pelo Matheus no cofre e no servidor | — | 0.4 e 1.5 |
+| — | Contas do Sentry e do Resend, com as chaves gravadas pelo Matheus no cofre e no servidor (o R2 ficou pronto e testado em 16/11/2026) | — | Sentry: 0.4. Resend: 1.5 (sem ele, flag `email_real` desligada) |
+| — | Kitnet conta como studio? | Não | Nada |
 | — | Hetzner Backups do servidor (cerca de +20% do plano; protege também os outros projetos) | `pg_dump` diário no R2 | Nada (recomendado) |
 | — | Memória para a produção: subir o plano ou desligar a homologação, se a medição pedir | Decidir na 1.10 | 1.10 |

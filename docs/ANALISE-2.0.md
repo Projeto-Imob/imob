@@ -11,7 +11,7 @@
 
 1. **A especificação 1.0 tem conteúdo de produto muito bom em um formato difícil de manter.** São 57,7 KB de texto puro carregados em toda sessão, misturando produto, cálculo, arquitetura, processo e pendências. A 2.0 preserva todo o texto, mas o reorganiza por assunto e por ritmo de mudança.
 2. **O "MVP" é a plataforma inteira** (cerca de 25 capacidades), sem cliente nem praça definidos (P5). A 2.0 define um piloto com uma incorporadora e 12 funcionalidades.
-3. **O plano é horizontal.** Banco real e login só chegam depois de todas as telas, e a integração fica para o fim. A 2.0 usa fatias verticais desde a Fase 0, com banco, login e deploy reais.
+3. **O plano é horizontal.** Banco real e login só chegam depois de todas as telas, e a integração fica para o fim. A 2.0 usa fatias verticais desde a Fase 0, com banco e deploy reais; o login entra na fatia 1.4, antes da primeira tela que o exige.
 4. **Há dois modos de dados (LocalStorage e Postgres)**, o que dobra o trabalho, e há código "só para teste". A 2.0 usa um caminho de dados só: Postgres em todo ambiente.
 5. **O processo tem cinco sistemas sobrepostos** (AIOX, GSD, OpenSpec, speckit e forja). A 2.0 adota um fluxo: o método forja.
 6. **O servidor atual precisa de endurecimento** e tem pouca memória livre. Por decisão do Matheus (D11), o Imob usa esse servidor como stack isolada, e o endurecimento virou pré-requisito do primeiro deploy.
@@ -42,7 +42,7 @@ O que se mantém sem discussão: as 20 regras inegociáveis, a matriz de visibil
 - **Dois modos de dados.** Cada repositório existiria duas vezes (LocalStorage e Postgres), com uma suíte de contrato para mantê-los iguais. Os eventos gravados no navegador nunca chegariam aos números da incorporadora.
 - **Código diferente no teste e na produção.** A variante latitude e longitude "só para testes locais" e o PostGIS no CI testam funções diferentes.
 
-Na 2.0: Fase 0 com banco, login e deploy reais; fatias verticais pequenas; um caminho de dados; o mesmo Postgres no desenvolvimento, nos testes e na produção.
+Na 2.0: Fase 0 com banco e deploy reais (login na fatia 1.4); fatias verticais pequenas; um caminho de dados; o mesmo Postgres no desenvolvimento, nos testes e na produção.
 
 ## 3. Processo e repositório
 

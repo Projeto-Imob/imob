@@ -3,6 +3,10 @@
 > **Origem:** SPEC 1.0, §9 Negociação e §10 Simulador — texto da 1.0 preservado abaixo, só convertido para Markdown.
 > **Fase na SPEC 2.0:** fase 3, atrás das flags `assinatura_eletronica` e `simulador`. Depende de P7, C10 e da decisão sobre o simulador.
 
+### Esclarecimentos e mudanças da 2.0
+
+Nenhum até agora: o texto da 1.0 vale como está e será revisto quando a fase 3 for fatiada.
+
 ---
 
 ## Negociação (Épico 2)

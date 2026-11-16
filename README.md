@@ -35,6 +35,26 @@ Na primeira vez, para os testes ponta a ponta: `npx playwright install chromium 
 | `npm run catalogo` | Falha com texto fora de `src/i18n/pt-BR.ts`; gera `src/i18n/catalogo.gerado.json` |
 | `npm run check:secrets` | Falha com `.env*` versionável ou padrão de segredo; rode antes de cada commit |
 | `npm run build` | Build de produção (roda `catalogo` antes) |
+| `npm run db:start` / `db:stop` / `db:status` | Liga, desliga e mostra o Postgres local |
+| `npm run db:reset` | Recria o banco local `imob`, aplica as migrations e grava o seed fictício (só em localhost) |
+| `npm run db:migrate` / `db:seed` / `db:bootstrap` | Aplica migrations, grava o seed, cria papéis e banco |
+| `npm run db:generate` | Gera a migration das tabelas a partir de `src/server/db/schema/` |
+| `npm run test:db` | Testes de banco contra o Postgres real (recria `imob_teste` a cada execução) |
+
+## Banco local (sem Docker)
+
+PostgreSQL 17 com os binários portáteis oficiais, fora do repositório (decisão D4). Uma vez por máquina:
+
+1. Baixe o zip "PostgreSQL binaries" da versão 17 no site da EDB e extraia as pastas `pgsql/bin`, `pgsql/lib` e `pgsql/share` em `C:\dev\ferramentas\pgsql`.
+2. Crie o cluster, só com acesso local:
+   ```bash
+   C:\dev\ferramentas\pgsql\bin\initdb.exe -D C:\dev\ferramentas\pgdata-imob -U postgres -A trust -E UTF8 --locale-provider=builtin --builtin-locale=C.UTF-8
+   ```
+3. `npm run db:start` e depois `npm run db:reset`.
+
+Outros caminhos: defina `PG_BIN` e `PGDATA_IMOB`. Depois de reiniciar o computador, basta `npm run db:start`.
+
+O banco local só guarda dados fictícios e aceita conexão só da própria máquina, sem senha. Em homologação e produção, cada papel tem senha e as URLs vêm do ambiente (`.env.example`).
 
 ## Onde fica cada coisa
 

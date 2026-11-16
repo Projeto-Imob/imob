@@ -1,7 +1,7 @@
 # God mode: personalização da plataforma
 
 > **Origem:** SPEC 1.0, §11 God mode — texto da 1.0 preservado abaixo, só convertido para Markdown.
-> **Fase na SPEC 2.0:** fase 2. Na v1, os textos ficam no catálogo do código (`src/i18n/pt-BR.ts`) e mudam por PR; os textos legais versionados já existem na v1.
+> **Fase na SPEC 2.0:** fase 2. Na v1, o god mode só lê (conta por bootstrap com MFA, fatia 1.4), e os textos ficam no catálogo do código (`src/i18n/pt-BR.ts`) e mudam por PR; os textos legais versionados já existem na v1.
 
 ### Esclarecimentos e mudanças da 2.0
 
