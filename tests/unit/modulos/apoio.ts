@@ -1,5 +1,5 @@
-import { montarCompletos, type EmpreendimentoCompleto } from "@/dominio/catalogo";
-import { PERFIL_VAZIO, type Empreendimento, type Perfil } from "@/dominio/tipos";
+import { PERFIL_VAZIO, type Perfil } from "@/modulos/busca";
+import { montarCompletos, type Empreendimento, type EmpreendimentoCompleto } from "@/modulos/catalogo";
 import { gerarSeed } from "@/seed/seed";
 
 export const HOJE = "2026-11-13";

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { baseElegivel, elegivel, faseVenda, motivosExclusao } from "@/dominio/elegibilidade";
+import { baseElegivel, elegivel, faseVenda, motivosExclusao } from "@/modulos/catalogo";
 import { CASOS_EXCLUSAO } from "@/seed/seed";
 import { HOJE, comEmpreendimento, completos, porSlug } from "./apoio";
 

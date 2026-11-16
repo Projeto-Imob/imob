@@ -1,9 +1,15 @@
 import { describe, expect, it } from "vitest";
-import { baseElegivel } from "@/dominio/elegibilidade";
-import { LIMITE_MOTIVO, motivoPorTemplate } from "@/dominio/motivo";
-import { avaliar, avaliarBase, type Avaliacao, type ContextoNota } from "@/dominio/nota";
-import { extrairRequisitos } from "@/dominio/requisitos";
-import type { Perfil } from "@/dominio/tipos";
+import {
+  LIMITE_MOTIVO,
+  avaliar,
+  avaliarBase,
+  extrairRequisitos,
+  motivoPorTemplate,
+  type Avaliacao,
+  type ContextoNota,
+  type Perfil,
+} from "@/modulos/busca";
+import { baseElegivel } from "@/modulos/catalogo";
 import { HOJE, comEmpreendimento, completos, perfilCom, porSlug, seed } from "./apoio";
 
 const base = baseElegivel(completos(), { hoje: HOJE });

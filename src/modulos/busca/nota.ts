@@ -5,13 +5,13 @@
  * não entram aqui (regra 2) — EmpreendimentoCompleto nem os carrega.
  */
 import { scoringConfig, type ScoringConfig } from "@config/scoring.config";
-import type { EmpreendimentoCompleto } from "./catalogo";
+import { distanciaM } from "@/lib/geo";
+import type { CategoriaPonto, Comodidade, EmpreendimentoCompleto } from "@/modulos/catalogo";
 import { filtrar, pertoDeMimAtivo, type ContextoBusca } from "./filtros";
 import type { Exigencia } from "./exigencia";
-import { distanciaM } from "./geo";
 import { extrairRequisitos } from "./requisitos";
 import { sorteioFixo } from "./sorteio";
-import type { CategoriaPonto, Comodidade, Perfil } from "./tipos";
+import type { Perfil } from "./tipos";
 
 export type ChaveComponente = "financeiro" | "tipologia" | "localizacao" | "requisitos" | "comportamento";
 

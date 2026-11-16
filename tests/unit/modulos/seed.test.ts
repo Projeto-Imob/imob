@@ -1,19 +1,20 @@
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
-import * as t from "@/dominio/tipos";
+import { empreendimento, empreendimentoComercial, plano, subcondominio, tipologia, unidade } from "@/modulos/catalogo";
+import { conta, incorporadora } from "@/modulos/contas";
 import { CASOS_EXCLUSAO, gerarSeed } from "@/seed/seed";
 
 const seed = gerarSeed();
 
 const COLECOES = {
-  incorporadoras: t.incorporadora,
-  contas: t.conta,
-  empreendimentos: t.empreendimento,
-  comerciais: t.empreendimentoComercial,
-  subcondominios: t.subcondominio,
-  tipologias: t.tipologia,
-  unidades: t.unidade,
-  planos: t.plano,
+  incorporadoras: incorporadora,
+  contas: conta,
+  empreendimentos: empreendimento,
+  comerciais: empreendimentoComercial,
+  subcondominios: subcondominio,
+  tipologias: tipologia,
+  unidades: unidade,
+  planos: plano,
 } as const;
 
 describe("seed fictício (2.2)", () => {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { resolveHomeState, type EntradaHome } from "@/dominio/homeState";
+import { resolveHomeState, type EntradaHome } from "@/modulos/contas";
 
 const vazio: EntradaHome = { usuario: null, eventos: 0, questionarioConcluido: false, favoritos: 0, alertas: 0, visitas: [], propostas: [] };
 const com = (alt: Partial<EntradaHome>): EntradaHome => ({ ...vazio, ...alt });

@@ -2,7 +2,7 @@
  * Texto livre dos requisitos sem IA (tarefa 2.9): lido por palavras-chave do catálogo de comodidades.
  * A IA (flag ia_motivo, grupo 10) só transforma o texto numa lista; a comparação é sempre esta.
  */
-import type { Comodidade } from "./tipos";
+import type { Comodidade } from "@/modulos/catalogo";
 
 /** Minúsculas, sem acento e com espaços simples. */
 export function normalizar(texto: string): string {

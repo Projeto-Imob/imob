@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { cabe, compararExigencias, exigenciaDoPlano, melhorExigencia } from "@/dominio/exigencia";
-import type { FormaPagamento, Perfil, Plano } from "@/dominio/tipos";
+import { cabe, compararExigencias, exigenciaDoPlano, melhorExigencia, type FormaPagamento, type Perfil } from "@/modulos/busca";
+import type { Plano } from "@/modulos/catalogo";
 
 const plano = (id: string, alt: Partial<Plano> = {}): Plano => ({
   id,

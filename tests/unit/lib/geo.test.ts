@@ -1,13 +1,15 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { METROS_POR_MINUTO_A_PE, distanciaM, minutosAPe } from "@/dominio/geo";
 import {
+  METROS_POR_MINUTO_A_PE,
   OPCOES_GEOLOCALIZACAO,
   PORTO_ALEGRE,
+  distanciaM,
   geolocalizarNavegador,
+  minutosAPe,
   posicaoDaUrl,
   resolverPosicaoInicial,
   type ResultadoGeolocalizacao,
-} from "@/dominio/mapa";
+} from "@/lib/geo";
 
 afterEach(() => vi.useRealTimers());
 

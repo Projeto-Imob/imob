@@ -3,9 +3,9 @@
  * Recebe a base já elegível. No modo postgres, a mesma regra roda em SQL (teste de paridade no grupo 4).
  */
 import { scoringConfig } from "@config/scoring.config";
-import type { EmpreendimentoCompleto } from "./catalogo";
+import { distanciaM } from "@/lib/geo";
+import type { EmpreendimentoCompleto } from "@/modulos/catalogo";
 import { filtrar, type ContextoBusca } from "./filtros";
-import { distanciaM } from "./geo";
 import type { OpcaoQuartos, Perfil } from "./tipos";
 
 /** Perguntas que reduzem a base e têm contagem por opção. */

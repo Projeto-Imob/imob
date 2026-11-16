@@ -3,10 +3,11 @@
  * Recebem a base já elegível; a posição de "Perto de mim" vem só da sessão, nunca do perfil gravado.
  */
 import { scoringConfig, type ScoringConfig } from "@config/scoring.config";
-import type { EmpreendimentoCompleto } from "./catalogo";
+import type { Coordenadas } from "@/lib/esquemas";
+import { distanciaM } from "@/lib/geo";
+import type { EmpreendimentoCompleto, Subcondominio, Tipologia, Unidade } from "@/modulos/catalogo";
 import { melhorExigencia, type Exigencia } from "./exigencia";
-import { distanciaM } from "./geo";
-import type { Coordenadas, OpcaoQuartos, Perfil, Subcondominio, Tipologia, Unidade } from "./tipos";
+import type { OpcaoQuartos, Perfil } from "./tipos";
 
 export type ContextoBusca = {
   hoje: string;

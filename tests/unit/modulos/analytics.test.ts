@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { montarEvento, sanitizarDados } from "@/modulos/analytics/regras";
+import { montarEvento, sanitizarDados } from "@/modulos/analytics";
 
 const VISITANTE = "00000000-0000-4000-8000-000000000001";
 const ID = "00000000-0000-4000-8000-0000000000aa";

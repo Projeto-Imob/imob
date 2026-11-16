@@ -1,15 +1,8 @@
 import { describe, expect, it } from "vitest";
-import {
-  PERFIL_VAZIO,
-  empreendimento,
-  evento,
-  lead,
-  leadContato,
-  perfil,
-  plano,
-  tipologia,
-  unidade,
-} from "@/dominio/tipos";
+import { evento } from "@/modulos/analytics";
+import { lead, leadContato } from "@/modulos/atendimento";
+import { PERFIL_VAZIO, perfil } from "@/modulos/busca";
+import { empreendimento, plano, tipologia, unidade } from "@/modulos/catalogo";
 
 const ID = (n: number) => `00000000-0000-4000-8000-${String(n).padStart(12, "0")}`;
 

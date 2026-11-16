@@ -2,7 +2,7 @@
  * Base elegível do comprador (tarefa 2.3; spec conformidade-de-publicacao e catalogo).
  * Contador, resultado, mapa, alertas e listas públicas usam só o que passa aqui.
  */
-import type { EmpreendimentoCompleto } from "./catalogo";
+import type { EmpreendimentoCompleto } from "./regras";
 import type { Subcondominio, Unidade } from "./tipos";
 
 export type FaseVenda = "pre_lancamento" | "esgotado" | "vendas_abertas";

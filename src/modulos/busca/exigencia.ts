@@ -3,7 +3,8 @@
  * Entrada = preço × sinal%. Parcela = preço × mensais% ÷ número de parcelas (nula sem o número).
  * Só "À vista" marcado, ou sem planos: a entrada é o preço inteiro.
  */
-import type { FormaPagamento, Perfil, Plano, Unidade } from "./tipos";
+import type { Plano, Unidade } from "@/modulos/catalogo";
+import type { FormaPagamento, Perfil } from "./tipos";
 
 export type Exigencia = {
   unidadeId: string;

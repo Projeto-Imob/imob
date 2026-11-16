@@ -1,9 +1,16 @@
 import { describe, expect, it } from "vitest";
-import { montarCompletos } from "@/dominio/catalogo";
-import { baseElegivel } from "@/dominio/elegibilidade";
-import { escolher } from "@/dominio/escolha";
-import { avaliar, avaliarBase, compararAvaliacoes, notaFinal, type Avaliacao, type Componente, type ContextoNota } from "@/dominio/nota";
-import { sorteioFixo } from "@/dominio/sorteio";
+import {
+  avaliar,
+  avaliarBase,
+  compararAvaliacoes,
+  escolher,
+  notaFinal,
+  sorteioFixo,
+  type Avaliacao,
+  type Componente,
+  type ContextoNota,
+} from "@/modulos/busca";
+import { baseElegivel, montarCompletos } from "@/modulos/catalogo";
 import { gerarSeed } from "@/seed/seed";
 import { HOJE, completos, perfilCom, porSlug, seed } from "./apoio";
 

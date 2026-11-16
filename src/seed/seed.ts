@@ -7,16 +7,15 @@
  */
 import type {
   Comodidade,
-  Conta,
   Empreendimento,
   EmpreendimentoComercial,
-  Incorporadora,
   Plano,
   PontoProximo,
   Subcondominio,
   Tipologia,
   Unidade,
-} from "@/dominio/tipos";
+} from "@/modulos/catalogo";
+import type { Conta, Incorporadora } from "@/modulos/contas";
 
 /** UUID v4 fixo a partir de um prefixo de entidade e um número. */
 export function uid(prefixo: number, n: number): string {

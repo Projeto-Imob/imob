@@ -8,9 +8,9 @@ import {
   contarOpcao,
   contarOpcoes,
   deveSugerirAmpliar,
-} from "@/dominio/contagem";
-import { baseElegivel } from "@/dominio/elegibilidade";
-import type { ContextoBusca } from "@/dominio/filtros";
+  type ContextoBusca,
+} from "@/modulos/busca";
+import { baseElegivel } from "@/modulos/catalogo";
 import { HOJE, completos, perfilCom } from "./apoio";
 
 const todos = completos();

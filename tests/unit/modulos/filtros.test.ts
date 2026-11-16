@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { baseElegivel } from "@/dominio/elegibilidade";
-import { filtrar, tipologiaAtende, unidadesCompativeis, type ContextoBusca } from "@/dominio/filtros";
-import type { Perfil, Tipologia } from "@/dominio/tipos";
+import { filtrar, tipologiaAtende, unidadesCompativeis, type ContextoBusca, type Perfil } from "@/modulos/busca";
+import { baseElegivel, type Tipologia } from "@/modulos/catalogo";
 import { HOJE, comEmpreendimento, completos, perfilCom, porSlug } from "./apoio";
 
 const base = baseElegivel(completos(), { hoje: HOJE });

@@ -5,8 +5,8 @@
  * Todo número vem do cadastro ou das respostas da pessoa e é interpolado pelo sistema.
  */
 import { interpolar, ptBR, type ChaveTexto, type Sobreposicoes } from "@/i18n/pt-BR";
-import type { EmpreendimentoCompleto } from "./catalogo";
-import { minutosAPe } from "./geo";
+import { minutosAPe } from "@/lib/geo";
+import type { EmpreendimentoCompleto } from "@/modulos/catalogo";
 import { CATEGORIAS_PONTOS_NOTA, type Avaliacao, type Componente } from "./nota";
 
 export const LIMITE_MOTIVO = 140;

@@ -1,10 +1,31 @@
 /**
- * Posição inicial do mapa em cascata (tarefa 2.11; spec comprador/mapa):
- * (1) coordenadas da URL; (2) navegador, depois da tela de explicação; (3) cidade pelo IP, por função
- * de servidor plugável e só com a flag geo_ip; (4) Porto Alegre. A origem vai no evento map_open.
- * A posição exata nunca é gravada: a função só devolve o centro para a sessão.
+ * Geografia sem domínio: distância (Haversine), tempo a pé e a posição inicial do mapa em cascata.
+ * A posição exata nunca é gravada: as funções só devolvem o centro para a sessão.
  */
-import type { Coordenadas } from "./tipos";
+import type { Coordenadas } from "./esquemas";
+
+const RAIO_TERRA_M = 6_371_000;
+const rad = (g: number) => (g * Math.PI) / 180;
+
+/** Distância em metros pela fórmula de Haversine. */
+export function distanciaM(a: Coordenadas, b: Coordenadas): number {
+  const dLat = rad(b.lat - a.lat);
+  const dLng = rad(b.lng - a.lng);
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.sin(dLng / 2) ** 2;
+  return 2 * RAIO_TERRA_M * Math.asin(Math.sqrt(h));
+}
+
+/** Velocidade a pé da especificação: 80 m por minuto. */
+export const METROS_POR_MINUTO_A_PE = 80;
+
+/** Minutos a pé, arredondados para cima (mínimo 1). */
+export function minutosAPe(metros: number): number {
+  return Math.max(1, Math.ceil(metros / METROS_POR_MINUTO_A_PE));
+}
+
+// ---------- Posição inicial do mapa (spec comprador/mapa; o mapa público é da fase 2) ----------
+// Cascata: (1) coordenadas da URL; (2) navegador, depois da tela de explicação; (3) cidade pelo IP,
+// por função de servidor plugável e só com a flag geo_ip; (4) Porto Alegre. A origem vai no evento map_open.
 
 export type OrigemPosicao = "url" | "browser" | "ip" | "default";
 
