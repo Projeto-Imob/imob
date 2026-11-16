@@ -65,13 +65,21 @@ Fatias grandes ou incertas ganham uma spec própria em `docs/specs/<fatia>.md` a
     - a conta de comprador (e-mail de login) não é lida pela equipe nem pelo god mode: o contato do comprador chega a eles pelo lead, com consentimento ativo (matriz de visibilidade);
     - a house lê só as contas internas: a equipe de vendas da incorporadora fica fora dela (matriz de visibilidade), e o contato do plantão chega pelo escritório de vendas do empreendimento. Corrigido depois da auditoria de 16/11, antes do merge;
     - a função do papel atual chama `app.current_papel()`, porque `current_role` é palavra reservada do Postgres.
-- [ ] **0.3 Primeira fatia vertical e módulos.**
+- [x] **0.3 Primeira fatia vertical e módulos.** Entregue em 16/11/2026, na branch `fatia/0.3-modulos`: `src/modulos/` com índice como API pública e lint de fronteira, migration `0002_vitrine`, página `/empreendimento/{slug}` com o resumo lido do banco e Postgres no job `e2e` do CI.
   - Entrega:
     - `src/dominio` reorganizado em `src/modulos/` (D6), com lint de fronteira, incluindo a lista permitida de quem importa `src/server/db` (`docs/specs/acesso-e-visibilidade.md`);
     - página `/empreendimento/{slug}` lendo do banco pelo módulo `catalogo`, com a elegibilidade aplicada no banco e no servidor.
   - Verificar:
     - e2e abre um empreendimento elegível e recebe "não encontrado" para cada caso de exclusão do seed;
     - axe sem violação.
+  - Decisões técnicas (detalhes na `docs/ARQUITETURA.md`, seções 3 e 11):
+    - a elegibilidade da página vem só do banco: a consulta pública filtra por `app.na_vitrine`, além do RLS do visitante. A regra em TypeScript e a paridade TS × SQL ficam para a 0.5;
+    - a `0002_vitrine` conta como aditiva: cria `app.na_vitrine` e troca só o corpo de `app.esgotado`, que passa a olhar as torres que o público vê (as lançadas, ou todas com o pré-lançamento ativo);
+    - "não encontrado" responde 200 com `noindex`: com Cache Components, o shell estático sai antes do `notFound()`;
+    - sem `generateStaticParams`: a página renderiza a cada requisição, e o dado fica em `use cache` por horas, com tag por empreendimento;
+    - o acesso ao banco abre e fecha a transação por conta própria (o `begin` do Drizzle ficava fora do `try` e prendia a conexão), e a consulta pública é só de leitura;
+    - o lint barra `sql.raw` fora dos testes desde esta fatia (saiu da 1.4);
+    - sem CSP nesta fatia: ela entra na 0.5, sem nonce.
 - [ ] **0.4 Homologação no servidor atual, como stack isolada** (D11; `docs/ARQUITETURA.md`, seção 7).
   - Entrega, parte 1 — endurecimento do servidor compartilhado:
     - firewall de nuvem com 22, 80 e 443;
@@ -106,7 +114,7 @@ Fatias grandes ou incertas ganham uma spec própria em `docs/specs/<fatia>.md` a
     - studio e finalidade (Studio e Loft contam como studio, decisão de 14/11/2026);
     - nota somada em inteiros;
     - motivo fiel ao que a pessoa informou;
-    - CSP e cabeçalhos de segurança;
+    - CSP e cabeçalhos de segurança (CSP sem nonce, mantendo o cache; decisão de 16/11/2026);
     - `check:secrets` com os padrões que faltam e gitleaks no CI;
     - actions por SHA e imagem do Postgres do CI por digest;
     - Dependabot só com versões menores e de correção. Versão maior (como TypeScript 7, ESLint 10 e `@types/node` acima do Node 24) vira decisão, com PR própria; a PR #2, que juntou as duas coisas e quebrou o CI, é fechada;
@@ -149,7 +157,7 @@ Fatias grandes ou incertas ganham uma spec própria em `docs/specs/<fatia>.md` a
     - bootstrap do god mode (na v1 ele só lê; o banco já bloqueia a escrita dele desde a 0.2);
     - retorno só para caminho interno;
     - `merge_visitor`;
-    - contexto do banco endurecido: a conta entra por token de sessão validado no banco, e não por `set_config` direto; o impersonate é validado numa tabela própria; o lint barra SQL dinâmico (`sql.raw`) fora dos testes; a transação fica inutilizável depois do callback;
+    - contexto do banco endurecido: a conta entra por token de sessão validado no banco, e não por `set_config` direto; o impersonate é validado numa tabela própria; a transação fica inutilizável depois do callback;
     - `audit_logs`;
     - o que a conta de um tenant suspenso ou encerrado ainda vê (**Proposta:** só a vitrine pública).
   - Verificar:
@@ -235,6 +243,10 @@ Fatiadas quando a v1 estiver no ar, nesta ordem de valor:
 - 2026-11-13: **SPEC 2.0 aprovada**, com as decisões D1 a D18 abaixo. Na D11, o Matheus escolheu usar o servidor atual (Nuremberg), que ainda tem espaço, em vez de uma VPS dedicada.
 - 2026-11-14: repositório **público** `Projeto-Imob/imob`, para ter a `main` protegida sem custo (no plano gratuito, repositório privado de organização não tem proteção de branch). A estratégia de negócio fica pública; o diagnóstico de segurança do servidor fica fora do repositório, na pasta protegida de credenciais.
 - 2026-11-14: **Loft conta como studio** na busca (esclarecimento do D15, entra na fatia 0.5). Kitnet continua fora até decisão em contrário.
+- 2026-11-16: **prazos.** MVP em homologação até 01/12 (Fase 0 e fatias 1.1 a 1.3), com fatias em paralelo. Fica para depois de 01/12 o que não aparece na demonstração: gitleaks, estabilidade da suíte e actions por SHA.
+- 2026-11-16: **piloto enxuto em dezembro:** página, questionário, resultado e contato. O lead chega à house por WhatsApp ou e-mail, e os empreendimentos são cadastrados por script com os dados da incorporadora. Depende da C15. A jornada completa da v1 passa para janeiro.
+- 2026-11-16: **CSP sem nonce**, mantendo o cache das páginas públicas (fatia 0.5).
+- 2026-11-16: na 0.3, a elegibilidade da página vem só da regra do banco (`app.na_vitrine`); a paridade TS × SQL fica para a 0.5. A migration `0002_vitrine`, que troca o corpo de `app.esgotado`, conta como aditiva. "Não encontrado" responde 200 com `noindex`.
 
 **Decisões da 2.0 (aprovadas em 13/11/2026)**
 

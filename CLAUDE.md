@@ -54,13 +54,12 @@ Palavras proibidas na interface: "oportunidade imperdível", "garantido", "lucro
 npm install
 npm run dev            # http://localhost:3000
 npm test               # unidade (passa por scripts/vitest.mjs; no Windows não chame npx vitest direto)
-npm run test:e2e       # Playwright + axe sobre o build de produção (porta 3100)
+npm run test:e2e       # Playwright + axe sobre o build de produção (porta 3100; antes, npm run db:reset)
 npm run lint
 npm run typecheck      # next typegen + tsc
 npm run catalogo       # falha com texto de tela fora de src/i18n/pt-BR.ts
 npm run check:secrets  # rode antes de cada commit
 npm run build
-npm run seed:json      # seed fictício em JSON
 npm run db:start       # liga o Postgres local (binários portáteis; instalação no README)
 npm run db:reset       # recria o banco local imob com migrations e seed (só localhost)
 npm run db:migrate     # aplica as migrations
@@ -79,16 +78,16 @@ npm run test:db        # testes de banco contra o Postgres real (recria imob_tes
 
 ```
 src/app/         # rotas
-src/dominio/     # regras puras (vão para src/modulos/<dominio>/ na fatia 0.3)
-src/data/        # acesso a dados (a maior parte sai na 2.0: um caminho só, Postgres)
+src/modulos/     # um módulo por domínio (catalogo, busca, contas, atendimento, analytics); index.ts é a API pública
+src/lib/         # utilitários sem domínio: esquemas Zod básicos, geo, formato, metadata
 src/server/      # código só de servidor: db/ (cliente, contexto e schema Drizzle), auth, arquivos
 src/components/  # UI (T.tsx, layout)
 src/i18n/        # catálogo de textos
 src/seed/        # seed fictício único
 config/          # brand.ts, flags.ts, scoring.config.ts
 db/migrations/   # SQL: tabelas (geradas pelo drizzle-kit) e segurança (RLS, funções app.*, GRANTs, à mão)
-scripts/         # catalogo, check-secrets, termos-proibidos, seed-json, vitest.mjs, db/
-tests/           # unit/, contrato/, banco/, e2e/
+scripts/         # catalogo, check-secrets, termos-proibidos, vitest.mjs, db/
+tests/           # unit/, banco/, e2e/
 docs/            # SPEC, PLANO, ARQUITETURA, specs/, historico/
 ```
 
@@ -97,7 +96,8 @@ docs/            # SPEC, PLANO, ARQUITETURA, specs/, historico/
 - **Textos:** todo texto de tela passa pelo catálogo (`<T k="…">` ou `texto("…")`). O nome da marca vem só de `config/brand.ts`.
 - **Regras de negócio:** funções puras, com relógio e configuração injetados; nunca dependem de React nem de banco.
 - **Acesso a dados:**
-  - só no servidor; componente nunca lê banco, LocalStorage ou armazenamento direto (há regra de lint);
+  - só no servidor, pelos `consultas.ts` e `acoes.ts` dos módulos; banco e arquivos só nessa lista permitida e em `src/server`; nada guardado no navegador (regras de lint em `eslint.config.mjs`);
+  - um módulo importa outro só pelo índice (`@/modulos/<modulo>`); `sql.raw` é barrado fora dos testes;
   - toda Server Action e Route Handler começa por `exigirContexto()`, valida a entrada com Zod estrito e responde 404 para id de outro tenant.
 - **Banco:** migrations só aditivas (nunca `drizzle-kit push`), RLS em toda tabela e índice em todo `tenant_id`. Políticas, funções `app.*`, gatilhos e GRANTs são escritos à mão em SQL, cada regra com teste de banco.
 - **Pendências:**
@@ -134,6 +134,7 @@ docs/            # SPEC, PLANO, ARQUITETURA, specs/, historico/
 
 - **Vitest no Windows:** terminal aberto em `c:\` (minúsculo) faz o Vitest carregar duas cópias de si mesmo. Use `npm test` (wrapper `scripts/vitest.mjs`).
 - **Postgres local desligado:** depois de reiniciar o computador, o Postgres fica parado. `test:db` e `db:reset` falham com `ECONNREFUSED` na porta 5432 até `npm run db:start`.
+- **Cache Components em rota com parâmetro:** sem `generateStaticParams`, o `await params` fica dentro de `<Suspense>`; `usePathname` no layout também precisa de Suspense, senão o build falha. O `notFound()` responde 200 com `noindex`, porque o shell já saiu.
 - **Node 24 obrigatório:** os scripts `.ts` rodam direto no Node 24 (type stripping). Num Node mais antigo, `catalogo`, `check:secrets` e o `prebuild` quebram.
 - **`typecheck`** roda `next typegen` antes do `tsc`. Sem isso, `LayoutProps` e os tipos de rota somem.
 - **Next 16** tem APIs novas: leia `node_modules/next/dist/docs/` antes de usar uma API (ver `AGENTS.md`).

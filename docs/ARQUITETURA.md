@@ -52,7 +52,7 @@ Regra para dependência nova: dizer por quê, fixar a versão e conferir a docum
 
 ## 3. Organização do código
 
-Hoje o código está organizado por camada (`src/dominio`, `src/data`, `src/server`). Com 25 capacidades e cinco áreas de usuário, isso vira pasta-depósito. A 2.0 organiza **por domínio** (D6):
+Até a 1.0, o código era organizado por camada (`src/dominio`, `src/data`, `src/server`). Com 25 capacidades e cinco áreas de usuário, isso vira pasta-depósito. A 2.0 organiza **por domínio** (D6), desde a fatia 0.3:
 
 ```
 src/
@@ -65,7 +65,8 @@ src/
     privacidade/            # consentimentos, versões legais, direitos do titular
     analytics/              # eventos anônimos, números agregados
     <modulo>/
-      regras.ts             # funções puras: sem React, sem banco, relógio injetado
+      regras.ts             # funções puras: sem React, sem banco, relógio injetado (a busca tem um arquivo por regra)
+      tipos.ts              # schemas Zod de fronteira do módulo
       consultas.ts          # acesso a dados (server-only)
       acoes.ts              # Server Actions: exigirContexto() + Zod estrito
       componentes/          # UI do módulo
@@ -73,7 +74,7 @@ src/
   server/
     db/                     # cliente, contexto por transação e schema/ (tabelas Drizzle de todos os módulos)
     auth/, arquivos/, email/, observabilidade/
-  lib/                      # utilitários sem domínio (metadata, geo)
+  lib/                      # utilitários sem domínio (esquemas Zod básicos, geo, formato, metadata)
   ui/                       # shadcn/ui (gerado, não editar à mão) e layout
   i18n/                     # catálogo de textos (pt-BR) e <T>
   styles/                   # tokens da marca e CSS global
@@ -87,27 +88,28 @@ tests/                      # unit/, banco/, e2e/
 
 As tabelas Drizzle ficam num lugar só, `src/server/db/schema/` (decisão da 0.2): o drizzle-kit e os scripts de banco leem o schema direto, sem depender dos módulos. Cada módulo lê e escreve as próprias tabelas pelo `consultas.ts`.
 
-Regras de dependência, verificadas por lint:
-- Um módulo importa outro **só pelo `index.ts`**.
-- `consultas.ts` e `src/server/db` só são importados por código de servidor (`server-only`).
-- Componente nunca acessa banco, LocalStorage ou armazenamento direto.
-- `regras.ts` não importa nada de React, Next ou banco.
+Regras de dependência, verificadas por lint (`eslint.config.mjs`, testadas em `tests/unit/lint-acesso-dados.test.ts`):
+- Um módulo importa outro **só pelo `index.ts`**; no servidor, também por `consultas.ts` e `acoes.ts`. Dentro do módulo, só `./`.
+- Banco (`src/server/db` e o driver) e arquivos (`src/server/arquivos`) só têm uma lista permitida: `src/server` e os `consultas.ts` e `acoes.ts` dos módulos, que começam por `import "server-only"`.
+- Nada é guardado no navegador em `src/`: o lint pega os globais, apelidos (`w.localStorage`), acesso por string (`Reflect.get`) e `document.cookie`. Quando o progresso do questionário chegar, o arquivo que o guarda entra como exceção.
+- `regras.ts`, os demais arquivos puros e o `index.ts` não importam React, Next, banco nem servidor, nem `consultas` e `acoes`. O índice pode reexportar os componentes do módulo.
+- `sql.raw` é barrado fora dos testes: valor dinâmico vai como parâmetro em `` sql`…` ``.
 
-O que muda no código atual (fatia 0.3):
+O que mudou na fatia 0.3:
 
 | Hoje | Vai para |
 |---|---|
-| `src/dominio/elegibilidade.ts`, `catalogo.ts` | `modulos/catalogo/regras.ts` |
+| `src/dominio/elegibilidade.ts`, `catalogo.ts` | `modulos/catalogo/elegibilidade.ts` e `regras.ts` |
 | `src/dominio/filtros.ts`, `exigencia.ts`, `contagem.ts`, `nota.ts`, `escolha.ts`, `motivo.ts`, `requisitos.ts`, `sorteio.ts` | `modulos/busca/` |
-| `src/dominio/homeState.ts` | `modulos/contas/` (home) |
+| `src/dominio/homeState.ts` | `modulos/contas/homeState.ts` (home) |
 | `src/dominio/mapa.ts`, `geo.ts` | `src/lib/geo.ts`; o mapa público é da fase 2 |
-| `src/dominio/tipos.ts` | Schemas Zod de fronteira em cada módulo; as tabelas já estão em `src/server/db/schema/` |
-| `src/components/T.tsx` | `src/i18n/` |
-| `src/components/layout/` | `src/ui/` |
-| `src/data/port.ts`, `local.ts`, `armazenamento-local.ts`, `imagens-plataforma-idb.ts` | Removidos; fica só o progresso do questionário no navegador |
-| `src/data/eventos.ts` | `modulos/analytics/`, com lista permitida por tipo de evento |
+| `src/dominio/tipos.ts` | `tipos.ts` de cada módulo, com os esquemas básicos em `src/lib/esquemas.ts`; as tabelas já estão em `src/server/db/schema/` |
+| `src/components/T.tsx` | `src/i18n/` (ainda não movido) |
+| `src/components/layout/` | `src/ui/` (ainda não movido) |
+| `src/data/port.ts`, `local.ts`, `armazenamento-local.ts`, `imagens-plataforma-idb.ts` | Removidos, com o `fake-indexeddb`, o `seed:json` e o `NEXT_PUBLIC_DATA_SOURCE` |
+| `src/data/eventos.ts` | `modulos/analytics/regras.ts`; a lista permitida por tipo de evento ainda não foi feita |
 | `src/data/arquivos.ts`, `src/server/storage/disco.ts` | `src/server/arquivos/` (disco no desenvolvimento, R2 em homologação e produção) |
-| `tests/contrato/` | Vira `tests/banco/`, contra o Postgres real |
+| `tests/contrato/` | Removido com os adaptadores locais; o banco é testado em `tests/banco/`, contra o Postgres real |
 
 ## 4. Dados
 
@@ -297,7 +299,7 @@ Nada com custo acima de zero, nem serviço externo gratuito novo, sem o OK do Ma
 **Como chegar lá:**
 - **Server Components e streaming.**
 - **Cache das páginas públicas:**
-  - `use cache` com `cacheTag` por empreendimento, invalidado na publicação e nas mudanças de cadastro;
+  - `use cache` com `cacheTag` por empreendimento, invalidado na publicação e nas mudanças de cadastro. Desde a 0.3, a página do empreendimento lê o dado em `use cache` com `cacheLife("hours")` e as tags `vitrine` e `empreendimento:{slug}`; a invalidação chega com a escrita do catálogo. Sem `generateStaticParams`, a página renderiza a cada requisição e só o dado fica em cache;
   - base elegível em cache por hash dos filtros.
 - **Imagens:** gerar os tamanhos no upload e servir do R2 com cache longo, para não gastar CPU do servidor compartilhado.
 - **Fontes locais** (já feito).
