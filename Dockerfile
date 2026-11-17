@@ -21,7 +21,8 @@ ARG NEXT_PUBLIC_SENTRY_DSN=""
 ENV NEXT_TELEMETRY_DISABLED=1 \
     IMOB_STANDALONE=1 \
     NEXT_PUBLIC_SENTRY_DSN=${NEXT_PUBLIC_SENTRY_DSN}
-RUN npm run build
+# O git não guarda pasta vazia: a public/ pode não existir no checkout.
+RUN mkdir -p public && npm run build
 
 # --- app ---
 FROM ${NODE_IMAGEM} AS app

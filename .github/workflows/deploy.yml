@@ -110,9 +110,10 @@ jobs:
           VERSAO: ${{ steps.versao.outputs.valor }}
         run: |
           install -m 700 -d ~/.ssh
-          printf '%s\n' "$CHAVE" > ~/.ssh/deploy
+          # Sem o \r de quebras de linha do Windows, que o ssh não aceita.
+          printf '%s\n' "$CHAVE" | tr -d '\r' > ~/.ssh/deploy
           chmod 600 ~/.ssh/deploy
-          printf '%s\n' "$HOSTS_CONHECIDOS" > ~/.ssh/known_hosts
+          printf '%s\n' "$HOSTS_CONHECIDOS" | tr -d '\r' > ~/.ssh/known_hosts
           # A chave só roda o deploy.sh no servidor; o texto abaixo é o pedido que ele valida.
           ssh -i ~/.ssh/deploy -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o BatchMode=yes \
             "deploy@$SERVIDOR" "deploy hml $VERSAO"
