@@ -2,6 +2,34 @@
 
 Uma entrada por sessão, a mais recente no topo. Para continuar de onde parou, comece com `/forja:retomar`.
 
+## 2026-11-17 11:33
+
+**Feito:**
+- **Endurecimento do servidor concluído (passos 0 a 8)**, com o Matheus presente e snapshot antes. O detalhe fica fora do repositório.
+  - Depois do reinício, alguns serviços de outras stacks não voltaram sozinhos e foram religados sem mudar a configuração.
+  - Os sites ficaram como antes.
+- **Sentry:** projeto `imob` criado, DSN no cofre do Matheus, evento de teste recebido.
+- **Plano da 0.4 aprovado** e registrado na própria 0.4 do PLANO.
+- **Decisões de 17/11 no PLANO:**
+  - homologação num subdomínio da I.Ara;
+  - MVP de 01/12 com a interface completa e cadeado no que fica para depois (fatia nova 1.3b);
+  - pré-lançamento continua oculto;
+  - login simples para a incorporadora.
+
+**Em andamento:**
+- **Fatia 0.4:** o plano está aprovado, e falta implementar. Começa pelo código, que não depende do servidor nem do DNS. A primeira etapa é o `next.config` com `IMOB_STANDALONE`.
+
+**Decisões:** as de 17/11 estão na seção Decisões do PLANO. As da 0.4 estão na própria 0.4.
+
+**Próximo passo:**
+- Abrir uma conversa nova, rodar `/forja:retomar` e implementar a 0.4 conforme o plano, com testes primeiro, até a parte que não precisa do servidor.
+- Até 20/11: protótipo visual com a navegação completa do comprador e da incorporadora, incluindo os itens com cadeado. Ele serve para aprovar a lista de funcionalidades da 1.3b.
+- O Matheus cria o registro DNS do subdomínio de homologação.
+
+**Atenção:**
+- **Escopo:** o MVP de 01/12 cresceu com a 1.3b (login, área da incorporadora e cadeados). Acompanhar o prazo fatia a fatia.
+- **Senhas:** nunca digitar senha no prompt do servidor. O login é pela chave e não pede nada.
+
 ## 2026-11-16 21:30
 
 **Feito:**
