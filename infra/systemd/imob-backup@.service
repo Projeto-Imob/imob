@@ -1,0 +1,11 @@
+# Backup do banco do Imob (fatia 0.4). Instância = ambiente: imob-backup@hml.service
+# Instalar: copiar para /etc/systemd/system/ junto com o .timer e ligar o timer (ver o .timer).
+[Unit]
+Description=Backup do banco do Imob (%i): pg_dump cifrado enviado ao R2
+Wants=network-online.target
+After=network-online.target docker.service
+
+[Service]
+Type=oneshot
+User=deploy
+ExecStart=/opt/imob/infra/backup.sh %i diario

@@ -1,0 +1,103 @@
+# Stack do Imob no Swarm compartilhado (fatia 0.4; ARQUITETURA, seções 7 e 8).
+# Aplicada só pelo infra/deploy.sh, que lê este arquivo da imagem de migracao da mesma versão:
+#   docker stack deploy -c imob-stack.yml imob_<ambiente>
+# Nunca com --prune: os serviços das outras stacks não estão aqui.
+# O repositório é público: o domínio, a rede e o resolvedor do Traefik vêm do deploy.env do servidor,
+# e os segredos, dos arquivos .env da pasta do ambiente (IMOB_PASTA), fora do repositório.
+# Nomes finais: serviços imob_<ambiente>_app, _worker e _db; rede imob_<ambiente>_interno; volume imob_<ambiente>_db.
+version: "3.8"
+
+services:
+  app:
+    image: ghcr.io/projeto-imob/imob:${IMOB_VERSAO:?defina IMOB_VERSAO}
+    # Só a DATABASE_URL do app_user (o migrator existe só na tarefa de migration), Sentry e afins.
+    env_file: ${IMOB_PASTA:?defina IMOB_PASTA}/app.env
+    environment:
+      IMOB_VERSAO: ${IMOB_VERSAO}
+    networks: [interno, traefik]
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/api/saude').then((r) => process.exit(r.ok ? 0 : 1), () => process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    deploy:
+      replicas: ${IMOB_APP_REPLICAS:-1}
+      update_config:
+        order: start-first
+        failure_action: rollback
+        monitor: 60s
+      rollback_config:
+        order: start-first
+      restart_policy:
+        condition: any
+        delay: 5s
+      resources:
+        reservations:
+          memory: 192M
+        limits:
+          memory: 384M
+      labels:
+        - traefik.enable=true
+        - traefik.swarm.network=${TRAEFIK_REDE:?defina TRAEFIK_REDE}
+        - traefik.docker.network=${TRAEFIK_REDE}
+        - traefik.http.routers.imob_${IMOB_AMBIENTE:?defina IMOB_AMBIENTE}.rule=Host(`${IMOB_DOMINIO:?defina IMOB_DOMINIO}`)
+        - traefik.http.routers.imob_${IMOB_AMBIENTE}.entrypoints=${TRAEFIK_ENTRADA:?defina TRAEFIK_ENTRADA}
+        - traefik.http.routers.imob_${IMOB_AMBIENTE}.tls=true
+        - traefik.http.routers.imob_${IMOB_AMBIENTE}.tls.certresolver=${TRAEFIK_CERTRESOLVER:?defina TRAEFIK_CERTRESOLVER}
+        - traefik.http.routers.imob_${IMOB_AMBIENTE}.service=imob_${IMOB_AMBIENTE}
+        - traefik.http.services.imob_${IMOB_AMBIENTE}.loadbalancer.server.port=3000
+
+  # Adiado (regra 20): sobe na primeira fatia com tarefa agendada, que define o comando e o worker.env dele.
+  worker:
+    image: ghcr.io/projeto-imob/imob:${IMOB_VERSAO}
+    networks: [interno]
+    deploy:
+      replicas: 0
+      restart_policy:
+        condition: any
+        delay: 5s
+      resources:
+        reservations:
+          memory: 96M
+        limits:
+          memory: 192M
+
+  db:
+    image: postgres:17.12
+    command: ["postgres", "-c", "shared_buffers=128MB", "-c", "max_connections=40"]
+    # POSTGRES_PASSWORD do superusuário, usado só no bootstrap e nos backups.
+    env_file: ${IMOB_PASTA}/db.env
+    volumes:
+      - db:/var/lib/postgresql/data
+    networks: [interno]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    deploy:
+      # Dois Postgres no mesmo volume corrompem os dados: sempre para o antigo antes de subir o novo.
+      update_config:
+        order: stop-first
+      restart_policy:
+        condition: any
+        delay: 5s
+      resources:
+        reservations:
+          memory: 192M
+        limits:
+          memory: 512M
+
+networks:
+  # attachable: a tarefa de migration entra nesta rede para chegar ao banco. Sem porta publicada.
+  interno:
+    driver: overlay
+    attachable: true
+  traefik:
+    external: true
+    name: ${TRAEFIK_REDE}
+
+volumes:
+  db:

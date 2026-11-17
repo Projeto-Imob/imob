@@ -97,6 +97,74 @@ jobs:
           path: playwright-report
           retention-days: 7
 
+  imagem:
+    name: imagem
+    # Só em PR: monta as imagens do deploy (fatia 0.4) e confere que sobem contra um Postgres de verdade.
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:17.12
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      DATABASE_URL_ADMIN: postgres://postgres:postgres@localhost:5432/postgres
+      DB_SENHA_MIGRATOR: ci-migrator
+      DB_SENHA_APP_USER: ci-app-user
+      DB_SENHA_AUTH_SERVICE: ci-auth-service
+      DB_SENHA_WORKER: ci-worker
+    steps:
+      - uses: actions/checkout@v7
+      - uses: docker/setup-buildx-action@v4
+      # Lê o cache que o workflow Deploy grava na main.
+      - uses: docker/build-push-action@v7
+        with:
+          context: .
+          target: app
+          load: true
+          tags: imob:ci
+          cache-from: type=gha,scope=imagem-app
+      - uses: docker/build-push-action@v7
+        with:
+          context: .
+          target: migracao
+          load: true
+          tags: imob-migracao:ci
+          cache-from: type=gha,scope=imagem-migracao
+      # Como no servidor: o bootstrap usa o superusuário (preparar); migrations e seed, só o migrator.
+      - name: Bootstrap, migrations e seed pela imagem
+        run: |
+          docker run --rm --network host -e DATABASE_URL_ADMIN -e DB_SENHA_MIGRATOR -e DB_SENHA_APP_USER \
+            -e DB_SENHA_AUTH_SERVICE -e DB_SENHA_WORKER imob-migracao:ci bootstrap
+          migrator=postgres://migrator:ci-migrator@localhost:5432/imob
+          docker run --rm --network host -e DATABASE_URL_MIGRATOR=$migrator imob-migracao:ci migrate
+          docker run --rm --network host -e DATABASE_URL_MIGRATOR=$migrator imob-migracao:ci seed --homologacao
+      - name: O app recusa subir com outro papel
+        run: |
+          set +e
+          timeout 60 docker run --name app-errado --network host \
+            -e DATABASE_URL=postgres://migrator:ci-migrator@localhost:5432/imob imob:ci
+          codigo=$?
+          docker rm -f app-errado >/dev/null 2>&1
+          [ "$codigo" -eq 1 ] || { echo "::error::O app subiu conectado como migrator (código $codigo)."; exit 1; }
+      - name: O app sobe, responde a saúde e a página
+        run: |
+          docker run -d --name app --network host -e IMOB_VERSAO=ci \
+            -e DATABASE_URL=postgres://app_user:ci-app-user@localhost:5432/imob imob:ci
+          for _ in $(seq 1 30); do curl -fsS http://localhost:3000/api/saude && break; sleep 2; done
+          curl -fsS http://localhost:3000/api/saude | grep -q '"status":"ok","versao":"ci"'
+          curl -fsS -o /dev/null http://localhost:3000/empreendimento/residencial-jardim-das-aguas
+      - if: failure()
+        run: docker logs app || true
+
   banco:
     name: banco
     runs-on: ubuntu-latest
