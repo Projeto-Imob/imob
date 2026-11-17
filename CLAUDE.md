@@ -134,6 +134,7 @@ docs/            # SPEC, PLANO, ARQUITETURA, specs/, historico/
 
 - **Vitest no Windows:** terminal aberto em `c:\` (minúsculo) faz o Vitest carregar duas cópias de si mesmo. Use `npm test` (wrapper `scripts/vitest.mjs`).
 - **Postgres local desligado:** depois de reiniciar o computador, o Postgres fica parado. `test:db` e `db:reset` falham com `ECONNREFUSED` na porta 5432 até `npm run db:start`.
+- **Fatias em paralelo:** crie a pasta de trabalho à mão (`git worktree add ../imob-<fatia> -b <branch> origin/main`); o `isolation: worktree` dos agentes falha no Windows por diferença de maiúscula no caminho. O Postgres local e o banco `imob` são os mesmos para todas as pastas: um `db:reset` numa pasta vale para as outras.
 - **Cache Components em rota com parâmetro:** sem `generateStaticParams`, o `await params` fica dentro de `<Suspense>`; `usePathname` no layout também precisa de Suspense, senão o build falha. O `notFound()` responde 200 com `noindex`, porque o shell já saiu.
 - **Node 24 obrigatório:** os scripts `.ts` rodam direto no Node 24 (type stripping). Num Node mais antigo, `catalogo`, `check:secrets` e o `prebuild` quebram.
 - **`typecheck`** roda `next typegen` antes do `tsc`. Sem isso, `LayoutProps` e os tipos de rota somem.

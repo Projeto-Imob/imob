@@ -108,7 +108,7 @@ Fatias grandes ou incertas ganham uma spec própria em `docs/specs/<fatia>.md` a
     - memória e swap medidos dentro do orçamento;
     - stacks vizinhas intactas.
   - Bloqueada por:
-    - OK e janela para o endurecimento;
+    - endurecimento: plano aprovado em 16/11/2026 e passo 0 (só leitura) na mesma noite; os demais passos esperam uma janela com o Matheus presente;
     - subdomínio de homologação;
     - DSN do projeto `imob` no Sentry (conta criada em 16/11/2026), gravado pelo Matheus no cofre e no servidor. O R2 ficou pronto e testado em 16/11/2026: buckets `imob-hml-arquivos` e `imob-backups`, com token só de objetos nesses dois.
 - [ ] **0.5 Correções que a 2.0 mantém** (da `docs/AUDITORIA.md`).
@@ -120,7 +120,7 @@ Fatias grandes ou incertas ganham uma spec própria em `docs/specs/<fatia>.md` a
     - CSP e cabeçalhos de segurança (CSP sem nonce, mantendo o cache; decisão de 16/11/2026);
     - `check:secrets` com os padrões que faltam e gitleaks no CI;
     - actions por SHA e imagem do Postgres do CI por digest;
-    - Dependabot só com versões menores e de correção. Versão maior (como TypeScript 7, ESLint 10 e `@types/node` acima do Node 24) vira decisão, com PR própria; a PR #2, que juntou as duas coisas e quebrou o CI, é fechada;
+    - Dependabot só com versões menores e de correção. Versão maior (como TypeScript 7, ESLint 10 e `@types/node` acima do Node 24) vira decisão, com PR própria; as PRs #2 e #6 (16/11/2026), que juntaram as duas coisas e quebraram o CI, são fechadas;
     - suíte estável na máquina local.
   - Verificar: um teste novo para cada achado; suíte verde três vezes seguidas.
 
@@ -300,7 +300,7 @@ Fatiadas quando a v1 estiver no ar, nesta ordem de valor:
 | C15 | Validação jurídica de consentimento, visita, projeção, atuação sem CRECI e hospedagem fora do Brasil | — | Lançamento (1.10) |
 | — | Simulador, Vitrine Destacada (vagas e valores), planos Essencial e Avançado, quantos "semelhantes" | — | Fases 2 e 3 |
 | — | Proposta e contrato continuam dentro do sistema (R5) mesmo com o fluxo Reelly no atendimento? | — | Fase 3 |
-| — | OK e janela para o endurecimento do servidor compartilhado (seção 7 da ARQUITETURA) | — | 0.4 |
+| — | Janela, com o Matheus presente, para os passos do endurecimento depois do passo 0 (plano aprovado em 16/11/2026; seção 7 da ARQUITETURA) | — | 0.4 |
 | — | Subdomínios de homologação e de produção | — | 0.4 e 1.10 |
 | — | DSN do Sentry (conta criada em 16/11/2026) e conta do Resend, com as chaves gravadas pelo Matheus no cofre e no servidor (o R2 ficou pronto e testado em 16/11/2026) | — | Sentry: 0.4. Resend: 1.5 (sem ele, flag `email_real` desligada) |
 | — | Kitnet conta como studio? | Não | Nada |
