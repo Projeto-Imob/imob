@@ -21,7 +21,10 @@ Uma entrada por sessão, a mais recente no topo. Para continuar de onde parou, c
 - Capturas da página da 0.3 em `capturas/fatia-0.3/`, fora do git.
 
 **Em andamento:**
-- **Endurecimento:** o Matheus saiu às 21:30 e autorizou só o passo 0, a foto do estado, que só lê. Ele está agendado para as 22:00, com segunda tentativa às 00:55 se a cota do plano acabar. Os demais passos esperam uma janela com ele presente.
+- **Endurecimento:** o Matheus saiu às 21:30 e autorizou só o passo 0, a foto do estado, que só lê.
+  - O passo 0 rodou às 22:00 sem erro: a foto ficou salva no servidor, e todos os serviços estavam com as réplicas completas.
+  - A checagem de saúde não achou endereço público para um dos conjuntos de serviços. Antes do próximo passo, confira se ele tem um, para que a checagem também o cubra.
+  - Os demais passos esperam uma janela com o Matheus presente.
 - **Fatia 0.4 (homologação):** o Sentry já está na main. Falta o deploy, que depende de três coisas:
   - o endurecimento;
   - o subdomínio de homologação;
