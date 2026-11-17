@@ -85,7 +85,10 @@ Fatias grandes ou incertas ganham uma spec própria em `docs/specs/<fatia>.md` a
     - rede própria e HTTPS pelo Traefik existente num subdomínio;
     - limites de memória;
     - imagem no GHCR por commit e deploy por Actions (D12);
-    - Sentry e monitor de disponibilidade (D10);
+    - Sentry e monitor de disponibilidade (D10). O SDK está no app desde 16/11/2026, sem dado pessoal. Faltam:
+      - o DSN no servidor e no build;
+      - o monitor de disponibilidade (o plano grátis do Sentry inclui 1);
+      - os source maps;
     - backup diário cifrado no R2 (D8);
     - o contêiner `app` recebe só a `DATABASE_URL` do `app_user` e, ao subir, confere que conectou como `app_user`; o `migrator` só existe na tarefa de migration;
     - `statement_timeout` e `idle_in_transaction_session_timeout` nos papéis do app e do worker;
@@ -99,7 +102,7 @@ Fatias grandes ou incertas ganham uma spec própria em `docs/specs/<fatia>.md` a
   - Bloqueada por:
     - OK e janela para o endurecimento;
     - subdomínio de homologação;
-    - conta do Sentry, com a chave gravada pelo Matheus no cofre e no servidor. O R2 ficou pronto e testado em 16/11/2026: buckets `imob-hml-arquivos` e `imob-backups`, com token só de objetos nesses dois.
+    - DSN do projeto `imob` no Sentry (conta criada em 16/11/2026), gravado pelo Matheus no cofre e no servidor. O R2 ficou pronto e testado em 16/11/2026: buckets `imob-hml-arquivos` e `imob-backups`, com token só de objetos nesses dois.
 - [ ] **0.5 Correções que a 2.0 mantém** (da `docs/AUDITORIA.md`).
   - Entrega:
     - pré-lançamento por subcondomínio, com os casos do D15 no seed (torre com lançamento futuro e sem data) e paridade TS × SQL;
@@ -287,7 +290,7 @@ Fatiadas quando a v1 estiver no ar, nesta ordem de valor:
 | — | Proposta e contrato continuam dentro do sistema (R5) mesmo com o fluxo Reelly no atendimento? | — | Fase 3 |
 | — | OK e janela para o endurecimento do servidor compartilhado (seção 7 da ARQUITETURA) | — | 0.4 |
 | — | Subdomínios de homologação e de produção | — | 0.4 e 1.10 |
-| — | Contas do Sentry e do Resend, com as chaves gravadas pelo Matheus no cofre e no servidor (o R2 ficou pronto e testado em 16/11/2026) | — | Sentry: 0.4. Resend: 1.5 (sem ele, flag `email_real` desligada) |
+| — | DSN do Sentry (conta criada em 16/11/2026) e conta do Resend, com as chaves gravadas pelo Matheus no cofre e no servidor (o R2 ficou pronto e testado em 16/11/2026) | — | Sentry: 0.4. Resend: 1.5 (sem ele, flag `email_real` desligada) |
 | — | Kitnet conta como studio? | Não | Nada |
 | — | Hetzner Backups do servidor (cerca de +20% do plano; protege também os outros projetos) | `pg_dump` diário no R2 | Nada (recomendado) |
 | — | Memória para a produção: subir o plano ou desligar a homologação, se a medição pedir | Decidir na 1.10 | 1.10 |
