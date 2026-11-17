@@ -137,7 +137,7 @@ Fatias grandes ou incertas ganham uma spec própria em `docs/specs/<fatia>.md` a
     - endurecimento concluído;
     - DSN do Sentry no cofre do Matheus;
     - R2 pronto desde 16/11, com os buckets `imob-hml-arquivos` e `imob-backups` e um token só de objetos nesses dois;
-    - parte do repositório pronta na branch `fatia/0.4-homologacao`, ainda sem PR:
+    - parte do repositório pronta na PR #9 (branch `fatia/0.4-homologacao`), esperando o CI e o merge do Matheus:
       - os arquivos do plano;
       - os limites de tempo por papel (**Proposta**: 15 s e 30 s no app e no auth; 60 s e 60 s no worker);
       - o job `imagem` no CI das PRs, que monta as imagens e confere migrations, seed, papel do app, saúde e página;

@@ -65,6 +65,7 @@ npm run db:reset       # recria o banco local imob com migrations e seed (só lo
 npm run db:migrate     # aplica as migrations
 npm run db:generate    # gera a migration das tabelas a partir de src/server/db/schema/
 npm run test:db        # testes de banco contra o Postgres real (recria imob_teste)
+IMOB_STANDALONE=1 npm run build   # build igual ao da imagem; teste com node .next/standalone/server.js
 ```
 
 ## Stack
@@ -124,6 +125,10 @@ docs/            # SPEC, PLANO, ARQUITETURA, specs/, historico/
 - **Máquina do Matheus:** Windows 11, 8 GB de RAM, 2 núcleos, sem WSL nem Docker. Rode suítes pesadas com parcimônia e mantenha o código compilando.
 - **Repositório:** `C:\dev\imob`, fora do OneDrive. No GitHub: `Projeto-Imob/imob` (público; nada de segredo nem de detalhe de segurança do servidor nos arquivos), acessado pela conta `iaraaivendas`, já integrada (CLAUDE.md global). O `Projeto-Imob/projeto-vieza` é o protótipo antigo: não mexer.
 - **Servidor:** as credenciais e o acesso seguem o CLAUDE.md global. O Imob roda no servidor atual (Docker Swarm com Traefik) como stack isolada `imob_*` (D11; `docs/ARQUITETURA.md`, seção 7).
+- **Deploy de homologação** (fatia 0.4; `docs/ARQUITETURA.md`, seção 8):
+  - é automático depois do merge na `main`: o workflow `Deploy` chama o `infra/deploy.sh` no servidor;
+  - a primeira vez em cada ambiente é `deploy.sh preparar <ambiente> <commit>`, no terminal do servidor;
+  - para voltar a um commit: Actions > Deploy > Run workflow.
 - **O servidor é compartilhado** com outros projetos e clientes:
   - só adicione, com prefixo `imob_` em tudo;
   - nunca altere, reinicie ou remova o que é de outra stack;
@@ -143,4 +148,8 @@ docs/            # SPEC, PLANO, ARQUITETURA, specs/, historico/
 - **Docker Swarm:**
   - nunca `docker restart` num contêiner de serviço, porque o Swarm sobe outro e os dois ficam rodando; use `docker service update --force imob_…`, só com imagem de versão fixa;
   - nunca `docker stack deploy --prune` nem `--remove-orphans` fora das stacks `imob_*`.
+- **Sem Docker local:**
+  - o `Dockerfile` só é testado pelo job `imagem` do CI nas PRs;
+  - para ver o servidor de produção na máquina, use o build standalone;
+  - o arquivo da stack vai dentro da imagem de migração, então mudar `infra/imob-stack.yml` só vale no deploy de um commit novo.
 - **Termos proibidos:** o teste varre só o código do app. `docs/`, `openspec/`, `CLAUDE.md`, `AGENTS.md` e `README.md` ficam fora porque descrevem os próprios termos.
