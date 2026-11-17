@@ -11,7 +11,7 @@ export default defineConfig({
   resolve: { tsconfigPaths: true },
   test: {
     environment: "node",
-    include: ["tests/unit/**/*.test.{ts,tsx}", "tests/contrato/**/*.test.{ts,tsx}"],
+    include: ["tests/unit/**/*.test.{ts,tsx}"],
     testTimeout: 30_000,
   },
 });

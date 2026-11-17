@@ -54,6 +54,20 @@ export const ptBR = {
   "project.projection.disclaimer": "Projeção calculada em {data} com {indicadores}. Não é garantia.",
   "visit.confirmed": "Pronto! {dia}, {hora}, você conhece o seu possível novo lar. {gerente} te espera.",
   "favorites.empty": "Toque no coração para acompanhar um imóvel. A gente avisa quando algo mudar.",
+
+  // Página do empreendimento (fatia 0.3: o resumo; os demais blocos chegam na 1.1). Textos propostos.
+  "empreendimento.selo_ri": "Incorporação registrada",
+  "empreendimento.local": "{bairro}, {cidade}/{uf}",
+  "empreendimento.resumo": "Resumo do empreendimento",
+  "empreendimento.construtora": "Construtora",
+  "empreendimento.entrega": "Entrega",
+  "empreendimento.obra": "Obra",
+  "empreendimento.obra_valor": "{n}% concluída",
+  "empreendimento.nao_informado": "Não informado",
+  "empreendimento.carregando": "Carregando o empreendimento…",
+  "empreendimento.nao_encontrado.titulo": "Empreendimento não encontrado",
+  "empreendimento.nao_encontrado.texto": "Este endereço não leva a um empreendimento disponível no momento.",
+  "empreendimento.nao_encontrado.voltar": "Voltar ao início",
 } as const;
 
 export type ChaveTexto = keyof typeof ptBR;

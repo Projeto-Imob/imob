@@ -14,12 +14,11 @@ const variaveis = linhas.flatMap((l) => {
  * Únicas variáveis públicas permitidas: não são segredo.
  * O DSN do Sentry só permite enviar eventos ao projeto e vai para o navegador por definição.
  */
-const PUBLICAS_PERMITIDAS = new Set(["NEXT_PUBLIC_DATA_SOURCE", "NEXT_PUBLIC_SENTRY_DSN"]);
+const PUBLICAS_PERMITIDAS = new Set(["NEXT_PUBLIC_SENTRY_DSN"]);
 
 describe(".env.example", () => {
-  it("declara a fonte de dados com valor local ou postgres", () => {
-    expect(arquivo).toMatch(/^NEXT_PUBLIC_DATA_SOURCE=local$/m);
-    expect(arquivo).toMatch(/"local".*"postgres"/);
+  it("não tem mais a fonte de dados local: um caminho só, o Postgres (D3)", () => {
+    expect(variaveis).not.toContain("NEXT_PUBLIC_DATA_SOURCE");
   });
 
   it.each(["DATABASE_URL", "BETTER_AUTH_SECRET", "BETTER_AUTH_URL", "S3_ENDPOINT", "S3_REGION", "S3_BUCKET", "S3_ACCESS_KEY_ID", "S3_SECRET_ACCESS_KEY", "ANTHROPIC_API_KEY", "SENTRY_DSN", "NEXT_PUBLIC_SENTRY_DSN"])(

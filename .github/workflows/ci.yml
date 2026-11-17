@@ -16,7 +16,6 @@ permissions:
   contents: read
 
 env:
-  NEXT_PUBLIC_DATA_SOURCE: local
   NEXT_TELEMETRY_DISABLED: "1"
 
 jobs:
@@ -58,6 +57,27 @@ jobs:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    # A página do empreendimento lê do banco (fatia 0.3): o mesmo Postgres do job banco, com o seed fictício.
+    services:
+      postgres:
+        image: postgres:17.12
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      DATABASE_URL_ADMIN: postgres://postgres:postgres@localhost:5432/postgres
+      DB_SENHA_MIGRATOR: ci-migrator
+      DB_SENHA_APP_USER: ci-app-user
+      DB_SENHA_AUTH_SERVICE: ci-auth-service
+      DB_SENHA_WORKER: ci-worker
+      # O next start do e2e conecta como app_user, como em produção.
+      DATABASE_URL: postgres://app_user:ci-app-user@localhost:5432/imob
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -67,6 +87,8 @@ jobs:
           cache-dependency-path: package-lock.json
       - run: npm ci
       - run: npx playwright install --with-deps --only-shell chromium
+      # Papéis, banco imob, migrations e o seed fictício.
+      - run: npm run db:reset
       - run: npm run test:e2e
       - uses: actions/upload-artifact@v7
         if: failure()

@@ -28,10 +28,10 @@ Na primeira vez, para os testes ponta a ponta: `npx playwright install chromium 
 
 | Comando | O que faz |
 |---|---|
-| `npm run lint` | ESLint, incluindo a regra que proíbe acesso a dados fora de `src/data/` e `src/server/` |
+| `npm run lint` | ESLint, com as fronteiras: módulos pelo índice, banco e arquivos só em `src/server` e nos `consultas.ts`/`acoes.ts`, nada guardado no navegador e sem `sql.raw` |
 | `npm run typecheck` | TypeScript estrito |
 | `npm test` | Testes de unidade (Vitest) |
-| `npm run test:e2e` | Playwright + axe sobre o build de produção (porta 3100) |
+| `npm run test:e2e` | Playwright + axe sobre o build de produção (porta 3100), lendo do banco local: rode `npm run db:reset` antes |
 | `npm run catalogo` | Falha com texto fora de `src/i18n/pt-BR.ts`; gera `src/i18n/catalogo.gerado.json` |
 | `npm run check:secrets` | Falha com `.env*` versionável ou padrão de segredo; rode antes de cada commit |
 | `npm run build` | Build de produção (roda `catalogo` antes) |
@@ -63,6 +63,8 @@ O banco local só guarda dados fictícios e aceita conexão só da própria máq
 - `config/scoring.config.ts`: parâmetros **Proposta** da busca (C14).
 - `src/app/globals.css`: tokens de cor e tipografia.
 - `src/i18n/pt-BR.ts` e `src/components/T.tsx`: catálogo de textos.
+- `src/modulos/<modulo>/`: regras, tipos, consultas e componentes de cada domínio; o resto do app importa pelo `index.ts`.
+- `db/migrations/`: tabelas (geradas) e segurança e vitrine (escritas à mão).
 
 ## Observação para Windows
 

@@ -1,7 +1,6 @@
 import { sql } from "drizzle-orm";
 import { afterAll, describe, expect, it } from "vitest";
-import { dataLocal, montarCompletos } from "@/dominio/catalogo";
-import { baseElegivel } from "@/dominio/elegibilidade";
+import { baseElegivel, dataLocal, montarCompletos } from "@/modulos/catalogo";
 import { CASOS_EXCLUSAO, gerarSeed } from "@/seed/seed";
 import { comContexto, consultaPublica, encerrarBanco, type Transacao } from "@/server/db";
 import { CONTAS, FIXTURES, URL_BANCO, comCliente } from "./apoio";
