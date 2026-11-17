@@ -10,8 +10,11 @@ const variaveis = linhas.flatMap((l) => {
   return m ? [m[1]!] : [];
 });
 
-/** Únicas variáveis públicas permitidas: não são segredo. */
-const PUBLICAS_PERMITIDAS = new Set(["NEXT_PUBLIC_DATA_SOURCE"]);
+/**
+ * Únicas variáveis públicas permitidas: não são segredo.
+ * O DSN do Sentry só permite enviar eventos ao projeto e vai para o navegador por definição.
+ */
+const PUBLICAS_PERMITIDAS = new Set(["NEXT_PUBLIC_DATA_SOURCE", "NEXT_PUBLIC_SENTRY_DSN"]);
 
 describe(".env.example", () => {
   it("declara a fonte de dados com valor local ou postgres", () => {
@@ -19,7 +22,7 @@ describe(".env.example", () => {
     expect(arquivo).toMatch(/"local".*"postgres"/);
   });
 
-  it.each(["DATABASE_URL", "BETTER_AUTH_SECRET", "BETTER_AUTH_URL", "S3_ENDPOINT", "S3_REGION", "S3_BUCKET", "S3_ACCESS_KEY_ID", "S3_SECRET_ACCESS_KEY", "ANTHROPIC_API_KEY"])(
+  it.each(["DATABASE_URL", "BETTER_AUTH_SECRET", "BETTER_AUTH_URL", "S3_ENDPOINT", "S3_REGION", "S3_BUCKET", "S3_ACCESS_KEY_ID", "S3_SECRET_ACCESS_KEY", "ANTHROPIC_API_KEY", "SENTRY_DSN", "NEXT_PUBLIC_SENTRY_DSN"])(
     "%s aparece só como placeholder comentado",
     (nome) => {
       const linha = linhas.find((l) => l.match(new RegExp(`^#?\\s*${nome}=`)));
