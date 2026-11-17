@@ -136,7 +136,26 @@ Fatias grandes ou incertas ganham uma spec própria em `docs/specs/<fatia>.md` a
   - Situação em 17/11/2026:
     - endurecimento concluído;
     - DSN do Sentry no cofre do Matheus;
-    - R2 pronto desde 16/11, com os buckets `imob-hml-arquivos` e `imob-backups` e um token só de objetos nesses dois.
+    - R2 pronto desde 16/11, com os buckets `imob-hml-arquivos` e `imob-backups` e um token só de objetos nesses dois;
+    - parte do repositório pronta na branch `fatia/0.4-homologacao`, ainda sem PR:
+      - os arquivos do plano;
+      - os limites de tempo por papel (**Proposta**: 15 s e 30 s no app e no auth; 60 s e 60 s no worker);
+      - o job `imagem` no CI das PRs, que monta as imagens e confere migrations, seed, papel do app, saúde e página;
+      - o `systemd` do backup em `infra/systemd/`;
+      - testes de unidade e de banco verdes;
+      - o build standalone, visto funcionando no Windows: a saúde dá 200 com o `app_user` e 503 com o `migrator`, e o app não sobe com o `migrator`.
+    - Falta no servidor, cada passo com o OK do Matheus:
+      - usuário `deploy` no grupo docker, com a chave do Actions presa ao `deploy.sh` (`command=` e `restrict`);
+      - `age` e `rclone` instalados;
+      - a pasta `/opt/imob` com os scripts, os `.env` do ambiente e os do backup, e o timer `imob-backup@hml`;
+      - `deploy.sh preparar hml <commit>`, depois do merge;
+      - regra de 30 dias no bucket `imob-backups`.
+    - Falta com o Matheus:
+      - par de chaves do `age`, gerado na máquina dele (a privada não sai de lá);
+      - secrets e variáveis do ambiente `homologacao` no GitHub e a variável `NEXT_PUBLIC_SENTRY_DSN` do repositório;
+      - o pacote do GHCR público depois da primeira publicação, se não vier assim;
+      - o monitor de disponibilidade.
+    - Verificar depois do deploy: a URL com a página da 0.3, deploy e rollback ensaiados, restauração do backup, memória e swap medidos e as stacks vizinhas intactas.
 
     O registro DNS do subdomínio foi criado e conferido em 17/11, inclusive nos resolvedores públicos.
 - [ ] **0.5 Correções que a 2.0 mantém** (da `docs/AUDITORIA.md`).
@@ -299,6 +318,11 @@ Fatiadas quando a v1 estiver no ar, nesta ordem de valor:
 - 2026-11-17: **endurecimento do servidor concluído**, com o Matheus presente. O plano e o registro ficam fora do repositório.
 - 2026-11-17: **homologação num subdomínio do domínio da I.Ara**, sem custo. O domínio definitivo é comprado antes da produção.
 - 2026-11-17: **plano da 0.4 aprovado**: worker adiado, imagem pública no GHCR, backup com `age` e `rclone` e cortes para depois de 01/12 (detalhes na 0.4).
+- 2026-11-17: na implementação da 0.4, sem mudar o plano:
+  - o arquivo da stack de cada versão vai dentro da imagem de migração, e o servidor não guarda cópia do repositório;
+  - a primeira subida de cada ambiente e o bootstrap dos papéis são o `deploy.sh preparar`, só no terminal do servidor;
+  - o seed fictício, que é idempotente, roda a cada deploy de homologação e nunca em produção;
+  - os limites de tempo por papel são **Proposta**.
 - 2026-11-17: **MVP de 01/12 com a interface completa.**
   - Todas as funcionalidades do comprador e da incorporadora aparecem.
   - As que ficam para depois de 01/12 vêm com cadeado, bloqueadas para todos, menos para o superadmin do Imob e o god mode, como amostra do que vem.
