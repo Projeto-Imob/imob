@@ -137,25 +137,33 @@ Fatias grandes ou incertas ganham uma spec própria em `docs/specs/<fatia>.md` a
     - endurecimento concluído;
     - DSN do Sentry no cofre do Matheus;
     - R2 pronto desde 16/11, com os buckets `imob-hml-arquivos` e `imob-backups` e um token só de objetos nesses dois;
-    - parte do repositório pronta na PR #9 (branch `fatia/0.4-homologacao`), esperando o CI e o merge do Matheus:
+    - parte do repositório entregue na PR #9 (17/11), com:
       - os arquivos do plano;
       - os limites de tempo por papel (**Proposta**: 15 s e 30 s no app e no auth; 60 s e 60 s no worker);
-      - o job `imagem` no CI das PRs, que monta as imagens e confere migrations, seed, papel do app, saúde e página;
-      - o `systemd` do backup em `infra/systemd/`;
-      - testes de unidade e de banco verdes;
-      - o build standalone, visto funcionando no Windows: a saúde dá 200 com o `app_user` e 503 com o `migrator`, e o app não sobe com o `migrator`.
-    - Falta no servidor, cada passo com o OK do Matheus:
-      - usuário `deploy` no grupo docker, com a chave do Actions presa ao `deploy.sh` (`command=` e `restrict`);
-      - `age` e `rclone` instalados;
-      - a pasta `/opt/imob` com os scripts, os `.env` do ambiente e os do backup, e o timer `imob-backup@hml`;
-      - `deploy.sh preparar hml <commit>`, depois do merge;
-      - regra de 30 dias no bucket `imob-backups`.
-    - Falta com o Matheus:
-      - par de chaves do `age`, gerado na máquina dele (a privada não sai de lá);
-      - secrets e variáveis do ambiente `homologacao` no GitHub e a variável `NEXT_PUBLIC_SENTRY_DSN` do repositório;
-      - o pacote do GHCR público depois da primeira publicação, se não vier assim;
-      - o monitor de disponibilidade.
-    - Verificar depois do deploy: a URL com a página da 0.3, deploy e rollback ensaiados, restauração do backup, memória e swap medidos e as stacks vizinhas intactas.
+      - o job `imagem` no CI das PRs;
+      - o timer do backup em `infra/systemd/`.
+    - **Homologação no ar em 17/11/2026**, com o commit `afe9415`:
+      - saúde e página respondem pelo endereço público, com certificado da Let's Encrypt;
+      - medido em repouso: app com 87 MB e banco com 60 MB;
+      - as stacks vizinhas ficaram intactas.
+    - Feito no servidor, com o OK do Matheus:
+      - `age` e `rclone`;
+      - usuário `deploy`, com a chave do Actions presa ao `deploy.sh`;
+      - `/opt/imob`, com as senhas do banco geradas no próprio servidor, sem exibição;
+      - timer `imob-backup@hml`;
+      - regra de 30 dias no bucket;
+      - `preparar`.
+    - Feito com o Matheus: chaves do `age`, com a privada no Bitwarden; ambiente `homologacao` no GitHub; pacotes do GHCR públicos.
+    - Três ajustes descobertos no primeiro deploy entram numa PR pequena:
+      - o label duplicado do Traefik;
+      - o `no_head` do `rclone` com o R2;
+      - o `deploy.sh` rodado pelo root.
+    - Falta:
+      - o Matheus copiar as senhas do banco da homologação para o Bitwarden;
+      - ensaiar o rollback, no próximo deploy;
+      - ensaiar a restauração do backup, com a chave do Matheus pela entrada padrão;
+      - o monitor de disponibilidade no Sentry;
+      - reinstalar o `deploy.sh` corrigido no servidor, com OK.
 
     O registro DNS do subdomínio foi criado e conferido em 17/11, inclusive nos resolvedores públicos.
 - [ ] **0.5 Correções que a 2.0 mantém** (da `docs/AUDITORIA.md`).

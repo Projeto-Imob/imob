@@ -190,7 +190,7 @@ Homologação e produção ficam juntas no mesmo servidor só se a memória perm
 O servidor é **compartilhado** com outros projetos e clientes, por isso valem as regras do mentor para servidor compartilhado:
 
 - **Só adicionar.** Tudo do Imob tem o prefixo `imob_`: stacks, serviços, volumes, redes e configs. Nada das stacks vizinhas é alterado, reiniciado ou removido.
-- **Rede própria.** A rede overlay `imob_<ambiente>_interno` é `attachable`, para rodar migrations como tarefa avulsa, e liga `app`, `worker` e `db`. Só o `app` também entra na rede do Traefik, com `traefik.enable=true` e um roteador por subdomínio. Os nomes da rede e do resolvedor de certificados vêm do arquivo de ambiente do servidor, não do repositório.
+- **Rede própria.** A rede overlay `imob_<ambiente>_interno` é `attachable`, para rodar migrations como tarefa avulsa, e liga `app`, `worker` e `db`. Só o `app` também entra na rede do Traefik, com `traefik.enable=true` e um roteador por subdomínio. Os labels são só `traefik.swarm.*`: misturados com `traefik.docker.*`, o Traefik descarta o serviço. Os nomes da rede e do resolvedor de certificados vêm do arquivo de ambiente do servidor, não do repositório.
 - **Postgres sem porta publicada,** com volume nomeado `imob_<ambiente>_db`.
 - **Imagens com versão fixa,** a tag sendo o commit, nunca `:latest`.
 - **Em cada serviço:** limite e reserva de memória, healthcheck e política de reinício.
@@ -251,11 +251,13 @@ Arquivos (fatia 0.4): `Dockerfile` (alvos `app` e `migracao`), `.dockerignore` (
    - manual: Actions > Deploy > Run workflow, com o SHA de um commit já publicado.
 
    Como as migrations são só aditivas, a versão anterior do app roda sobre o schema novo.
-6. **Primeira vez em cada ambiente:** no terminal do servidor, `deploy.sh preparar <ambiente> <commit>` cria a stack com o app em 0 réplicas, espera o banco e roda o `bootstrap` (papéis, limites de tempo e banco) com o `bootstrap.env` do superusuário. Rodar de novo reaplica os papéis e os limites. Por SSH, a chave do Actions não consegue pedir o `preparar`.
+6. **Primeira vez em cada ambiente:** no terminal do servidor, `deploy.sh preparar <ambiente> <commit>` cria a stack com o app em 0 réplicas, espera o banco e roda o `bootstrap` (papéis, limites de tempo e banco) com o `bootstrap.env` do superusuário. Rodar de novo reaplica os papéis e os limites. Por SSH, a chave do Actions não consegue pedir o `preparar`. Rodado pelo root, o script troca sozinho para o usuário `deploy`, dono dos arquivos e da trava do ambiente.
 
 O `deploy.sh` mantém no servidor só as imagens da versão nova e da anterior. Actions fixadas por SHA, com Dependabot atualizando. Varredura de segredos com gitleaks no CI, além do `check:secrets`. O arquivo da stack é versionado em `infra/` e nunca é aplicado com `--prune`: os serviços vizinhos não estão nele.
 
-**Backup (D8):** `infra/backup.sh` faz o `pg_dump` dentro do contêiner do banco, cifra com `age` e envia ao bucket `imob-backups` do R2 por `rclone`. Roda todo dia às 3h de Brasília pelo timer `imob-backup@<ambiente>` e antes de cada deploy. O servidor tem só a chave pública do `age`; a privada fica só com o Matheus. A retenção de 30 dias é uma regra de ciclo de vida do bucket. O ensaio de restauração (`infra/restaurar-teste.sh`) recebe a chave privada pela entrada padrão, sem gravá-la no disco, e restaura o backup mais recente num Postgres descartável e sem rede.
+**Backup (D8):** `infra/backup.sh` faz o `pg_dump` dentro do contêiner do banco, cifra com `age` e envia ao bucket `imob-backups` do R2 por `rclone`. Roda todo dia às 3h de Brasília pelo timer `imob-backup@<ambiente>` e antes de cada deploy. O servidor tem só a chave pública do `age`; a privada fica só com o Matheus. A retenção de 30 dias é uma regra de ciclo de vida do bucket (`imob-backups-30-dias`, criada em 17/11/2026).
+
+O `rclone.conf` do servidor (`/opt/imob/backup/`, fora do repositório) usa `provider = Cloudflare`, `region = auto`, `no_check_bucket = true`, porque o token só acessa objetos, e `no_head = true`. Sem o `no_head`, o `rclone` 1.60 do Ubuntu confere o envio com uma consulta por versão que o R2 não implementa (501). O envio dá certo, mas o backup é dado como falho. O ensaio de restauração (`infra/restaurar-teste.sh`) recebe a chave privada pela entrada padrão, sem gravá-la no disco, e restaura o backup mais recente num Postgres descartável e sem rede.
 
 ## 9. Observabilidade
 

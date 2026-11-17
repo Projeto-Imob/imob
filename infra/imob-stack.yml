@@ -39,8 +39,8 @@ services:
           memory: 384M
       labels:
         - traefik.enable=true
+        # Só labels traefik.swarm.*: com traefik.docker.* junto, o Traefik descarta o serviço.
         - traefik.swarm.network=${TRAEFIK_REDE:?defina TRAEFIK_REDE}
-        - traefik.docker.network=${TRAEFIK_REDE}
         - traefik.http.routers.imob_${IMOB_AMBIENTE:?defina IMOB_AMBIENTE}.rule=Host(`${IMOB_DOMINIO:?defina IMOB_DOMINIO}`)
         - traefik.http.routers.imob_${IMOB_AMBIENTE}.entrypoints=${TRAEFIK_ENTRADA:?defina TRAEFIK_ENTRADA}
         - traefik.http.routers.imob_${IMOB_AMBIENTE}.tls=true
