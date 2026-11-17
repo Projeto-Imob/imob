@@ -238,6 +238,8 @@ Fatiadas quando a v1 estiver no ar, nesta ordem de valor:
 - 2026-11-13: **SPEC 2.0 aprovada**, com as decisões D1 a D18 abaixo. Na D11, o Matheus escolheu usar o servidor atual (Nuremberg), que ainda tem espaço, em vez de uma VPS dedicada.
 - 2026-11-14: repositório **público** `Projeto-Imob/imob`, para ter a `main` protegida sem custo (no plano gratuito, repositório privado de organização não tem proteção de branch). A estratégia de negócio fica pública; o diagnóstico de segurança do servidor fica fora do repositório, na pasta protegida de credenciais.
 - 2026-11-14: **Loft conta como studio** na busca (esclarecimento do D15, entra na fatia 0.5). Kitnet continua fora até decisão em contrário.
+- 2026-11-16: **cor principal da marca: laranja #FF8C00**, no lugar do lima. Preto, grafite e off-white mantidos. A regra 15 passa a valer para o laranja (2,12:1 sobre o off-white).
+- 2026-11-16: **protótipo visual até 20/11/2026** das telas da demonstração, seguindo os benchmarks Reelly.io e QuintoAndar documentados em `docs/specs/negocio.md`. As fatias seguem em paralelo.
 
 **Decisões da 2.0 (aprovadas em 13/11/2026)**
 

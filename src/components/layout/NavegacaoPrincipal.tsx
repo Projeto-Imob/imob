@@ -20,7 +20,7 @@ export const AREAS: Area[] = [
 
 /**
  * Um único <nav>: barra inferior fixa no celular e menu no cabeçalho fixo a partir de md.
- * O item ativo usa o lima como preenchimento atrás de texto preto (regra do lima).
+ * O item ativo usa o laranja como preenchimento atrás de texto preto (regra do laranja).
  */
 export function NavegacaoPrincipal() {
   const caminho = usePathname() ?? "/";
@@ -39,7 +39,7 @@ export function NavegacaoPrincipal() {
                 href={area.href}
                 aria-current={ativa ? "page" : undefined}
                 className={`flex min-h-14 min-w-11 flex-col items-center justify-center gap-0.5 px-1 text-xs font-medium text-preto md:min-h-11 md:flex-row md:gap-2 md:rounded-md md:px-3 md:text-sm ${
-                  ativa ? "bg-lima font-semibold" : "hover:bg-white"
+                  ativa ? "bg-laranja font-semibold" : "hover:bg-white"
                 }`}
               >
                 {area.icone}
