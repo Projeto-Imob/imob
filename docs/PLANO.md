@@ -138,7 +138,7 @@ Fatias grandes ou incertas ganham uma spec própria em `docs/specs/<fatia>.md` a
     - DSN do Sentry no cofre do Matheus;
     - R2 pronto desde 16/11, com os buckets `imob-hml-arquivos` e `imob-backups` e um token só de objetos nesses dois.
 
-    Falta o registro DNS do subdomínio.
+    O registro DNS do subdomínio foi criado e conferido em 17/11, inclusive nos resolvedores públicos.
 - [ ] **0.5 Correções que a 2.0 mantém** (da `docs/AUDITORIA.md`).
   - Entrega:
     - pré-lançamento por subcondomínio, com os casos do D15 no seed (torre com lançamento futuro e sem data) e paridade TS × SQL;
@@ -352,7 +352,6 @@ Fatiadas quando a v1 estiver no ar, nesta ordem de valor:
 | C15 | Validação jurídica de consentimento, visita, projeção, atuação sem CRECI e hospedagem fora do Brasil | — | Lançamento (1.10) |
 | — | Simulador, Vitrine Destacada (vagas e valores), planos Essencial e Avançado, quantos "semelhantes" | — | Fases 2 e 3 |
 | — | Proposta e contrato continuam dentro do sistema (R5) mesmo com o fluxo Reelly no atendimento? | — | Fase 3 |
-| — | Registro DNS do subdomínio de homologação no domínio da I.Ara | — | 0.4 |
 | — | Domínio definitivo para a produção (compra com custo, regra 18) | — | 1.10 |
 | — | Lista de funcionalidades do MVP com cadeado, a aprovar junto com o protótipo de 20/11 | — | 1.3b |
 | — | Conta do Resend, com a chave gravada pelo Matheus no cofre e no servidor (o DSN do Sentry já está no cofre desde 17/11/2026) | — | 1.5 (sem ele, flag `email_real` desligada) |

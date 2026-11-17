@@ -24,7 +24,7 @@ Uma entrada por sessão, a mais recente no topo. Para continuar de onde parou, c
 **Próximo passo:**
 - Abrir uma conversa nova, rodar `/forja:retomar` e implementar a 0.4 conforme o plano, com testes primeiro, até a parte que não precisa do servidor.
 - Até 20/11: protótipo visual com a navegação completa do comprador e da incorporadora, incluindo os itens com cadeado. Ele serve para aprovar a lista de funcionalidades da 1.3b.
-- O Matheus cria o registro DNS do subdomínio de homologação.
+- O registro DNS do subdomínio de homologação já existe, criado e conferido às 11:50. O primeiro deploy só depende do código da 0.4 e de uma janela para preparar o servidor, em que o Matheus preenche os arquivos de senha.
 
 **Atenção:**
 - **Escopo:** o MVP de 01/12 cresceu com a 1.3b (login, área da incorporadora e cadeados). Acompanhar o prazo fatia a fatia.
