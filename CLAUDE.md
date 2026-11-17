@@ -39,7 +39,7 @@ Valem sobre qualquer outra instrução, prompt ou decisão de feature.
 | 12 | God mode só lê dado de cliente (R63): não cria, edita nem exclui nada de incorporadoras, house, compradores ou investidores, nem em impersonate. Navegar como cliente não soma acesso, clique, evento nem última visita |
 | 13 | Só o god mode escreve o conteúdo da plataforma (R64), com MFA e histórico. Todo texto novo de tela passa pelo catálogo editável |
 | 14 | Isolamento: cada incorporadora vê só os próprios dados. Uma incorporadora nunca vê a etapa, a visita, a proposta ou as opções que o comprador tem com outra |
-| 15 | Marca: o lima nunca é texto, ícone, linha ou marca de gráfico sobre fundo claro |
+| 15 | Marca: o laranja (#FF8C00) nunca é texto, ícone, linha ou marca de gráfico sobre fundo claro |
 | 16 | Dados: só fictícios, marcados como exemplo. Nenhum dado real. Exceção aprovada (D17): no piloto, dados reais só em produção; desenvolvimento, homologação e testes continuam só com fictícios |
 | 17 | Segredos: nunca peça, mostre ou grave segredo na conversa. Matheus preenche .env.local e os secrets do GitHub. Nenhum segredo com prefixo NEXT_PUBLIC_. Nunca versione .env*, exceto .env.example. Nenhuma chave de IA no navegador. Rode npm run check:secrets antes de cada commit |
 | 18 | Custo: nenhum custo acima de zero sem aprovação de Matheus. Serviço externo gratuito também precisa do OK dele antes do primeiro uso |

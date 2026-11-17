@@ -246,7 +246,16 @@ Actions fixadas por SHA, com Dependabot atualizando. Varredura de segredos com g
 
 ## 9. Observabilidade
 
-- **Erros:** Sentry (camada gratuita) no navegador e no servidor.
+- **Erros:** Sentry (camada gratuita) no navegador e no servidor, ligado em `src/instrumentation.ts`, `src/instrumentation-client.ts` e `src/app/global-error.tsx`, com as opções em `src/lib/sentry.ts`.
+  - **Sem DSN, fica desligado:** `SENTRY_DSN` no servidor e `NEXT_PUBLIC_SENTRY_DSN` no navegador. O DSN não é segredo, porque só permite enviar eventos.
+  - **Nenhum dado pessoal (regra 9):**
+    - não coleta usuário, cookies, cabeçalhos, corpos nem parâmetros de URL;
+    - o `beforeSend` limpa o que escapar;
+    - não grava sessão;
+    - no painel, a opção "Prevent Storing of IP Addresses" fica ligada.
+  - **Ambiente:** no servidor vem de `SENTRY_ENVIRONMENT`; no navegador, do endereço do site (`hml.` é homologação), porque a mesma imagem roda nos dois ambientes (D12).
+  - **Rastreio de desempenho:** desligado no navegador; no servidor, segue `SENTRY_TRACES_SAMPLE_RATE` (padrão 0).
+  - **Fica para o deploy (0.4):** o `NEXT_PUBLIC_SENTRY_DSN` no build do CI, e os source maps, que pedem `SENTRY_AUTH_TOKEN` e `withSentryConfig`.
 - **Logs:** em JSON no stdout (pino), com `requestId`, rota, conta (id, nunca contato) e duração. A rotação é do Docker.
 - **Disponibilidade:** monitor externo gratuito em `/` e `/api/saude` (que confere app, banco e worker), com alerta por e-mail.
 - **Banco:**

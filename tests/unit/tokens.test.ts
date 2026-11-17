@@ -41,8 +41,8 @@ const TEXTO: Array<[string, string]> = [
   ["cor-texto-secundario", "cor-branco"],
   ["cor-texto-discreto", "cor-off-white"],
   ["cor-texto-discreto", "cor-branco"],
-  ["cor-preto", "cor-lima"],
-  ["cor-lima", "cor-preto"],
+  ["cor-preto", "cor-laranja"],
+  ["cor-laranja", "cor-preto"],
   ["cor-off-white", "cor-preto"],
   ["cor-secundario-sobre-preto", "cor-preto"],
   ["cor-sucesso", "cor-off-white"],
@@ -74,8 +74,8 @@ describe("tokens de cor (seção 12)", () => {
     expect(contraste(cor(elemento), cor(fundo))).toBeGreaterThanOrEqual(3);
   });
 
-  it("o lima falha como texto sobre fundo claro (motivo da regra)", () => {
-    expect(contraste(cor("cor-lima"), cor("cor-off-white"))).toBeLessThan(3);
+  it("o laranja falha como texto sobre fundo claro (motivo da regra)", () => {
+    expect(contraste(cor("cor-laranja"), cor("cor-off-white"))).toBeLessThan(3);
   });
 
   it("tipografia: Inter Tight nos títulos e Inter na interface", () => {
@@ -94,43 +94,43 @@ function arquivos(dir: string): string[] {
   });
 }
 
-// Utilitários que pintariam texto, ícone, linha ou marca de gráfico com o lima.
-const USO_PROIBIDO = /\b(?:text|border|stroke|fill|outline|ring|decoration|divide|accent|caret|placeholder)-lima\b/;
+// Utilitários que pintariam texto, ícone, linha ou marca de gráfico com o laranja.
+const USO_PROIBIDO = /\b(?:text|border|stroke|fill|outline|ring|decoration|divide|accent|caret|placeholder)-laranja\b/;
 
-export function usosProibidosDoLima(fonte: string, arquivo: string): string[] {
+export function usosProibidosDoLaranja(fonte: string, arquivo: string): string[] {
   const achados: string[] = [];
-  if (USO_PROIBIDO.test(fonte)) achados.push(`${arquivo}: utilitário de texto/linha com lima`);
+  if (USO_PROIBIDO.test(fonte)) achados.push(`${arquivo}: utilitário de texto/linha com laranja`);
   if (arquivo.endsWith(".css")) {
     for (const [, seletor, corpo] of fonte.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
-      const pintaComLima = /(?:^|[;\s])(?:color|border(?:-\w+)?-color|stroke|fill|outline-color)\s*:\s*var\(--cor-lima\)/.test(corpo!);
+      const pintaComLaranja = /(?:^|[;\s])(?:color|border(?:-\w+)?-color|stroke|fill|outline-color)\s*:\s*var\(--cor-laranja\)/.test(corpo!);
       const sobrePreto = /background(?:-color)?\s*:\s*var\(--cor-preto\)/.test(corpo!);
-      if (pintaComLima && !sobrePreto) achados.push(`${arquivo}: ${seletor!.trim()} usa o lima como cor de texto/linha`);
+      if (pintaComLaranja && !sobrePreto) achados.push(`${arquivo}: ${seletor!.trim()} usa o laranja como cor de texto/linha`);
     }
-  } else if (/["'`]var\(--cor-lima\)["'`]|stroke=["']#dbdf4a|fill=["']#dbdf4a/i.test(fonte)) {
-    achados.push(`${arquivo}: lima usado como traço/preenchimento de gráfico ou ícone`);
+  } else if (/["'`]var\(--cor-laranja\)["'`]|stroke=["']#ff8c00|fill=["']#ff8c00/i.test(fonte)) {
+    achados.push(`${arquivo}: laranja usado como traço/preenchimento de gráfico ou ícone`);
   }
   return achados;
 }
 
-describe("regra do lima", () => {
-  it("o código não usa o lima como texto, ícone, linha ou marca de gráfico sobre fundo claro", () => {
+describe("regra do laranja", () => {
+  it("o código não usa o laranja como texto, ícone, linha ou marca de gráfico sobre fundo claro", () => {
     const achados = arquivos(path.join(raiz, "src")).flatMap((a) =>
-      usosProibidosDoLima(fs.readFileSync(a, "utf8"), path.relative(raiz, a)),
+      usosProibidosDoLaranja(fs.readFileSync(a, "utf8"), path.relative(raiz, a)),
     );
     expect(achados).toEqual([]);
   });
 
   it.each([
-    ["x.tsx", '<p className="text-lima">a</p>'],
-    ["x.tsx", '<Line stroke="var(--cor-lima)" />'],
-    ["x.css", ".a { color: var(--cor-lima); }"],
+    ["x.tsx", '<p className="text-laranja">a</p>'],
+    ["x.tsx", '<Line stroke="var(--cor-laranja)" />'],
+    ["x.css", ".a { color: var(--cor-laranja); }"],
   ])("detecta violação em %s: %s", (arquivo, fonte) => {
-    expect(usosProibidosDoLima(fonte, arquivo)).not.toEqual([]);
+    expect(usosProibidosDoLaranja(fonte, arquivo)).not.toEqual([]);
   });
 
-  it("permite lima como fundo e como texto sobre preto", () => {
-    expect(usosProibidosDoLima(".a { background: var(--cor-lima); color: var(--cor-preto); }", "x.css")).toEqual([]);
-    expect(usosProibidosDoLima(".b { background: var(--cor-preto); color: var(--cor-lima); }", "x.css")).toEqual([]);
-    expect(usosProibidosDoLima('<div className="bg-lima text-preto" />', "x.tsx")).toEqual([]);
+  it("permite laranja como fundo e como texto sobre preto", () => {
+    expect(usosProibidosDoLaranja(".a { background: var(--cor-laranja); color: var(--cor-preto); }", "x.css")).toEqual([]);
+    expect(usosProibidosDoLaranja(".b { background: var(--cor-preto); color: var(--cor-laranja); }", "x.css")).toEqual([]);
+    expect(usosProibidosDoLaranja('<div className="bg-laranja text-preto" />', "x.tsx")).toEqual([]);
   });
 });

@@ -16,6 +16,11 @@ export const ptBR = {
   "layout.pular": "Pular para o conteúdo",
   "rodape.dados_exemplo": "Todos os dados exibidos são fictícios, de exemplo.",
 
+  // Erro na raiz do app (global-error)
+  "erro.titulo": "Algo deu errado.",
+  "erro.texto": "Tente de novo em alguns instantes. Se continuar, volte mais tarde.",
+  "erro.tentar": "Tentar de novo",
+
   // Textos de referência (seção 5) e fechamento do início (seção 12)
   "home.hero.morar": "O lar que cabe na sua vida. A gente analisa, você só visita.",
   "home.hero.investir": "Só o que passou na nossa análise. Com os números na mesa.",

@@ -3,12 +3,12 @@
 
 /*
  * Design tokens (CLAUDE.md, seção 12). Cores e logotipo são provisórios.
- * Regra do lima: nas áreas claras, o lima nunca é texto, ícone, linha ou marca de gráfico.
+ * Regra do laranja: nas áreas claras, o laranja nunca é texto, ícone, linha ou marca de gráfico.
  * Use-o só como preenchimento atrás de texto preto, ou como texto sobre preto (.destaque-sobre-preto).
  * O teste tests/unit/tokens.test.ts lê este arquivo e mede o contraste das combinações de texto.
  */
 :root {
-  --cor-lima: #dbdf4a;
+  --cor-laranja: #ff8c00;
   --cor-preto: #0c0c0c;
   --cor-grafite: #262626;
   --cor-off-white: #f4f4f0;
@@ -26,16 +26,16 @@
   --cor-apoio-investir: #1d5a85;
 
   /* Gráficos: rampa ordinal (≥ 3:1 sobre branco) e paleta categórica. */
-  --cor-grafico-rampa-inicio: #949800;
-  --cor-grafico-rampa-fim: #242500;
-  --cor-grafico-cat-1: #7a7f00;
+  --cor-grafico-rampa-inicio: #b35900;
+  --cor-grafico-rampa-fim: #3d1d00;
+  --cor-grafico-cat-1: #b35900;
   --cor-grafico-cat-2: #2a78d6;
-  --cor-grafico-cat-3: #eb6834;
+  --cor-grafico-cat-3: #0e8a7c;
   --cor-grafico-cat-4: #6250d6;
 }
 
 @theme inline {
-  --color-lima: var(--cor-lima);
+  --color-laranja: var(--cor-laranja);
   --color-preto: var(--cor-preto);
   --color-grafite: var(--cor-grafite);
   --color-off-white: var(--cor-off-white);
@@ -90,15 +90,15 @@ body {
     letter-spacing: 0.14em;
   }
 
-  /* Destaque de título: bloco lima com texto preto. */
+  /* Destaque de título: bloco laranja com texto preto. */
   .destaque {
-    background: var(--cor-lima);
+    background: var(--cor-laranja);
     color: var(--cor-preto);
   }
 
-  /* Sobre preto, o texto é lima. */
+  /* Sobre preto, o texto é laranja. */
   .destaque-sobre-preto {
     background: var(--cor-preto);
-    color: var(--cor-lima);
+    color: var(--cor-laranja);
   }
 }
