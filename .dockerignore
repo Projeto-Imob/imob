@@ -1,0 +1,14 @@
+# Lista permitida (fatia 0.4): só entra no build da imagem o que o app e as tarefas de banco usam.
+# Fica de fora todo o resto, inclusive .env*, .git, node_modules, .next, testes, docs e o framework AIOX.
+*
+!package.json
+!package-lock.json
+!.npmrc
+!next.config.ts
+!tsconfig.json
+!src/
+!config/
+!public/
+!scripts/
+!db/migrations/
+!infra/imob-stack.yml

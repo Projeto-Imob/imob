@@ -107,10 +107,57 @@ Fatias grandes ou incertas ganham uma spec própria em `docs/specs/<fatia>.md` a
     - restauração do backup num banco limpo;
     - memória e swap medidos dentro do orçamento;
     - stacks vizinhas intactas.
-  - Bloqueada por:
-    - OK e janela para o endurecimento;
-    - subdomínio de homologação;
-    - DSN do projeto `imob` no Sentry (conta criada em 16/11/2026), gravado pelo Matheus no cofre e no servidor. O R2 ficou pronto e testado em 16/11/2026: buckets `imob-hml-arquivos` e `imob-backups`, com token só de objetos nesses dois.
+  - Plano aprovado pelo Matheus em 17/11/2026:
+    - arquivos:
+      - `Dockerfile`, com os targets `app` (standalone, sem root) e `migracao`;
+      - `.dockerignore`;
+      - `infra/imob-stack.yml`, `infra/deploy.sh`, `infra/backup.sh` e `infra/restaurar-teste.sh`;
+      - `.github/workflows/deploy.yml`;
+      - a rota `/api/saude`, que confere o banco e se a conexão é do `app_user`;
+    - `output: 'standalone'` só no build da imagem (`IMOB_STANDALONE=1`); o e2e e o uso local não mudam;
+    - `statement_timeout` e `idle_in_transaction_session_timeout` definidos no `prepararPapeis`; `migrate` e `seed` passam a rodar sem o superusuário;
+    - worker adiado para a primeira fatia com tarefa agendada: fica no arquivo da stack com `replicas: 0` (regra 20);
+    - imagem pública no GHCR, com a tag do commit e sem segredo. O pacote privado estouraria a cota gratuita (regra 18);
+    - backup:
+      - `pg_dump` cifrado com `age`, com a chave privada só com o Matheus;
+      - envio ao R2 por `rclone`, num timer do systemd;
+      - retenção de 30 dias no bucket;
+    - usuário `deploy` no grupo docker, com a chave do Actions restrita por `command=` ao script de deploy;
+    - deploy:
+      - roda depois do CI verde na `main`;
+      - volta sozinho para a versão anterior se a saúde falhar;
+      - tem `workflow_dispatch` para voltar a um commit;
+    - homologação num subdomínio do domínio da I.Ara que começa por `hml.`. O endereço fica numa variável do ambiente no GitHub, fora do repositório;
+    - ficam para depois de 01/12:
+      - source maps;
+      - `pg_stat_statements`;
+      - logs em JSON;
+      - smoke test com Playwright. No lugar dele, fica uma checagem da página e de `/api/saude`.
+  - Situação em 17/11/2026:
+    - endurecimento concluído;
+    - DSN do Sentry no cofre do Matheus;
+    - R2 pronto desde 16/11, com os buckets `imob-hml-arquivos` e `imob-backups` e um token só de objetos nesses dois;
+    - parte do repositório pronta na PR #9 (branch `fatia/0.4-homologacao`), esperando o CI e o merge do Matheus:
+      - os arquivos do plano;
+      - os limites de tempo por papel (**Proposta**: 15 s e 30 s no app e no auth; 60 s e 60 s no worker);
+      - o job `imagem` no CI das PRs, que monta as imagens e confere migrations, seed, papel do app, saúde e página;
+      - o `systemd` do backup em `infra/systemd/`;
+      - testes de unidade e de banco verdes;
+      - o build standalone, visto funcionando no Windows: a saúde dá 200 com o `app_user` e 503 com o `migrator`, e o app não sobe com o `migrator`.
+    - Falta no servidor, cada passo com o OK do Matheus:
+      - usuário `deploy` no grupo docker, com a chave do Actions presa ao `deploy.sh` (`command=` e `restrict`);
+      - `age` e `rclone` instalados;
+      - a pasta `/opt/imob` com os scripts, os `.env` do ambiente e os do backup, e o timer `imob-backup@hml`;
+      - `deploy.sh preparar hml <commit>`, depois do merge;
+      - regra de 30 dias no bucket `imob-backups`.
+    - Falta com o Matheus:
+      - par de chaves do `age`, gerado na máquina dele (a privada não sai de lá);
+      - secrets e variáveis do ambiente `homologacao` no GitHub e a variável `NEXT_PUBLIC_SENTRY_DSN` do repositório;
+      - o pacote do GHCR público depois da primeira publicação, se não vier assim;
+      - o monitor de disponibilidade.
+    - Verificar depois do deploy: a URL com a página da 0.3, deploy e rollback ensaiados, restauração do backup, memória e swap medidos e as stacks vizinhas intactas.
+
+    O registro DNS do subdomínio foi criado e conferido em 17/11, inclusive nos resolvedores públicos.
 - [ ] **0.5 Correções que a 2.0 mantém** (da `docs/AUDITORIA.md`).
   - Entrega:
     - pré-lançamento por subcondomínio, com os casos do D15 no seed (torre com lançamento futuro e sem data) e paridade TS × SQL;
@@ -120,7 +167,7 @@ Fatias grandes ou incertas ganham uma spec própria em `docs/specs/<fatia>.md` a
     - CSP e cabeçalhos de segurança (CSP sem nonce, mantendo o cache; decisão de 16/11/2026);
     - `check:secrets` com os padrões que faltam e gitleaks no CI;
     - actions por SHA e imagem do Postgres do CI por digest;
-    - Dependabot só com versões menores e de correção. Versão maior (como TypeScript 7, ESLint 10 e `@types/node` acima do Node 24) vira decisão, com PR própria; a PR #2, que juntou as duas coisas e quebrou o CI, é fechada;
+    - Dependabot só com versões menores e de correção. Versão maior (como TypeScript 7, ESLint 10 e `@types/node` acima do Node 24) vira decisão, com PR própria; as PRs #2 e #6 (16/11/2026), que juntaram as duas coisas e quebraram o CI, são fechadas;
     - suíte estável na máquina local.
   - Verificar: um teste novo para cada achado; suíte verde três vezes seguidas.
 
@@ -151,6 +198,22 @@ Fatias grandes ou incertas ganham uma spec própria em `docs/specs/<fatia>.md` a
   - Verificar:
     - e2e do visitante sem conta vendo de 2 a 3 opções;
     - teste de banco: a incorporadora não lê o lead que só respondeu ao questionário.
+- [ ] **1.3b Interface completa do MVP, com cadeado e login simples** (decisão de 17/11/2026).
+  - Entrega:
+    - todas as funcionalidades do comprador e da incorporadora aparecem na interface, a partir da lista da SPEC;
+    - o que fica para depois de 01/12 aparece com cadeado e uma frase sobre o que vem, com o texto no catálogo (regra 13);
+    - a rota de uma funcionalidade com cadeado mostra "em breve" para todos, menos para o superadmin do Imob e o god mode;
+    - o pré-lançamento continua fora da interface do comprador, nem com cadeado (regra 11);
+    - login simples, adiantado da 1.4:
+      - e-mail e senha, em contas criadas por script: incorporadora de demonstração, superadmin e god mode;
+      - convite, recuperação de senha e cadastro pela própria incorporadora ficam para depois de 01/12;
+    - área da incorporadora com a navegação completa, adiantada da 1.7 só na estrutura: nenhum dado de comprador aparece antes das regras 5 e 14;
+    - o god mode só lê até existir o MFA (regra 13).
+  - Verificar:
+    - cada estado (liberada, com cadeado, oculta) testado por papel;
+    - um teste garante que o pré-lançamento não aparece para o comprador;
+    - axe e capturas em 390 e 1440 px.
+  - Depende de: protótipo visual de 20/11 e lista de funcionalidades aprovada pelo Matheus.
 - [ ] **1.4 Contas e login rápido (F10, F5).**
   - Entrega:
     - Better Auth (e-mail e senha, recuperação);
@@ -252,6 +315,19 @@ Fatiadas quando a v1 estiver no ar, nesta ordem de valor:
 - 2026-11-16: na 0.3, a elegibilidade da página vem só da regra do banco (`app.na_vitrine`); a paridade TS × SQL fica para a 0.5. A migration `0002_vitrine`, que troca o corpo de `app.esgotado`, conta como aditiva. "Não encontrado" responde 200 com `noindex`.
 - 2026-11-16: **cor principal da marca: laranja #FF8C00**, no lugar do lima. Preto, grafite e off-white mantidos. A regra 15 passa a valer para o laranja (2,12:1 sobre o off-white).
 - 2026-11-16: **protótipo visual até 20/11/2026** das telas da demonstração, seguindo os benchmarks Reelly.io e QuintoAndar documentados em `docs/specs/negocio.md`. As fatias seguem em paralelo.
+- 2026-11-17: **endurecimento do servidor concluído**, com o Matheus presente. O plano e o registro ficam fora do repositório.
+- 2026-11-17: **homologação num subdomínio do domínio da I.Ara**, sem custo. O domínio definitivo é comprado antes da produção.
+- 2026-11-17: **plano da 0.4 aprovado**: worker adiado, imagem pública no GHCR, backup com `age` e `rclone` e cortes para depois de 01/12 (detalhes na 0.4).
+- 2026-11-17: na implementação da 0.4, sem mudar o plano:
+  - o arquivo da stack de cada versão vai dentro da imagem de migração, e o servidor não guarda cópia do repositório;
+  - a primeira subida de cada ambiente e o bootstrap dos papéis são o `deploy.sh preparar`, só no terminal do servidor;
+  - o seed fictício, que é idempotente, roda a cada deploy de homologação e nunca em produção;
+  - os limites de tempo por papel são **Proposta**.
+- 2026-11-17: **MVP de 01/12 com a interface completa.**
+  - Todas as funcionalidades do comprador e da incorporadora aparecem.
+  - As que ficam para depois de 01/12 vêm com cadeado, bloqueadas para todos, menos para o superadmin do Imob e o god mode, como amostra do que vem.
+  - O pré-lançamento continua oculto para o comprador (regra 11).
+  - A incorporadora entra com login simples, em conta criada por script (fatia 1.3b).
 
 **Decisões da 2.0 (aprovadas em 13/11/2026)**
 
@@ -300,9 +376,9 @@ Fatiadas quando a v1 estiver no ar, nesta ordem de valor:
 | C15 | Validação jurídica de consentimento, visita, projeção, atuação sem CRECI e hospedagem fora do Brasil | — | Lançamento (1.10) |
 | — | Simulador, Vitrine Destacada (vagas e valores), planos Essencial e Avançado, quantos "semelhantes" | — | Fases 2 e 3 |
 | — | Proposta e contrato continuam dentro do sistema (R5) mesmo com o fluxo Reelly no atendimento? | — | Fase 3 |
-| — | OK e janela para o endurecimento do servidor compartilhado (seção 7 da ARQUITETURA) | — | 0.4 |
-| — | Subdomínios de homologação e de produção | — | 0.4 e 1.10 |
-| — | DSN do Sentry (conta criada em 16/11/2026) e conta do Resend, com as chaves gravadas pelo Matheus no cofre e no servidor (o R2 ficou pronto e testado em 16/11/2026) | — | Sentry: 0.4. Resend: 1.5 (sem ele, flag `email_real` desligada) |
+| — | Domínio definitivo para a produção (compra com custo, regra 18) | — | 1.10 |
+| — | Lista de funcionalidades do MVP com cadeado, a aprovar junto com o protótipo de 20/11 | — | 1.3b |
+| — | Conta do Resend, com a chave gravada pelo Matheus no cofre e no servidor (o DSN do Sentry já está no cofre desde 17/11/2026) | — | 1.5 (sem ele, flag `email_real` desligada) |
 | — | Kitnet conta como studio? | Não | Nada |
 | — | Hetzner Backups do servidor (cerca de +20% do plano; protege também os outros projetos) | `pg_dump` diário no R2 | Nada (recomendado) |
 | — | Memória para a produção: subir o plano ou desligar a homologação, se a medição pedir | Decidir na 1.10 | 1.10 |

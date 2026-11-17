@@ -7,7 +7,7 @@ import { migrate } from "drizzle-orm/node-postgres/migrator";
 import pg from "pg";
 import { gerarSeed } from "../../src/seed/seed.ts";
 import * as s from "../../src/server/db/schema/index.ts";
-import { PAPEIS_BANCO, ehLocal, senhaDoPapel } from "./config.ts";
+import { LIMITES_DO_PAPEL, PAPEIS_BANCO, ehLocal, senhaDoPapel } from "./config.ts";
 
 const PASTA_MIGRATIONS = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../db/migrations");
 
@@ -53,6 +53,11 @@ export async function prepararPapeis(urlAdmin: string): Promise<void> {
       await c.query(existe.rowCount ? `alter role ${ident} ${atributos}` : `create role ${ident} ${atributos}`);
       const senha = senhaDoPapel(papel);
       if (senha) await c.query(`alter role ${ident} password ${c.escapeLiteral(verificadorScram(senha))}`);
+      const limites = LIMITES_DO_PAPEL[papel];
+      if (limites) {
+        await c.query(`alter role ${ident} set statement_timeout = ${c.escapeLiteral(limites.statementTimeout)}`);
+        await c.query(`alter role ${ident} set idle_in_transaction_session_timeout = ${c.escapeLiteral(limites.idleInTransactionSessionTimeout)}`);
+      }
     }
   });
 }

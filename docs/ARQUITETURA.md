@@ -140,6 +140,8 @@ O modelo da 1.0 está mantido; detalhes em `docs/specs/acesso-e-visibilidade.md`
 
 **Como ficou no banco (fatia 0.2)**, com um teste de banco para cada item:
 - **Papéis.** O `migrator` é dono do banco e das tabelas. `app_user`, `auth_service` e `worker` entram sem superusuário, sem `BYPASSRLS` e sem herdar papéis; fora do localhost, com senha SCRAM.
+  - **Limites de tempo no papel (Proposta da 0.4, em `LIMITES_DO_PAPEL` de `scripts/db/config.ts`):** `statement_timeout` de 15 s e `idle_in_transaction_session_timeout` de 30 s para `app_user` e `auth_service`; 60 s e 60 s para o `worker`. O `migrator` fica sem limite. O `bootstrap` grava os limites, e toda conexão do papel já entra com eles.
+  - **`migrate` e `seed` rodam sem o superusuário:** basta a `DATABASE_URL_MIGRATOR`. Só o `bootstrap` e o `reset` (este, só em localhost) usam a `DATABASE_URL_ADMIN`.
 - **Funções `app.*`.** São elas: `current_conta_id`, `current_papel`, `current_tenant_id`, `is_god_mode`, `is_internal`, `is_equipe_plataforma`, `pode_escrever`, `edita_catalogo`, `ve_catalogo_privado`, `hoje` (data no fuso de São Paulo), `em_stand_by` e `esgotado`. Nenhuma é executável por `PUBLIC`, nem as criadas depois.
 - **Políticas separadas por comando.** Na v1, só a equipe da plataforma escreve no catálogo (`app.edita_catalogo()`); god mode e impersonate nunca escrevem (regra 12).
 - **Escrita limitada.**
@@ -231,18 +233,29 @@ Conclusões do orçamento:
 
 ## 8. Deploy
 
-1. **PR:** CI com os jobs `qualidade` (check:secrets, lint, typecheck, catálogo, unidade), `banco` (contêiner Postgres 17, migrations, seed e testes de banco), `build` e `e2e` (só em PR). `concurrency` cancela a execução anterior.
-2. **Merge na `main`** (sempre pelo Matheus): build da imagem com tag do commit e envio ao GitHub Container Registry, que é privado.
-3. **Deploy em homologação,** automático depois do merge. O GitHub Actions entra por SSH com o usuário `deploy`. O servidor tem acesso de leitura ao GHCR, com token guardado no próprio servidor. Os passos:
-   1. `pg_dump` de segurança;
-   2. migrations com o papel `migrator`, numa tarefa avulsa na rede da stack;
-   3. `docker stack deploy --with-registry-auth -c infra/imob-stack.yml imob_hml`, com `IMOB_VERSAO=<commit>`;
-   4. espera o healthcheck;
-   5. smoke test com Playwright contra a URL.
-4. **Deploy em produção:** os mesmos passos na stack `imob_prd`, manual e com aprovação do Matheus no ambiente protegido do GitHub.
-5. **Rollback:** reaplicar a stack com o commit anterior. Como as migrations são só aditivas, a versão anterior do app roda sobre o schema novo.
+Arquivos (fatia 0.4): `Dockerfile` (alvos `app` e `migracao`), `.dockerignore` (lista permitida), `infra/imob-stack.yml`, `infra/deploy.sh`, `infra/backup.sh`, `infra/restaurar-teste.sh`, `infra/systemd/` e `.github/workflows/deploy.yml`.
 
-Actions fixadas por SHA, com Dependabot atualizando. Varredura de segredos com gitleaks no CI, além do `check:secrets`. O arquivo da stack é versionado em `infra/` e nunca é aplicado com `--prune`: os serviços vizinhos não estão nele.
+1. **PR:** CI com os jobs `qualidade` (check:secrets, lint, typecheck, catálogo, unidade), `banco` (contêiner Postgres 17, migrations, seed e testes de banco), `build`, e só em PR, `e2e` e `imagem`. O `imagem` monta as duas imagens e confere que as migrations e o seed rodam sem o superusuário, que o app recusa subir com outro papel e que a saúde e a página respondem. `concurrency` cancela a execução anterior.
+2. **Merge na `main`** (sempre pelo Matheus): depois do CI verde, o workflow `Deploy` monta as imagens `ghcr.io/projeto-imob/imob` e `imob-migracao` com a tag do commit e publica no GHCR. O pacote é público (decisão de 17/11/2026), por isso não tem segredo e o servidor baixa sem token.
+3. **Deploy em homologação,** automático em seguida. O GitHub Actions entra por SSH com o usuário `deploy`, cuja chave só roda o `infra/deploy.sh` (`command=` no `authorized_keys`), e pede `deploy hml <commit>`. O script:
+   1. lê o arquivo da stack de dentro da imagem `imob-migracao` do mesmo commit (o servidor não guarda cópia do repositório);
+   2. faz o `pg_dump` de segurança (`infra/backup.sh`);
+   3. roda as migrations com o papel `migrator`, numa tarefa avulsa na rede da stack, e o seed fictício (só em homologação);
+   4. aplica `docker stack deploy -c imob-stack.yml imob_hml` com `IMOB_VERSAO=<commit>`;
+   5. espera `/api/saude` responder pelo endereço público com a versão nova. O Actions confere de novo a saúde e a página de fora do servidor.
+
+   O smoke test com Playwright fica para depois de 01/12.
+4. **Deploy em produção:** os mesmos passos na stack `imob_prd`, manual e com aprovação do Matheus no ambiente protegido do GitHub (fatia 1.10).
+5. **Rollback:**
+   - automático: se a saúde não responder em 5 minutos, o `deploy.sh` reaplica a stack com o commit anterior;
+   - manual: Actions > Deploy > Run workflow, com o SHA de um commit já publicado.
+
+   Como as migrations são só aditivas, a versão anterior do app roda sobre o schema novo.
+6. **Primeira vez em cada ambiente:** no terminal do servidor, `deploy.sh preparar <ambiente> <commit>` cria a stack com o app em 0 réplicas, espera o banco e roda o `bootstrap` (papéis, limites de tempo e banco) com o `bootstrap.env` do superusuário. Rodar de novo reaplica os papéis e os limites. Por SSH, a chave do Actions não consegue pedir o `preparar`.
+
+O `deploy.sh` mantém no servidor só as imagens da versão nova e da anterior. Actions fixadas por SHA, com Dependabot atualizando. Varredura de segredos com gitleaks no CI, além do `check:secrets`. O arquivo da stack é versionado em `infra/` e nunca é aplicado com `--prune`: os serviços vizinhos não estão nele.
+
+**Backup (D8):** `infra/backup.sh` faz o `pg_dump` dentro do contêiner do banco, cifra com `age` e envia ao bucket `imob-backups` do R2 por `rclone`. Roda todo dia às 3h de Brasília pelo timer `imob-backup@<ambiente>` e antes de cada deploy. O servidor tem só a chave pública do `age`; a privada fica só com o Matheus. A retenção de 30 dias é uma regra de ciclo de vida do bucket. O ensaio de restauração (`infra/restaurar-teste.sh`) recebe a chave privada pela entrada padrão, sem gravá-la no disco, e restaura o backup mais recente num Postgres descartável e sem rede.
 
 ## 9. Observabilidade
 
@@ -255,9 +268,10 @@ Actions fixadas por SHA, com Dependabot atualizando. Varredura de segredos com g
     - no painel, a opção "Prevent Storing of IP Addresses" fica ligada.
   - **Ambiente:** no servidor vem de `SENTRY_ENVIRONMENT`; no navegador, do endereço do site (`hml.` é homologação), porque a mesma imagem roda nos dois ambientes (D12).
   - **Rastreio de desempenho:** desligado no navegador; no servidor, segue `SENTRY_TRACES_SAMPLE_RATE` (padrão 0).
-  - **Fica para o deploy (0.4):** o `NEXT_PUBLIC_SENTRY_DSN` no build do CI, e os source maps, que pedem `SENTRY_AUTH_TOKEN` e `withSentryConfig`.
+  - **No deploy (0.4):** o `NEXT_PUBLIC_SENTRY_DSN` entra no build da imagem pela variável do repositório no GitHub. Os source maps, que pedem `SENTRY_AUTH_TOKEN` e `withSentryConfig`, ficam para depois de 01/12.
 - **Logs:** em JSON no stdout (pino), com `requestId`, rota, conta (id, nunca contato) e duração. A rotação é do Docker.
-- **Disponibilidade:** monitor externo gratuito em `/` e `/api/saude` (que confere app, banco e worker), com alerta por e-mail.
+- **Disponibilidade:** monitor externo gratuito em `/` e `/api/saude`, com alerta por e-mail. A `/api/saude` confere que o banco responde e que a conexão é do `app_user`, e mostra o commit em execução; responde 503 sem dizer o motivo, que vai para o log. O worker entra na conferência quando existir.
+- **Papel do banco ao subir:** antes do `server.js`, o contêiner `app` roda `scripts/conferir-papel.ts` e não sobe se a `DATABASE_URL` não for do `app_user`.
 - **Banco:**
   - `pg_stat_statements` ligado;
   - consultas acima de 300 ms vão para o log;
@@ -282,21 +296,29 @@ Nada com custo acima de zero, nem serviço externo gratuito novo, sem o OK do Ma
 | GitHub Actions | Cota gratuita do plano | Avisar perto do limite |
 | IA (Claude) | Por uso | Fase 3, com teto diário e por pessoa no código (D16) |
 
-**Onde mora cada segredo** (a fonte da verdade é o cofre, D18). No servidor, cada ambiente tem o arquivo `/opt/imob/<ambiente>/.env`, com permissão 600, dono `deploy` e fora de qualquer repositório.
+**Onde mora cada segredo** (a fonte da verdade é o cofre, D18). No servidor, cada ambiente tem a pasta `/opt/imob/<ambiente>/`, fora de qualquer repositório, com arquivos de permissão 600 e dono `deploy`:
+- `deploy.env`: domínio e nomes da rede, da entrada e do resolvedor de certificados do Traefik. Não é segredo, mas não vai para o repositório público;
+- `app.env`: o que o contêiner `app` recebe;
+- `db.env`: o `POSTGRES_PASSWORD`;
+- `migrator.env`: a URL da tarefa de migration;
+- `bootstrap.env`: só para o `preparar`.
 
 | Segredo | Local | CI | Homologação e produção |
 |---|---|---|---|
-| `DATABASE_URL` (`app_user`) | Opcional: o padrão é o localhost sem senha | Montado pelo teste | `.env` do ambiente; é a única URL que o contêiner `app` recebe |
-| `DATABASE_URL_MIGRATOR` e `DB_SENHA_*` (senhas dos papéis) | Não precisa | Valores de teste no workflow | `.env` da tarefa de migration, nunca no `app` |
-| `DATABASE_URL_ADMIN` (superusuário, só para criar papéis e banco) | Opcional: o padrão é o localhost | Valor de teste no workflow | Só no bootstrap do ambiente |
-| `POSTGRES_PASSWORD` do contêiner do banco | Não se aplica | Gerado no job | `.env` do ambiente |
-| `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL` | `.env.local` | Gerado no job | `.env` do ambiente |
-| `S3_*` (R2) | `.env.local` (opcional) | Não precisa | `.env` do ambiente |
-| `RESEND_API_KEY` | Não precisa | Não precisa | `.env` do ambiente |
-| `SENTRY_DSN` | Opcional | Não precisa | `.env` do ambiente |
-| Token de leitura do GHCR | Não se aplica | Não se aplica | Login do Docker no servidor |
-| Chave SSH de deploy | Não se aplica | Secret do ambiente no GitHub | `authorized_keys` do usuário `deploy` |
-| `ANTHROPIC_API_KEY` (fase 3) | `.env.local` | Nunca (mock) | `.env` do ambiente |
+| `DATABASE_URL` (`app_user`) | Opcional: o padrão é o localhost sem senha | Montado pelo teste | `app.env`; é a única URL que o contêiner `app` recebe |
+| `DATABASE_URL_MIGRATOR` | Não precisa | Valor de teste no workflow | `migrator.env`, só na tarefa de migration, nunca no `app` |
+| `DATABASE_URL_ADMIN` (superusuário) e `DB_SENHA_*` (senhas dos papéis) | Opcionais: o padrão é o localhost | Valores de teste no workflow | `bootstrap.env`, só no `preparar` |
+| `POSTGRES_PASSWORD` do contêiner do banco | Não se aplica | Gerado no job | `db.env` |
+| `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL` | `.env.local` | Gerado no job | `app.env` |
+| `S3_*` (R2) | `.env.local` (opcional) | Não precisa | `app.env` |
+| `RESEND_API_KEY` | Não precisa | Não precisa | `app.env` |
+| `SENTRY_DSN` | Opcional | Não precisa | `app.env` |
+| Token do R2 para os backups (só objetos dos buckets do Imob) | Não se aplica | Não se aplica | `/opt/imob/backup/rclone.conf` |
+| Chave privada do `age` (lê os backups) | Só com o Matheus | Nunca | Nunca; o servidor tem só a pública |
+| Chave SSH de deploy | Não se aplica | Secret `DEPLOY_SSH_KEY` do ambiente `homologacao` | `authorized_keys` do usuário `deploy`, presa ao `deploy.sh` |
+| `ANTHROPIC_API_KEY` (fase 3) | `.env.local` | Nunca (mock) | `app.env` |
+
+O GHCR não precisa de token no servidor: o pacote é público e não contém segredo.
 
 ## 11. Desempenho e caminho de escala
 
