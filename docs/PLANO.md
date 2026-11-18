@@ -137,25 +137,33 @@ Fatias grandes ou incertas ganham uma spec própria em `docs/specs/<fatia>.md` a
     - endurecimento concluído;
     - DSN do Sentry no cofre do Matheus;
     - R2 pronto desde 16/11, com os buckets `imob-hml-arquivos` e `imob-backups` e um token só de objetos nesses dois;
-    - parte do repositório pronta na PR #9 (branch `fatia/0.4-homologacao`), esperando o CI e o merge do Matheus:
+    - parte do repositório entregue na PR #9 (17/11), com:
       - os arquivos do plano;
       - os limites de tempo por papel (**Proposta**: 15 s e 30 s no app e no auth; 60 s e 60 s no worker);
-      - o job `imagem` no CI das PRs, que monta as imagens e confere migrations, seed, papel do app, saúde e página;
-      - o `systemd` do backup em `infra/systemd/`;
-      - testes de unidade e de banco verdes;
-      - o build standalone, visto funcionando no Windows: a saúde dá 200 com o `app_user` e 503 com o `migrator`, e o app não sobe com o `migrator`.
-    - Falta no servidor, cada passo com o OK do Matheus:
-      - usuário `deploy` no grupo docker, com a chave do Actions presa ao `deploy.sh` (`command=` e `restrict`);
-      - `age` e `rclone` instalados;
-      - a pasta `/opt/imob` com os scripts, os `.env` do ambiente e os do backup, e o timer `imob-backup@hml`;
-      - `deploy.sh preparar hml <commit>`, depois do merge;
-      - regra de 30 dias no bucket `imob-backups`.
-    - Falta com o Matheus:
-      - par de chaves do `age`, gerado na máquina dele (a privada não sai de lá);
-      - secrets e variáveis do ambiente `homologacao` no GitHub e a variável `NEXT_PUBLIC_SENTRY_DSN` do repositório;
-      - o pacote do GHCR público depois da primeira publicação, se não vier assim;
-      - o monitor de disponibilidade.
-    - Verificar depois do deploy: a URL com a página da 0.3, deploy e rollback ensaiados, restauração do backup, memória e swap medidos e as stacks vizinhas intactas.
+      - o job `imagem` no CI das PRs;
+      - o timer do backup em `infra/systemd/`.
+    - **Homologação no ar em 17/11/2026**, com o commit `afe9415`:
+      - saúde e página respondem pelo endereço público, com certificado da Let's Encrypt;
+      - medido em repouso: app com 87 MB e banco com 60 MB;
+      - as stacks vizinhas ficaram intactas.
+    - Feito no servidor, com o OK do Matheus:
+      - `age` e `rclone`;
+      - usuário `deploy`, com a chave do Actions presa ao `deploy.sh`;
+      - `/opt/imob`, com as senhas do banco geradas no próprio servidor, sem exibição;
+      - timer `imob-backup@hml`;
+      - regra de 30 dias no bucket;
+      - `preparar`.
+    - Feito com o Matheus: chaves do `age`, com a privada no Bitwarden; ambiente `homologacao` no GitHub; pacotes do GHCR públicos.
+    - Três ajustes descobertos no primeiro deploy entram numa PR pequena:
+      - o label duplicado do Traefik;
+      - o `no_head` do `rclone` com o R2;
+      - o `deploy.sh` rodado pelo root.
+    - Falta:
+      - o Matheus copiar as senhas do banco da homologação para o Bitwarden;
+      - ensaiar o rollback, no próximo deploy;
+      - ensaiar a restauração do backup, com a chave do Matheus pela entrada padrão;
+      - o monitor de disponibilidade no Sentry;
+      - reinstalar o `deploy.sh` corrigido no servidor, com OK.
 
     O registro DNS do subdomínio foi criado e conferido em 17/11, inclusive nos resolvedores públicos.
 - [ ] **0.5 Correções que a 2.0 mantém** (da `docs/AUDITORIA.md`).
@@ -221,6 +229,11 @@ Fatias grandes ou incertas ganham uma spec própria em `docs/specs/<fatia>.md` a
     - um teste garante que o pré-lançamento não aparece para o comprador;
     - axe e capturas em 390 e 1440 px.
   - Depende de: protótipo visual de 20/11 e lista de funcionalidades aprovada pelo Matheus.
+- [ ] **1.3c Mapa e Favoritos no MVP** (decisão de 17/11/2026, que muda a D2).
+  - Entrega:
+    - para o comprador, o mapa dos empreendimentos elegíveis e os favoritos;
+    - para a incorporadora, o mapa dos próprios empreendimentos, para gestão.
+  - Plano em Opus em andamento, junto com o da 1.3b. Usa o OpenFreeMap, já aprovado, e não usa PostGIS (D5).
 - [ ] **1.4 Contas e login rápido (F10, F5).**
   - Entrega:
     - Better Auth (e-mail e senha, recuperação);
@@ -330,6 +343,28 @@ Fatiadas quando a v1 estiver no ar, nesta ordem de valor:
   - a primeira subida de cada ambiente e o bootstrap dos papéis são o `deploy.sh preparar`, só no terminal do servidor;
   - o seed fictício, que é idempotente, roda a cada deploy de homologação e nunca em produção;
   - os limites de tempo por papel são **Proposta**.
+- 2026-11-17, à noite: **aprovados os planos da 0.5a, da 1.1 e da 1.2/1.3 e a lista de funcionalidades do MVP,** com as recomendações da seção 6 do `docs/RETRATO-DO-PROJETO.md`:
+  - contato do gerente (WhatsApp, e-mail e telefone) liberado até 01/12;
+  - o texto dos planos é "corrigidas pelo índice do contrato", sem o nome do índice (regra 3);
+  - fachadas ilustradas no lugar de fotos;
+  - pergunta 9b mantida;
+  - progresso do questionário no navegador, liberado num único arquivo, e rota pública de contagem;
+  - "Meus empreendimentos" da incorporadora só com dados de cadastro;
+  - padrões novos do `check:secrets` na 0.5a;
+  - cartão de vendas só com a house.
+
+- 2026-11-17, à noite: **entrega do lead à house pelas opções A e B juntas.** O lead fica sempre gravado no banco do Imob, pronto para a fila da 1.6.
+  - **A:** aviso imediato no WhatsApp da house, por webhook assinado para o n8n da I.Ara, que também registra o lead numa planilha. Usa um número de WhatsApp próprio do Imob.
+  - **B:** e-mail automático pela Resend, saindo direto do app.
+  - Os dois ficam atrás de flags (`lead_webhook` e `email_real`), com destinos de teste em homologação.
+  - A ligação por IA (FirstLine) fica como teste para depois do piloto.
+- 2026-11-17, à noite: **Resend só para os avisos do sistema**, no subdomínio de envio `avisos.`: lead, confirmação de visita e recuperação de senha.
+  - E-mail de marketing e a apresentação do Imob para incorporadoras ficam no canal comercial da I.Ara (ActiveCampaign).
+  - O motivo: denúncias de spam ou uma suspensão da conta derrubariam os avisos de lead.
+- 2026-11-17, à noite: **o aviso por WhatsApp (canal A) fica para depois.** O Matheus quer ver a interface antes e ir moldando o produto.
+  - A 1.3 entrega o lead gravado e o e-mail.
+  - O webhook para o n8n fica com a flag `lead_webhook` desligada, até ele pedir.
+- 2026-11-17, à noite: **Mapa e Favoritos entram no MVP, sem cadeado** (ressalva do Matheus). Eles são o ponto de vitrine, de gestão dos empreendimentos e de procura, para o comprador e para a incorporadora. **Muda a D2,** que os deixava para a fase 2, e cria a fatia 1.3c.
 - 2026-11-17: **MVP de 01/12 com a interface completa.**
   - Todas as funcionalidades do comprador e da incorporadora aparecem.
   - As que ficam para depois de 01/12 vêm com cadeado, bloqueadas para todos, menos para o superadmin do Imob e o god mode, como amostra do que vem.

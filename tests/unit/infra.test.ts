@@ -54,6 +54,11 @@ describe("stack do Swarm", () => {
     expect(STACK).not.toMatch(/^\s+ports:/m);
   });
 
+  it("não mistura labels traefik.docker.* com traefik.swarm.* (o Traefik descarta o serviço)", () => {
+    expect(STACK).not.toMatch(/^\s*-\s*traefik\.docker\./m);
+    expect(bloco("app")).toMatch(/traefik\.swarm\.network=/);
+  });
+
   it("só o app entra na rede do Traefik, que vem do servidor", () => {
     expect(bloco("app")).toMatch(/networks: \[interno, traefik\]/);
     expect(bloco("worker")).toMatch(/networks: \[interno\]/);
