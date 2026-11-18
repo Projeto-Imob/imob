@@ -228,7 +228,7 @@ Regras do trabalho em paralelo:
 
 > **17/11, à noite:** o Matheus aprovou as recomendações abaixo, com duas ressalvas:
 > - item 9: Mapa e Favoritos entram no MVP de verdade, sem cadeado, na fatia nova 1.3c;
-> - item 3: ele pediu opções melhores para a entrega do lead à house, que segue em decisão.
+> - item 3: em seguida, ele escolheu, entre opções novas, a entrega do lead à house pelo WhatsApp (via n8n) e pelo e-mail (Resend) juntos.
 
 **Novas, dos planos de 17/11 (com a recomendação):**
 

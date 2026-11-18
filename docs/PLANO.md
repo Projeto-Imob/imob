@@ -346,7 +346,11 @@ Fatiadas quando a v1 estiver no ar, nesta ordem de valor:
   - padrões novos do `check:secrets` na 0.5a;
   - cartão de vendas só com a house.
 
-  A entrega do lead à house continua em decisão: o Matheus pediu opções melhores que o cartão do gerente.
+- 2026-11-17, à noite: **entrega do lead à house pelas opções A e B juntas.** O lead fica sempre gravado no banco do Imob, pronto para a fila da 1.6.
+  - **A:** aviso imediato no WhatsApp da house, por webhook assinado para o n8n da I.Ara, que também registra o lead numa planilha. Usa um número de WhatsApp próprio do Imob.
+  - **B:** e-mail automático pela Resend, saindo direto do app.
+  - Os dois ficam atrás de flags (`lead_webhook` e `email_real`), com destinos de teste em homologação.
+  - A ligação por IA (FirstLine) fica como teste para depois do piloto.
 - 2026-11-17, à noite: **Mapa e Favoritos entram no MVP, sem cadeado** (ressalva do Matheus). Eles são o ponto de vitrine, de gestão dos empreendimentos e de procura, para o comprador e para a incorporadora. **Muda a D2,** que os deixava para a fase 2, e cria a fatia 1.3c.
 - 2026-11-17: **MVP de 01/12 com a interface completa.**
   - Todas as funcionalidades do comprador e da incorporadora aparecem.
