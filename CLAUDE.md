@@ -16,6 +16,7 @@ Ecossistema de geração de demanda para lançamentos imobiliários. A incorpora
 | Fatias em ordem, decisões D1 a D18 e pendências do Matheus | `docs/PLANO.md` |
 | Por que a 2.0 existe | `docs/ANALISE-2.0.md` |
 | Auditoria do código | `docs/AUDITORIA.md` |
+| Retrato do projeto: do zero até hoje e o que falta (atualizado a cada marco) | `docs/RETRATO-DO-PROJETO.md` |
 
 Precedência: as regras abaixo > decisões aprovadas no `docs/PLANO.md` > `docs/SPEC.md` > `docs/specs/` > `docs/ARQUITETURA.md`. Conflito entre eles: pare e pergunte.
 
@@ -148,6 +149,10 @@ docs/            # SPEC, PLANO, ARQUITETURA, specs/, historico/
 - **Docker Swarm:**
   - nunca `docker restart` num contêiner de serviço, porque o Swarm sobe outro e os dois ficam rodando; use `docker service update --force imob_…`, só com imagem de versão fixa;
   - nunca `docker stack deploy --prune` nem `--remove-orphans` fora das stacks `imob_*`.
+- **Primeiro deploy (17/11/2026):**
+  - **Traefik do servidor:** use só labels `traefik.swarm.*`. Com `traefik.docker.*` junto, ele descarta o serviço ("both Docker and Swarm labels are defined"), e fica sem rota e sem certificado.
+  - **`rclone` 1.60 com o R2:** o `rclone.conf` precisa de `no_head = true`. Sem isso, o envio funciona, mas a conferência depois dele dá 501 e o backup é dado como falho.
+  - **PowerShell 5.1 mandando texto ao `ssh`:** ele põe um BOM no início do texto. Comece o texto com uma linha em branco e não use aspas internas no comando remoto.
 - **Sem Docker local:**
   - o `Dockerfile` só é testado pelo job `imagem` do CI nas PRs;
   - para ver o servidor de produção na máquina, use o build standalone;
