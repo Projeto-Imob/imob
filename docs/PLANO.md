@@ -354,6 +354,9 @@ Fatiadas quando a v1 estiver no ar, nesta ordem de valor:
 - 2026-11-17, à noite: **Resend só para os avisos do sistema**, no subdomínio de envio `avisos.`: lead, confirmação de visita e recuperação de senha.
   - E-mail de marketing e a apresentação do Imob para incorporadoras ficam no canal comercial da I.Ara (ActiveCampaign).
   - O motivo: denúncias de spam ou uma suspensão da conta derrubariam os avisos de lead.
+- 2026-11-17, à noite: **o aviso por WhatsApp (canal A) fica para depois.** O Matheus quer ver a interface antes e ir moldando o produto.
+  - A 1.3 entrega o lead gravado e o e-mail.
+  - O webhook para o n8n fica com a flag `lead_webhook` desligada, até ele pedir.
 - 2026-11-17, à noite: **Mapa e Favoritos entram no MVP, sem cadeado** (ressalva do Matheus). Eles são o ponto de vitrine, de gestão dos empreendimentos e de procura, para o comprador e para a incorporadora. **Muda a D2,** que os deixava para a fase 2, e cria a fatia 1.3c.
 - 2026-11-17: **MVP de 01/12 com a interface completa.**
   - Todas as funcionalidades do comprador e da incorporadora aparecem.
