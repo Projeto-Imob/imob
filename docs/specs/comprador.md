@@ -146,7 +146,7 @@ Função pura resolveHomeState escolhe o estado a partir de usuário, eventos, p
 
 ### Favoritos, listas, comparador e alertas
 
-Coração em todo card e pino; favoritar pede login rápido, e o favorito é salvo depois dele. Depois de favoritar, convide a criar um alerta.
+Coração em todo card e pino. No MVP, favoritar não pede login: o favorito fica no cookie de visitante de 90 dias e passa para a conta quando a pessoa entra (fatia 1.4; decisão de 18/11/2026). Depois de favoritar, convide a criar um alerta.
 
 Listas: criar, renomear, excluir e mover entre listas.
 

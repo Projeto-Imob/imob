@@ -70,8 +70,18 @@ describe("transação do banco (src/server/db)", () => {
     expect(await banco.comContexto({ contaId: CONTA }, async () => 42)).toBe(42);
     const conexao = ultimoPool().conexao;
     expect(conexao.comandos).toEqual(["begin", expect.stringContaining("set_config('app.conta_id', $1, true)"), "commit"]);
-    expect(conexao.parametros).toEqual([[CONTA, ""]]);
+    expect(conexao.parametros).toEqual([[CONTA, "", ""]]);
     expect(conexao.devolvida).toEqual([undefined]);
+  });
+
+  it("comContexto grava o visitante no set_config e recusa id fora do formato", async () => {
+    const banco = await carregar();
+    const VISITANTE = "6f1c2d3e-4a5b-4c6d-8e7f-0a1b2c3d4e5f";
+    await banco.comContexto({ contaId: null, visitanteId: VISITANTE }, async () => null);
+    const conexao = ultimoPool().conexao;
+    expect(conexao.comandos[1]).toContain("set_config('app.visitante_id', $3, true)");
+    expect(conexao.parametros).toEqual([["", "", VISITANTE]]);
+    await expect(banco.comContexto({ contaId: null, visitanteId: "1; select 1" }, async () => null)).rejects.toThrow();
   });
 
   it("consultaPublica abre transação só de leitura e sem conta", async () => {
@@ -79,7 +89,7 @@ describe("transação do banco (src/server/db)", () => {
     await banco.consultaPublica(async () => null);
     const conexao = ultimoPool().conexao;
     expect(conexao.comandos[0]).toBe("begin read only");
-    expect(conexao.parametros).toEqual([["", ""]]);
+    expect(conexao.parametros).toEqual([["", "", ""]]);
     expect(conexao.comandos.at(-1)).toBe("commit");
   });
 
