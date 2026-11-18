@@ -351,6 +351,9 @@ Fatiadas quando a v1 estiver no ar, nesta ordem de valor:
   - **B:** e-mail automático pela Resend, saindo direto do app.
   - Os dois ficam atrás de flags (`lead_webhook` e `email_real`), com destinos de teste em homologação.
   - A ligação por IA (FirstLine) fica como teste para depois do piloto.
+- 2026-11-17, à noite: **Resend só para os avisos do sistema**, no subdomínio de envio `avisos.`: lead, confirmação de visita e recuperação de senha.
+  - E-mail de marketing e a apresentação do Imob para incorporadoras ficam no canal comercial da I.Ara (ActiveCampaign).
+  - O motivo: denúncias de spam ou uma suspensão da conta derrubariam os avisos de lead.
 - 2026-11-17, à noite: **Mapa e Favoritos entram no MVP, sem cadeado** (ressalva do Matheus). Eles são o ponto de vitrine, de gestão dos empreendimentos e de procura, para o comprador e para a incorporadora. **Muda a D2,** que os deixava para a fase 2, e cria a fatia 1.3c.
 - 2026-11-17: **MVP de 01/12 com a interface completa.**
   - Todas as funcionalidades do comprador e da incorporadora aparecem.
