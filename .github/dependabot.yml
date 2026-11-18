@@ -10,6 +10,12 @@ updates:
     groups:
       dependencias-npm:
         patterns: ["*"]
+        # Versão maior (TypeScript 7, ESLint 10…) é decisão, com PR própria: não entra no grupo.
+        update-types: ["minor", "patch"]
+    ignore:
+      # Os tipos acompanham o Node 24 do projeto; uma versão maior só entra com a troca do Node.
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
     commit-message:
       prefix: "chore(deps)"
 
@@ -22,5 +28,6 @@ updates:
     groups:
       github-actions:
         patterns: ["*"]
+        update-types: ["minor", "patch"]
     commit-message:
       prefix: "chore(ci)"

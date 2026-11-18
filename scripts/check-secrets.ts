@@ -12,6 +12,9 @@ const PLACEHOLDER = /^(?:<[^>]*>|\[[^\]]*\]|\$\{[^}]*\}|x+|\*+|senha|password|ch
 /** Banco local de desenvolvimento ou de CI (contêiner de serviço em localhost) não é segredo. */
 const HOST_LOCAL = /^(?:localhost|127\.0\.0\.1)(?::\d+)?(?:\/|$)/i;
 
+/** Valor de exemplo feito só de x, asteriscos, pontos ou traços (ex.: sk_live_xxxxxxxx). */
+const SO_MARCADORES = /^[xX*._-]+$/;
+
 const PADROES: ReadonlyArray<{ motivo: string; padrao: RegExp; ehPlaceholder?: (m: RegExpMatchArray) => boolean }> = [
   { motivo: "chave de acesso AWS", padrao: /\bAKIA[0-9A-Z]{16}\b/ },
   { motivo: "chave da Anthropic", padrao: /\bsk-ant-[A-Za-z0-9_-]{20,}/ },
@@ -22,6 +25,26 @@ const PADROES: ReadonlyArray<{ motivo: string; padrao: RegExp; ehPlaceholder?: (
     motivo: "URL de banco com senha",
     padrao: /\bpostgres(?:ql)?:\/\/[^:\s/@]+:([^@\s]+)@(\S*)/i,
     ehPlaceholder: (m) => PLACEHOLDER.test(m[1] ?? "") || HOST_LOCAL.test(m[2] ?? ""),
+  },
+  { motivo: "chave de API do Google", padrao: /\bAIza([0-9A-Za-z_-]{35})\b/, ehPlaceholder: (m) => SO_MARCADORES.test(m[1] ?? "") },
+  { motivo: "chave secreta do Stripe", padrao: /\bsk_live_([0-9A-Za-z]{16,})/, ehPlaceholder: (m) => SO_MARCADORES.test(m[1] ?? "") },
+  { motivo: "JWT", padrao: /\beyJ[A-Za-z0-9_-]{10,}\.eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}/ },
+  { motivo: "token do Slack", padrao: /\bxox[abposr]-[A-Za-z0-9-]{10,}/ },
+  {
+    motivo: "URL de banco ou fila com senha",
+    // mysql, redis, mongodb e amqp; o usuário pode ficar vazio (redis://:senha@host).
+    padrao: /\b(?:mysql|redis|rediss|mongodb(?:\+srv)?|amqps?):\/\/[^:\s/@]*:([^@\s]+)@(\S*)/i,
+    ehPlaceholder: (m) => PLACEHOLDER.test(m[1] ?? "") || HOST_LOCAL.test(m[2] ?? ""),
+  },
+  { motivo: "chave privada do age", padrao: /\bAGE-SECRET-KEY-1[A-Z0-9]{20,}/ },
+  // O prefixo re_ exige um dígito no corpo, para não acusar nomes de variável como re_validacao_de_entrada.
+  { motivo: "chave do Resend", padrao: /\bre_(?=[A-Za-z0-9_]*\d)[A-Za-z0-9_]{24,}/ },
+  { motivo: "token do Sentry", padrao: /\bsntry[su]_[A-Za-z0-9+/=_-]{20,}/ },
+  {
+    motivo: "segredo sem aspas em INI ou YAML",
+    // chave: valor ou chave = valor, sem aspas, até o fim da linha (comentário depois de # é aceito).
+    padrao: /^\s*(?:-\s*)?[A-Za-z0-9_.-]*(?:secret|token|password|passwd|senha|api[_-]?key|access[_-]?key)[A-Za-z0-9_.-]*\s*[:=]\s*([A-Za-z0-9+/_-]{16,})\s*(?:#.*)?$/i,
+    ehPlaceholder: (m) => PLACEHOLDER.test(m[1] ?? "") || SO_MARCADORES.test(m[1] ?? ""),
   },
   {
     motivo: "segredo com prefixo NEXT_PUBLIC_",
