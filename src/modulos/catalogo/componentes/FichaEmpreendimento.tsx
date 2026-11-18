@@ -34,12 +34,12 @@ export function FichaEmpreendimento({ empreendimento: e, restam }: Props) {
           <dd className="mt-1 font-semibold text-preto">
             <T k="empreendimento.obra_valor" vars={{ n: numero(e.percentualObra) }} />
           </dd>
-          <svg viewBox="0 0 100 4" preserveAspectRatio="none" role="img" aria-label={texto("empreendimento.obra_valor", { n: numero(e.percentualObra) })} className="mt-2 h-1.5 w-full">
-            <rect width="100" height="4" className="fill-borda-controle" />
-            <rect width={Math.max(0, Math.min(100, e.percentualObra))} height="4" className="fill-preto" />
-          </svg>
         </div>
       </dl>
+      <svg viewBox="0 0 100 4" preserveAspectRatio="none" role="img" aria-label={texto("empreendimento.obra_valor", { n: numero(e.percentualObra) })} className="mt-3 h-1.5 w-full max-w-sm">
+        <rect width="100" height="4" className="fill-borda-controle" />
+        <rect width={Math.max(0, Math.min(100, e.percentualObra))} height="4" className="fill-preto" />
+      </svg>
       {restam !== null ? (
         <p className="mt-4 flex flex-wrap items-center gap-2 font-semibold text-preto">
           <T k="empreendimento.restam_resumo" vars={{ n: restam }} />
