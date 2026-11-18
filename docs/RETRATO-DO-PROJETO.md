@@ -168,16 +168,17 @@ Legenda: ✅ feito · 🔄 em andamento · 📝 plano pronto, esperando aprovaç
 | 0.2 | Banco local e de teste, migrations com RLS, seed e testes de banco | ✅ PR #3 (16/11) |
 | 0.3 | Módulos de domínio e página do empreendimento lendo do banco | ✅ PR #7 (16/11) |
 | 0.4 | Homologação no servidor, como stack isolada | 🔄 **No ar desde 17/11** (PR #4 e PR #9), com memória medida e stacks vizinhas intactas. Falta: a PR com os ajustes do primeiro deploy, ensaiar a volta e a restauração do backup, o monitor de disponibilidade e as senhas do banco no Bitwarden |
-| 0.5 | Correções da auditoria | 📝 Dividida em **0.5a**, antes de 01/12 (correções da busca, CSP, Dependabot e padrões do `check:secrets`), e **0.5b**, depois (gitleaks, actions por SHA e suíte estável) |
+| 0.5 | Correções da auditoria | 🔄 **0.5a** aprovada; implementação começou em 17/11 (correções da busca, CSP, Dependabot e padrões do `check:secrets`). A **0.5b** fica para depois de 01/12 (gitleaks, actions por SHA e suíte estável) |
 
 ### Fase 1: piloto (v1)
 
 | Fatia | Entrega | Situação |
 |---|---|---|
-| 1.1 | Página do empreendimento completa (F1) | 📝 Tamanho M, de 4 a 5 dias |
-| 1.2 | Questionário com contagem ao vivo (F2) | 📝 Tamanho G |
-| 1.3 | Resultado e lead (F3 e F4) | 📝 Tamanho M |
-| 1.3b | Interface completa do MVP, com cadeado e login simples | ⏳ Depende do protótipo e da lista de funcionalidades aprovados |
+| 1.1 | Página do empreendimento completa (F1) | 🔄 Plano aprovado; implementação começou em 17/11. Tamanho M |
+| 1.2 | Questionário com contagem ao vivo (F2) | 📝 Plano aprovado; começa depois da PR 1 da 0.5a. Tamanho G |
+| 1.3 | Resultado e lead (F3 e F4) | 📝 Plano aprovado; começa depois da 1.1 e da 1.2. Tamanho M. A entrega do lead à house está em decisão |
+| 1.3b | Interface completa do MVP, com cadeado e login simples | 🔄 Lista de funcionalidades aprovada em 17/11; plano em Opus em andamento |
+| 1.3c | **Mapa e Favoritos no MVP**, para o comprador e a incorporadora (decisão de 17/11, que muda a D2) | 🔄 Plano em Opus em andamento, junto com a 1.3b |
 | 1.4 | Contas e login rápido (F10 e F5) | ⏳ Depois de 01/12 |
 | 1.5 | Visita em 3 toques (F5) | ⏳ Depende da conta do Resend |
 | 1.6 | Fila da house (F7) | ⏳ |
@@ -224,6 +225,10 @@ Regras do trabalho em paralelo:
 - **Cota do Claude:** muitos agentes em paralelo esgotam a cota.
 
 ## 6. Decisões que esperam o Matheus
+
+> **17/11, à noite:** o Matheus aprovou as recomendações abaixo, com duas ressalvas:
+> - item 9: Mapa e Favoritos entram no MVP de verdade, sem cadeado, na fatia nova 1.3c;
+> - item 3: ele pediu opções melhores para a entrega do lead à house, que segue em decisão.
 
 **Novas, dos planos de 17/11 (com a recomendação):**
 

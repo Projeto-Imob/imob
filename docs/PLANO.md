@@ -222,6 +222,11 @@ Fatias grandes ou incertas ganham uma spec própria em `docs/specs/<fatia>.md` a
     - um teste garante que o pré-lançamento não aparece para o comprador;
     - axe e capturas em 390 e 1440 px.
   - Depende de: protótipo visual de 20/11 e lista de funcionalidades aprovada pelo Matheus.
+- [ ] **1.3c Mapa e Favoritos no MVP** (decisão de 17/11/2026, que muda a D2).
+  - Entrega:
+    - para o comprador, o mapa dos empreendimentos elegíveis e os favoritos;
+    - para a incorporadora, o mapa dos próprios empreendimentos, para gestão.
+  - Plano em Opus em andamento, junto com o da 1.3b. Usa o OpenFreeMap, já aprovado, e não usa PostGIS (D5).
 - [ ] **1.4 Contas e login rápido (F10, F5).**
   - Entrega:
     - Better Auth (e-mail e senha, recuperação);
@@ -331,6 +336,18 @@ Fatiadas quando a v1 estiver no ar, nesta ordem de valor:
   - a primeira subida de cada ambiente e o bootstrap dos papéis são o `deploy.sh preparar`, só no terminal do servidor;
   - o seed fictício, que é idempotente, roda a cada deploy de homologação e nunca em produção;
   - os limites de tempo por papel são **Proposta**.
+- 2026-11-17, à noite: **aprovados os planos da 0.5a, da 1.1 e da 1.2/1.3 e a lista de funcionalidades do MVP,** com as recomendações da seção 6 do `docs/RETRATO-DO-PROJETO.md`:
+  - contato do gerente (WhatsApp, e-mail e telefone) liberado até 01/12;
+  - o texto dos planos é "corrigidas pelo índice do contrato", sem o nome do índice (regra 3);
+  - fachadas ilustradas no lugar de fotos;
+  - pergunta 9b mantida;
+  - progresso do questionário no navegador, liberado num único arquivo, e rota pública de contagem;
+  - "Meus empreendimentos" da incorporadora só com dados de cadastro;
+  - padrões novos do `check:secrets` na 0.5a;
+  - cartão de vendas só com a house.
+
+  A entrega do lead à house continua em decisão: o Matheus pediu opções melhores que o cartão do gerente.
+- 2026-11-17, à noite: **Mapa e Favoritos entram no MVP, sem cadeado** (ressalva do Matheus). Eles são o ponto de vitrine, de gestão dos empreendimentos e de procura, para o comprador e para a incorporadora. **Muda a D2,** que os deixava para a fase 2, e cria a fatia 1.3c.
 - 2026-11-17: **MVP de 01/12 com a interface completa.**
   - Todas as funcionalidades do comprador e da incorporadora aparecem.
   - As que ficam para depois de 01/12 vêm com cadeado, bloqueadas para todos, menos para o superadmin do Imob e o god mode, como amostra do que vem.
