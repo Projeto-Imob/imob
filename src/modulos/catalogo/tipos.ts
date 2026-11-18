@@ -218,3 +218,20 @@ export type EmpreendimentoPublico = {
   /** Registro de incorporação: todo empreendimento da vitrine tem (regra 1). */
   ri: { numero: string; cartorio: string; dataRegistro: string; patrimonioAfetacao: boolean | null };
 };
+
+// ---------- Escritório de vendas (fatia 1.1) ----------
+
+/** Cartão de quem atende o empreendimento. Na 1.1 só a house; o plantão da incorporadora fica para depois (decisão 11). */
+export const escritorioVendas = z.strictObject({
+  empreendimentoId: id,
+  origem: z.enum(["house", "plantao"]),
+  nome: z.string().min(1),
+  cargo: z.string().nullable(),
+  experiencia: z.string().nullable(),
+  fotoPath: z.string().nullable(),
+  whatsapp: z.string().nullable(),
+  email: z.string().nullable(),
+  telefone: z.string().nullable(),
+  exemplo,
+});
+export type EscritorioVendas = z.infer<typeof escritorioVendas>;

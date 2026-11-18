@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
-import { empreendimento, empreendimentoComercial, plano, subcondominio, tipologia, unidade } from "@/modulos/catalogo";
+import { empreendimento, empreendimentoComercial, escritorioVendas, plano, subcondominio, tipologia, unidade } from "@/modulos/catalogo";
 import { conta, incorporadora } from "@/modulos/contas";
 import { CASOS_EXCLUSAO, gerarSeed } from "@/seed/seed";
 
@@ -11,6 +11,7 @@ const COLECOES = {
   contas: conta,
   empreendimentos: empreendimento,
   comerciais: empreendimentoComercial,
+  escritorios: escritorioVendas,
   subcondominios: subcondominio,
   tipologias: tipologia,
   unidades: unidade,
@@ -41,7 +42,7 @@ describe("seed fictício (2.2)", () => {
 
   it("ids são únicos em todas as coleções", () => {
     const ids = Object.keys(COLECOES)
-      .filter((n) => n !== "comerciais")
+      .filter((n) => n !== "comerciais" && n !== "escritorios")
       .flatMap((n) => seed[n as keyof typeof COLECOES].map((r) => (r as { id: string }).id));
     expect(new Set(ids).size).toBe(ids.length);
   });

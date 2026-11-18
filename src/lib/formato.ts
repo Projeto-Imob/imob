@@ -12,3 +12,16 @@ export function mesAno(dataIso: string): string {
 export function numero(n: number): string {
   return NUMERO.format(n);
 }
+
+const MOEDA = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
+const DATA_CURTA = new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", timeZone: "UTC" });
+
+/** 690000 → "R$ 690.000,00". */
+export function moeda(valor: number): string {
+  return MOEDA.format(valor);
+}
+
+/** "2025-12-15" → "15/12/2025". */
+export function dataCurta(dataIso: string): string {
+  return DATA_CURTA.format(new Date(`${dataIso}T00:00:00Z`));
+}

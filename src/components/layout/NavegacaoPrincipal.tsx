@@ -4,19 +4,22 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { T } from "@/components/T";
+import { FLAGS_PADRAO, type Flag } from "@config/flags";
 import { texto, type ChaveTexto } from "@/i18n/pt-BR";
 import { IconeBuscar, IconeConta, IconeFavoritos, IconeInicio, IconeMapa } from "./Icones";
 
-type Area = { href: string; rotulo: ChaveTexto; icone: ReactNode; ativa: (caminho: string) => boolean };
+type Area = { href: string; rotulo: ChaveTexto; icone: ReactNode; ativa: (caminho: string) => boolean; flag?: Flag };
 
-/** As cinco áreas do comprador (CLAUDE.md, seção 5). */
-export const AREAS: Area[] = [
+/** As cinco áreas do comprador. Mapa e Favoritos ficam atrás das flags, desligadas até a fatia 1.3c. */
+export const TODAS_AS_AREAS: Area[] = [
   { href: "/", rotulo: "nav.inicio", icone: <IconeInicio />, ativa: (c) => c === "/" },
   { href: "/buscar-imoveis", rotulo: "nav.buscar", icone: <IconeBuscar />, ativa: (c) => c.startsWith("/buscar-imoveis") },
-  { href: "/mapa", rotulo: "nav.mapa", icone: <IconeMapa />, ativa: (c) => c.startsWith("/mapa") },
-  { href: "/favoritos", rotulo: "nav.favoritos", icone: <IconeFavoritos />, ativa: (c) => c.startsWith("/favoritos") },
+  { href: "/mapa", rotulo: "nav.mapa", icone: <IconeMapa />, ativa: (c) => c.startsWith("/mapa"), flag: "mapa_publico" },
+  { href: "/favoritos", rotulo: "nav.favoritos", icone: <IconeFavoritos />, ativa: (c) => c.startsWith("/favoritos"), flag: "favoritos" },
   { href: "/conta", rotulo: "nav.conta", icone: <IconeConta />, ativa: (c) => c.startsWith("/conta") },
 ];
+
+export const AREAS: Area[] = TODAS_AS_AREAS.filter((a) => !a.flag || FLAGS_PADRAO[a.flag]);
 
 /**
  * Um único <nav>: barra inferior fixa no celular e menu no cabeçalho fixo a partir de md.
@@ -37,7 +40,7 @@ export function ListaNavegacao({ caminho }: { caminho: string | null }) {
       data-testid="navegacao-principal"
       className="fixed inset-x-0 bottom-0 z-40 border-t border-borda-controle bg-off-white pb-[env(safe-area-inset-bottom)] md:static md:border-0 md:bg-transparent md:pb-0"
     >
-      <ul className="grid grid-cols-5 md:flex md:gap-1">
+      <ul className={`grid md:flex md:gap-1 ${AREAS.length === 5 ? "grid-cols-5" : "grid-cols-3"}`}>
         {AREAS.map((area) => {
           const ativa = caminho !== null && area.ativa(caminho);
           return (
