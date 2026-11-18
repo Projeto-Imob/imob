@@ -19,6 +19,7 @@ const FLAGS_D6 = [
   "mapa_publico",
   "favoritos",
   "agendar_visita",
+  "contato_telefone_publico",
 ];
 
 describe("config/flags.ts", () => {

@@ -35,11 +35,18 @@ describe("campo vazio vira Não informado", () => {
     expect(container.querySelectorAll("a")).toHaveLength(0);
   });
 
-  it("com cartão, WhatsApp (wa.me com mensagem pronta), e-mail e telefone são links", () => {
+  it("com cartão, WhatsApp (wa.me com mensagem pronta) e e-mail são links, e o telefone não aparece (decisão de 18/11)", () => {
     const { container } = render(<BlocoEscritorio e={paginaDe("residencial-jardim-das-aguas")} modo="morar" />);
     const hrefs = [...container.querySelectorAll("a")].map((a) => a.getAttribute("href"));
+    expect(hrefs).toHaveLength(2);
     expect(hrefs[0]).toMatch(/^https:\/\/wa\.me\/5551900000003\?text=Ol%C3%A1!%20Vi%20o%20Residencial/);
     expect(hrefs[1]).toBe("mailto:helena.contas@exemplo.invalid");
+    expect(container.textContent).not.toContain("Telefone");
+  });
+
+  it("com a flag contato_telefone_publico ligada, o telefone volta como link (regra 20)", () => {
+    const { container } = render(<BlocoEscritorio e={paginaDe("residencial-jardim-das-aguas")} modo="morar" telefonePublico />);
+    const hrefs = [...container.querySelectorAll("a")].map((a) => a.getAttribute("href"));
     expect(hrefs[2]).toBe("tel:+555130000003");
   });
 

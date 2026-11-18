@@ -36,6 +36,11 @@ export const FLAGS_PADRAO = {
   agendar_visita: false,
   /** Envio real de e-mail (depende de provedor aprovado). Desligada: e-mails simulados (D10). */
   email_real: false,
+  /**
+   * Telefone da house no cartão de vendas da página. Desligada por decisão do Matheus (18/11/2026): só WhatsApp e
+   * e-mail ficam públicos. O telefone continua cadastrado; ligar a flag volta a mostrá-lo.
+   */
+  contato_telefone_publico: false,
 } as const satisfies Record<string, boolean>;
 
 export type Flag = keyof typeof FLAGS_PADRAO;

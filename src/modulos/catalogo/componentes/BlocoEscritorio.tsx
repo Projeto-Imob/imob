@@ -1,3 +1,4 @@
+import { FLAGS_PADRAO } from "@config/flags";
 import { T } from "@/components/T";
 import { texto, type ChaveTexto } from "@/i18n/pt-BR";
 import { linkEmail, linkTelefone, linkWhatsapp, type Modo, type PaginaEmpreendimento } from "../pagina";
@@ -14,9 +15,18 @@ const iniciais = (nome: string) =>
 
 /**
  * Cartão do escritório de vendas: só a house (decisão 11), com contato liberado (decisão 2): wa.me com mensagem
- * pronta, mailto e tel. Sem cartão cadastrado, cada campo é "Não informado". O evento manager_contact vem na 1.9.
+ * pronta e mailto. O telefone fica atrás da flag `contato_telefone_publico`, desligada por decisão do Matheus
+ * (18/11/2026). Sem cartão cadastrado, cada campo é "Não informado". O evento manager_contact vem na 1.9.
  */
-export function BlocoEscritorio({ e, modo }: { e: PaginaEmpreendimento; modo: Modo }) {
+export function BlocoEscritorio({
+  e,
+  modo,
+  telefonePublico = FLAGS_PADRAO.contato_telefone_publico,
+}: {
+  e: PaginaEmpreendimento;
+  modo: Modo;
+  telefonePublico?: boolean;
+}) {
   const o = e.escritorio;
   return (
     <Secao id="escritorio" titulo="empreendimento.escritorio.titulo" sub="empreendimento.escritorio.sub" modo={modo}>
@@ -46,14 +56,16 @@ export function BlocoEscritorio({ e, modo }: { e: PaginaEmpreendimento; modo: Mo
           </span>
           {ouNaoInformado(o?.experiencia)}
         </p>
-        <div className="mt-4 grid gap-2 sm:grid-cols-3">
+        <div className={`mt-4 grid gap-2 ${telefonePublico ? "sm:grid-cols-3" : "sm:grid-cols-2"}`}>
           <Contato
             rotulo="empreendimento.escritorio.whatsapp"
             href={o?.whatsapp ? linkWhatsapp(o.whatsapp, texto("empreendimento.escritorio.mensagem", { empreendimento: e.nome })) : null}
             externo
           />
           <Contato rotulo="empreendimento.escritorio.email" href={o?.email ? linkEmail(o.email) : null} />
-          <Contato rotulo="empreendimento.escritorio.telefone" href={o?.telefone ? linkTelefone(o.telefone) : null} />
+          {telefonePublico ? (
+            <Contato rotulo="empreendimento.escritorio.telefone" href={o?.telefone ? linkTelefone(o.telefone) : null} />
+          ) : null}
         </div>
       </div>
     </Secao>
