@@ -1,4 +1,5 @@
 import { afterAll, describe, expect, it } from "vitest";
+import { urlDoPapel } from "../../scripts/db/config";
 import { comContexto, encerrarBanco } from "@/server/db";
 import { CONTAS, URL_BANCO, comCliente, comoApp, erroDe } from "./apoio";
 
@@ -86,7 +87,7 @@ describe("isolamento do contexto do visitante", () => {
 
 describe("GRANTs das funções do visitante", () => {
   it("o worker executa current_visitante_id, mas não grava como comprador", async () => {
-    await comCliente(URL_BANCO.app.replace("app_user", "worker"), async (c) => {
+    await comCliente(urlDoPapel("worker", "teste"), async (c) => {
       await c.query("select app.current_visitante_id()");
       const e = await erroDe(c.query("select app.grava_como_comprador()"));
       expect(e.code).toBe("42501");
@@ -94,7 +95,7 @@ describe("GRANTs das funções do visitante", () => {
   });
 
   it("auth_service não executa nenhuma das duas", async () => {
-    await comCliente(URL_BANCO.app.replace("app_user", "auth_service"), async (c) => {
+    await comCliente(urlDoPapel("auth_service", "teste"), async (c) => {
       expect((await erroDe(c.query("select app.current_visitante_id()"))).code).toBe("42501");
     });
   });
