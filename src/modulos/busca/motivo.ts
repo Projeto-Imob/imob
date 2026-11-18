@@ -26,14 +26,30 @@ type Frase = { chave: ChaveTexto; vars: Record<string, string | null> };
 function frase(c: Componente, e: EmpreendimentoCompleto): Frase | null {
   const d = c.detalhe;
   switch (c.chave) {
-    case "financeiro":
-      return { chave: "motivo.financeiro", vars: { entrada: typeof d.entradaExigida === "number" ? reais.format(d.entradaExigida) : null } };
+    case "financeiro": {
+      // O modelo segue o que a pessoa informou: entrada, ou só a parcela máxima.
+      if (typeof d.entradaInformada === "number" && d.entradaInformada > 0 && typeof d.entradaExigida === "number") {
+        return { chave: "motivo.financeiro", vars: { entrada: reais.format(d.entradaExigida) } };
+      }
+      if (typeof d.parcelaMaxima === "number" && d.parcelaMaxima > 0 && typeof d.parcelaExigida === "number") {
+        return { chave: "motivo.financeiro.parcela", vars: { parcela: reais.format(d.parcelaExigida) } };
+      }
+      return null;
+    }
     case "tipologia": {
       const n = typeof d.unidadesCompativeis === "number" ? d.unidadesCompativeis : null;
       return { chave: n === 1 ? "motivo.tipologia.one" : "motivo.tipologia", vars: { n: n === null ? null : String(n) } };
     }
     case "localizacao": {
-      if (d.regiao !== null && d.regiao !== undefined) return { chave: "motivo.localizacao.regiao", vars: { bairro: e.empreendimento.bairro } };
+      if (d.regiao !== null && d.regiao !== undefined) {
+        const chave =
+          d.origemRegiao === "vizinho"
+            ? "motivo.localizacao.vizinho"
+            : d.origemRegiao === "perto_de_mim"
+              ? "motivo.localizacao.perto"
+              : "motivo.localizacao.regiao";
+        return { chave, vars: { bairro: e.empreendimento.bairro } };
+      }
       const ponto = e.empreendimento.pontosProximos
         .filter((p) => CATEGORIAS_PONTOS_NOTA.includes(p.categoria))
         .sort((a, b) => a.distanciaM - b.distanciaM)[0];
@@ -48,7 +64,9 @@ function frase(c: Componente, e: EmpreendimentoCompleto): Frase | null {
         },
       };
     case "comportamento":
-      return { chave: "motivo.comportamento", vars: {} };
+      if (typeof d.favoritos === "number" && d.favoritos > 0) return { chave: "motivo.comportamento.favoritou", vars: {} };
+      if (typeof d.aberturas === "number" && d.aberturas > 0) return { chave: "motivo.comportamento.viu", vars: {} };
+      return null;
   }
 }
 

@@ -27,10 +27,57 @@ describe("filtros do questionário (2.4)", () => {
   });
 
   it("quartos: unidade disponível com aqueles quartos; studio separado de 1 quarto", () => {
-    expect(passam(perfilCom({ quartos: ["studio"] }))).toEqual(["studio-cidade-baixa"]);
+    // Bela Vista Prime tem um Loft de 1 dormitório, que é studio.
+    expect(passam(perfilCom({ quartos: ["studio"] }))).toEqual(["bela-vista-prime", "studio-cidade-baixa"]);
     expect(passam(perfilCom({ quartos: ["1"] }))).toEqual(["edificio-mirante-petropolis"]);
     expect(passam(perfilCom({ quartos: ["4+"] }))).toEqual(["bela-vista-prime", "recanto-da-tristeza"]);
-    expect(passam(perfilCom({ quartos: ["1", "studio"] }))).toEqual(["edificio-mirante-petropolis", "studio-cidade-baixa"]);
+    expect(passam(perfilCom({ quartos: ["1", "studio"] }))).toEqual(["bela-vista-prime", "edificio-mirante-petropolis", "studio-cidade-baixa"]);
+  });
+
+  it("torre que o público não vê não entra: 4+ sem Vila Menino Deus e 3 sem Mirante (A1)", () => {
+    expect(passam(perfilCom({ quartos: ["4+"] }))).not.toContain("vila-menino-deus");
+    expect(passam(perfilCom({ quartos: ["3"] }))).not.toContain("edificio-mirante-petropolis");
+    const vila = porSlug(base, "vila-menino-deus");
+    const futura = vila.subcondominios.find((s) => s.dataLancamento !== null && s.dataLancamento > HOJE)!;
+    expect(unidadesCompativeis(vila, perfilCom({}), HOJE).some((u) => u.subcondominioId === futura.id)).toBe(false);
+    // Com o pré-lançamento ligado a torre passa a contar.
+    const ligado = comEmpreendimento(vila, { preLancamentoAtivo: true });
+    expect(unidadesCompativeis(ligado, perfilCom({ quartos: ["4+"] }), HOJE).some((u) => u.subcondominioId === futura.id)).toBe(true);
+  });
+
+  it("Loft só aparece em studio, nunca em 1 quarto (A2)", () => {
+    const bela = porSlug(base, "bela-vista-prime");
+    const loft = (p: Partial<Perfil>) =>
+      unidadesCompativeis(bela, perfilCom(p), HOJE).some((u) => bela.tipologias.find((t) => t.id === u.tipologiaId)!.tipo === "Loft");
+    expect(loft({ quartos: ["studio"] })).toBe(true);
+    expect(loft({ quartos: ["1"] })).toBe(false);
+    expect(passam(perfilCom({ quartos: ["1"] }))).not.toContain("bela-vista-prime");
+  });
+
+  it("Loja, Lote e aluguel ficam fora, mesmo sem filtro de quartos (A2)", () => {
+    const tristeza = porSlug(base, "recanto-da-tristeza");
+    const tipos = (e: typeof tristeza) =>
+      new Set(unidadesCompativeis(e, perfilCom({}), HOJE).map((u) => e.tipologias.find((t) => t.id === u.tipologiaId)!.tipo));
+    expect(tipos(tristeza).has("Loja")).toBe(false);
+    expect(tristeza.tipologias.some((t) => t.tipo === "Loja")).toBe(true);
+    const lote = structuredClone(tristeza);
+    lote.tipologias.forEach((t) => (t.tipo = "Lote"));
+    expect(unidadesCompativeis(lote, perfilCom({}), HOJE)).toEqual([]);
+    const aluguel = structuredClone(tristeza);
+    aluguel.tipologias.forEach((t) => (t.finalidade = "aluguel"));
+    expect(unidadesCompativeis(aluguel, perfilCom({}), HOJE)).toEqual([]);
+    const mista = structuredClone(tristeza);
+    mista.tipologias.forEach((t) => (t.finalidade = "venda_ou_aluguel"));
+    expect(unidadesCompativeis(mista, perfilCom({}), HOJE).length).toBeGreaterThan(0);
+  });
+
+  it("Kitnet não é studio e só entra sem filtro de quartos (A2, Proposta)", () => {
+    const kitnet = { tipo: "Kitnet", dormitorios: 0 } as Tipologia;
+    expect(tipologiaAtende(kitnet, ["studio"])).toBe(false);
+    expect(tipologiaAtende(kitnet, ["1"])).toBe(false);
+    expect(tipologiaAtende(kitnet, [])).toBe(true);
+    expect(tipologiaAtende({ tipo: "Loft", dormitorios: 1 } as Tipologia, ["studio"])).toBe(true);
+    expect(tipologiaAtende({ tipo: "Loft", dormitorios: 1 } as Tipologia, ["1"])).toBe(false);
   });
 
   it("4 ou mais aceita 5 dormitórios", () => {

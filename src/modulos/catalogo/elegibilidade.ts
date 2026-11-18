@@ -30,14 +30,31 @@ function subcondominioVendido(sub: Subcondominio, unidades: Unidade[]): boolean 
   return doSub.length > 0 && doSub.every((u) => u.status === "vendida");
 }
 
+// As três funções abaixo copiam o banco (migrations 0001 e 0002); tests/banco/paridade.test.ts prova a igualdade.
+
 /**
- * Fase de venda calculada, sem campo próprio: lançamento futuro em todos os subcondomínios
- * é pré-lançamento; todos os subcondomínios 100% vendidos é esgotado.
+ * Torre que o público vê: lançada até hoje, ou qualquer uma com o pré-lançamento ativo.
+ * Igual à política `subcondominios_leitura` (regra 11, por subcondomínio). Sem data não conta como lançada.
  */
+export function subcondominioVisivel(sub: Subcondominio, e: EmpreendimentoCompleto, hoje: string): boolean {
+  return e.empreendimento.preLancamentoAtivo || (sub.dataLancamento !== null && sub.dataLancamento <= hoje);
+}
+
+/** Stand-by: nenhuma torre lançada até hoje. Igual a `app.em_stand_by` (sem data ou futura não conta). */
+export function emStandBy(e: EmpreendimentoCompleto, hoje: string): boolean {
+  return !e.subcondominios.some((s) => s.dataLancamento !== null && s.dataLancamento <= hoje);
+}
+
+/** Esgotado: há torre visível e todas as visíveis estão vendidas. Igual a `app.esgotado`. */
+export function esgotado(e: EmpreendimentoCompleto, hoje: string): boolean {
+  const visiveis = e.subcondominios.filter((s) => subcondominioVisivel(s, e, hoje));
+  return visiveis.length > 0 && visiveis.every((s) => subcondominioVendido(s, e.unidades));
+}
+
+/** Fase de venda calculada, sem campo próprio. */
 export function faseVenda(e: EmpreendimentoCompleto, hoje: string): FaseVenda {
-  const subs = e.subcondominios;
-  if (subs.length > 0 && subs.every((s) => s.dataLancamento !== null && s.dataLancamento > hoje)) return "pre_lancamento";
-  if (subs.length > 0 && subs.every((s) => subcondominioVendido(s, e.unidades))) return "esgotado";
+  if (esgotado(e, hoje)) return "esgotado";
+  if (emStandBy(e, hoje)) return "pre_lancamento";
   return "vendas_abertas";
 }
 
@@ -47,10 +64,9 @@ export function motivosExclusao(e: EmpreendimentoCompleto, ctx: ContextoElegibil
   if (emp.ri === null) motivos.push("sem_ri");
   if (emp.publicacao !== "publicado") motivos.push("rascunho");
   if (!emp.curadoriaAprovada) motivos.push("sem_curadoria");
-  const fase = faseVenda(e, ctx.hoje);
-  // Regra 11: em stand-by enquanto pre_lancamento_ativo = false.
-  if (fase === "pre_lancamento" && !emp.preLancamentoAtivo) motivos.push("pre_lancamento");
-  if (fase === "esgotado") motivos.push("esgotado");
+  // Regra 11: em stand-by enquanto pre_lancamento_ativo = false. Igual a app.na_vitrine.
+  if (emStandBy(e, ctx.hoje) && !emp.preLancamentoAtivo) motivos.push("pre_lancamento");
+  if (esgotado(e, ctx.hoje)) motivos.push("esgotado");
   if (emp.visibilidade === "nao_listado") motivos.push("nao_listado");
   if (emp.visibilidade === "exclusivo") motivos.push("exclusivo");
   if (ctx.campanhaTenantId && emp.tenantId !== ctx.campanhaTenantId) motivos.push("fora_da_campanha");

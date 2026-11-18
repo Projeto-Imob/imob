@@ -45,6 +45,8 @@ export const scoringConfig = {
       divisor: 4,
     },
 
+    /** Arredondamento da nota final em inteiros: o meio ponto sobe (57,5 vira 58). */
+    arredondamentoNota: "meio_para_cima" as const,
     /** Nota mínima para uma opção entrar no resultado. */
     notaMinima: 50,
     /** A terceira opção só entra se estiver a até esta distância da primeira, em pontos. */

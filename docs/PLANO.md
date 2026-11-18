@@ -73,13 +73,13 @@ Fatias grandes ou incertas ganham uma spec própria em `docs/specs/<fatia>.md` a
     - e2e abre um empreendimento elegível e recebe "não encontrado" para cada caso de exclusão do seed;
     - axe sem violação.
   - Decisões técnicas (detalhes na `docs/ARQUITETURA.md`, seções 3 e 11):
-    - a elegibilidade da página vem só do banco: a consulta pública filtra por `app.na_vitrine`, além do RLS do visitante. A regra em TypeScript e a paridade TS × SQL ficam para a 0.5;
+    - a elegibilidade da página vem só do banco: a consulta pública filtra por `app.na_vitrine`, além do RLS do visitante. A regra em TypeScript e a paridade TS × SQL ficam para a 0.5a;
     - a `0002_vitrine` conta como aditiva: cria `app.na_vitrine` e troca só o corpo de `app.esgotado`, que passa a olhar as torres que o público vê (as lançadas, ou todas com o pré-lançamento ativo);
     - "não encontrado" responde 200 com `noindex`: com Cache Components, o shell estático sai antes do `notFound()`;
     - sem `generateStaticParams`: a página renderiza a cada requisição, e o dado fica em `use cache` por horas, com tag por empreendimento;
     - o acesso ao banco abre e fecha a transação por conta própria (o `begin` do Drizzle ficava fora do `try` e prendia a conexão), e a consulta pública é só de leitura;
     - o lint barra `sql.raw` fora dos testes desde esta fatia (saiu da 1.4);
-    - sem CSP nesta fatia: ela entra na 0.5, sem nonce.
+    - sem CSP nesta fatia: ela entra na 0.5a, sem nonce.
 - [ ] **0.4 Homologação no servidor atual, como stack isolada** (D11; `docs/ARQUITETURA.md`, seção 7).
   - Entrega, parte 1 — endurecimento do servidor compartilhado:
     - firewall de nuvem com 22, 80 e 443;
@@ -158,18 +158,22 @@ Fatias grandes ou incertas ganham uma spec própria em `docs/specs/<fatia>.md` a
     - Verificar depois do deploy: a URL com a página da 0.3, deploy e rollback ensaiados, restauração do backup, memória e swap medidos e as stacks vizinhas intactas.
 
     O registro DNS do subdomínio foi criado e conferido em 17/11, inclusive nos resolvedores públicos.
-- [ ] **0.5 Correções que a 2.0 mantém** (da `docs/AUDITORIA.md`).
+- [ ] **0.5a Correções da busca, CSP e Dependabot** (da `docs/AUDITORIA.md`; plano aprovado em 17/11/2026). Duas PRs: a primeira (A1 a A4) destrava a 1.2 e a 1.3.
+  - Entrega, PR 1 (`fatia/0.5a-busca`):
+    - A1: pré-lançamento por subcondomínio, com os casos do D15 no seed (torre com lançamento futuro e sem data) e paridade TS × SQL (`tests/banco/paridade.test.ts`), sem migration nova;
+    - A2: studio e finalidade (Studio e Loft contam como studio, decisão de 14/11/2026; só tipologia residencial de venda entra);
+    - A3: nota somada em inteiros, com o meio ponto para cima;
+    - A4: motivo fiel ao que a pessoa informou (entrada, parcela, região escolhida, vizinha ou perto de mim, visto ou favoritado).
+  - Entrega, PR 2 (`fatia/0.5a-cabecalhos`):
+    - A5: CSP e cabeçalhos de segurança (CSP sem nonce, mantendo o cache; decisão de 16/11/2026);
+    - A6: Dependabot só com versões menores e de correção. Versão maior (como TypeScript 7, ESLint 10 e `@types/node` acima do Node 24) vira decisão, com PR própria; as PRs #2 e #6 (16/11/2026), que juntaram as duas coisas e quebraram o CI, são fechadas, e a #8, agrupada, também;
+    - A7: `check:secrets` com os padrões que faltam.
+  - Verificar: um teste novo para cada achado.
+- [ ] **0.5b Estabilidade do CI** (depois de 01/12/2026).
   - Entrega:
-    - pré-lançamento por subcondomínio, com os casos do D15 no seed (torre com lançamento futuro e sem data) e paridade TS × SQL;
-    - studio e finalidade (Studio e Loft contam como studio, decisão de 14/11/2026);
-    - nota somada em inteiros;
-    - motivo fiel ao que a pessoa informou;
-    - CSP e cabeçalhos de segurança (CSP sem nonce, mantendo o cache; decisão de 16/11/2026);
-    - `check:secrets` com os padrões que faltam e gitleaks no CI;
+    - gitleaks no CI;
     - actions por SHA e imagem do Postgres do CI por digest;
-    - Dependabot só com versões menores e de correção. Versão maior (como TypeScript 7, ESLint 10 e `@types/node` acima do Node 24) vira decisão, com PR própria; as PRs #2 e #6 (16/11/2026), que juntaram as duas coisas e quebraram o CI, são fechadas;
-    - suíte estável na máquina local.
-  - Verificar: um teste novo para cada achado; suíte verde três vezes seguidas.
+    - suíte estável na máquina local, verde três vezes seguidas.
 
 ## Fase 1 — Piloto (v1)
 
@@ -308,11 +312,11 @@ Fatiadas quando a v1 estiver no ar, nesta ordem de valor:
 - 2026-11-13: GitHub na conta `iaraaivendas`, integrado ao `gh` e ao `git`.
 - 2026-11-13: **SPEC 2.0 aprovada**, com as decisões D1 a D18 abaixo. Na D11, o Matheus escolheu usar o servidor atual (Nuremberg), que ainda tem espaço, em vez de uma VPS dedicada.
 - 2026-11-14: repositório **público** `Projeto-Imob/imob`, para ter a `main` protegida sem custo (no plano gratuito, repositório privado de organização não tem proteção de branch). A estratégia de negócio fica pública; o diagnóstico de segurança do servidor fica fora do repositório, na pasta protegida de credenciais.
-- 2026-11-14: **Loft conta como studio** na busca (esclarecimento do D15, entra na fatia 0.5). Kitnet continua fora até decisão em contrário.
+- 2026-11-14: **Loft conta como studio** na busca (esclarecimento do D15, entra na fatia 0.5a). Kitnet continua fora até decisão em contrário.
 - 2026-11-16: **prazos.** MVP em homologação até 01/12 (Fase 0 e fatias 1.1 a 1.3), com fatias em paralelo. Fica para depois de 01/12 o que não aparece na demonstração: gitleaks, estabilidade da suíte e actions por SHA.
 - 2026-11-16: **piloto enxuto em dezembro:** página, questionário, resultado e contato. O lead chega à house por WhatsApp ou e-mail, e os empreendimentos são cadastrados por script com os dados da incorporadora. Depende da C15. A jornada completa da v1 passa para janeiro.
-- 2026-11-16: **CSP sem nonce**, mantendo o cache das páginas públicas (fatia 0.5).
-- 2026-11-16: na 0.3, a elegibilidade da página vem só da regra do banco (`app.na_vitrine`); a paridade TS × SQL fica para a 0.5. A migration `0002_vitrine`, que troca o corpo de `app.esgotado`, conta como aditiva. "Não encontrado" responde 200 com `noindex`.
+- 2026-11-16: **CSP sem nonce**, mantendo o cache das páginas públicas (fatia 0.5a).
+- 2026-11-16: na 0.3, a elegibilidade da página vem só da regra do banco (`app.na_vitrine`); a paridade TS × SQL fica para a 0.5a. A migration `0002_vitrine`, que troca o corpo de `app.esgotado`, conta como aditiva. "Não encontrado" responde 200 com `noindex`.
 - 2026-11-16: **cor principal da marca: laranja #FF8C00**, no lugar do lima. Preto, grafite e off-white mantidos. A regra 15 passa a valer para o laranja (2,12:1 sobre o off-white).
 - 2026-11-16: **protótipo visual até 20/11/2026** das telas da demonstração, seguindo os benchmarks Reelly.io e QuintoAndar documentados em `docs/specs/negocio.md`. As fatias seguem em paralelo.
 - 2026-11-17: **endurecimento do servidor concluído**, com o Matheus presente. O plano e o registro ficam fora do repositório.
