@@ -97,8 +97,16 @@ function arquivos(dir: string): string[] {
 // Utilitários que pintariam texto, ícone, linha ou marca de gráfico com o laranja.
 const USO_PROIBIDO = /\b(?:text|border|stroke|fill|outline|ring|decoration|divide|accent|caret|placeholder)-laranja\b/;
 
-export function usosProibidosDoLaranja(fonte: string, arquivo: string): string[] {
+/**
+ * Ilustrações que desenham com o laranja só sobre o fundo preto delas mesmas (a regra 15 proíbe o laranja
+ * apenas sobre fundo claro). Nelas, só `fill-laranja` fica liberado; texto, traço e borda em laranja continuam
+ * barrados. Cada uma tem um teste de componente que prova o fundo preto (tests/unit/pagina-componentes.test.tsx).
+ */
+export const ILUSTRACOES_SOBRE_PRETO = new Set([path.join("src", "modulos", "catalogo", "componentes", "FachadaIlustrada.tsx")]);
+
+export function usosProibidosDoLaranja(fonteOriginal: string, arquivo: string): string[] {
   const achados: string[] = [];
+  const fonte = ILUSTRACOES_SOBRE_PRETO.has(arquivo) ? fonteOriginal.replace(/\bfill-laranja\b/g, "") : fonteOriginal;
   if (USO_PROIBIDO.test(fonte)) achados.push(`${arquivo}: utilitário de texto/linha com laranja`);
   if (arquivo.endsWith(".css")) {
     for (const [, seletor, corpo] of fonte.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
@@ -126,6 +134,14 @@ describe("regra do laranja", () => {
     ["x.css", ".a { color: var(--cor-laranja); }"],
   ])("detecta violação em %s: %s", (arquivo, fonte) => {
     expect(usosProibidosDoLaranja(fonte, arquivo)).not.toEqual([]);
+  });
+
+  it("libera fill-laranja só nas ilustrações sobre fundo preto, e só o preenchimento", () => {
+    const fachada = path.join("src", "modulos", "catalogo", "componentes", "FachadaIlustrada.tsx");
+    expect(usosProibidosDoLaranja('<rect className="fill-laranja" />', fachada)).toEqual([]);
+    expect(usosProibidosDoLaranja('<path className="stroke-laranja" />', fachada)).not.toEqual([]);
+    expect(usosProibidosDoLaranja('<p className="text-laranja">a</p>', fachada)).not.toEqual([]);
+    expect(usosProibidosDoLaranja('<rect className="fill-laranja" />', "src/outro/Grafico.tsx")).not.toEqual([]);
   });
 
   it("permite laranja como fundo e como texto sobre preto", () => {

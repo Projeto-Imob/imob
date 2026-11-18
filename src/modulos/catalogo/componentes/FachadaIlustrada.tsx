@@ -1,7 +1,10 @@
 /**
  * Fachada ilustrada em SVG, no estilo do protótipo aprovado (decisão 5): sem imagem externa, sem custo e sempre
  * marcada como exemplo por quem a usa. Determinística pela semente. Só atributos de apresentação do SVG:
- * nenhum style inline (a CSP não permite). Janelas acesas e sol em off-white: o guarda da regra 15 barra o laranja como preenchimento de gráfico, mesmo sobre o preto.
+ * nenhum style inline (a CSP não permite).
+ * Janelas acesas e sol em laranja, sempre sobre o fundo preto da própria ilustração (escolha do Matheus em
+ * 18/11/2026). A regra 15 só proíbe o laranja sobre fundo claro; o teste da marca libera este componente e um
+ * teste de componente prova que o fundo é preto.
  */
 const LARGURA = 400;
 const ALTURA = 300;
@@ -33,7 +36,7 @@ export function FachadaIlustrada({ semente, descricao }: { semente: number; desc
     for (let a = 0; a < andares; a++) {
       for (let c = 0; c < colunas; c++) {
         const acesa = r() > 0.58;
-        formas.push({ chave: `t${t}-${a}-${c}`, x: x + 10 + c * 22, y: y + 10 + a * 22, w: 12, h: 14, classe: acesa ? "fill-off-white" : "fill-texto-discreto" });
+        formas.push({ chave: `t${t}-${a}-${c}`, x: x + 10 + c * 22, y: y + 10 + a * 22, w: 12, h: 14, classe: acesa ? "fill-laranja" : "fill-texto-discreto" });
       }
     }
     x += w + 14 + Math.floor(r() * 16);
@@ -41,7 +44,7 @@ export function FachadaIlustrada({ semente, descricao }: { semente: number; desc
   return (
     <svg viewBox={`0 0 ${LARGURA} ${ALTURA}`} preserveAspectRatio="xMidYMid slice" role="img" aria-label={descricao} className="block h-full w-full">
       <rect width={LARGURA} height={ALTURA} className="fill-preto" />
-      <circle cx={solX} cy={solY} r={14} className="fill-off-white" />
+      <circle cx={solX} cy={solY} r={14} className="fill-laranja" />
       {formas.map((f) => (
         <rect key={f.chave} x={f.x} y={f.y} width={f.w} height={f.h} className={f.classe} />
       ))}

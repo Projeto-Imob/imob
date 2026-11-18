@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
-import { BlocoComodidades, BlocoCustos, BlocoEscritorio, BlocoLegais, BlocoVizinhanca, type PaginaEmpreendimento } from "@/modulos/catalogo";
+import { BlocoComodidades, BlocoCustos, BlocoEscritorio, BlocoGaleria, BlocoLegais, BlocoVizinhanca, type PaginaEmpreendimento } from "@/modulos/catalogo";
 import { gerarSeed } from "@/seed/seed";
 
 afterEach(cleanup);
@@ -81,5 +81,23 @@ describe("BlocoCustos", () => {
     const { container } = render(<BlocoCustos unidades={vendidas} tipologias={e.tipologias} planos={e.planos} modo="investir" />);
     expect(container.querySelector("select")).toBeNull();
     expect(container.textContent).toContain("Não há unidade disponível");
+  });
+});
+
+describe("BlocoGaleria: o laranja das fachadas fica só sobre o fundo preto (regra 15)", () => {
+  it("cada fachada tem o fundo preto inteiro, e nenhum laranja aparece fora dela", () => {
+    const { container } = render(<BlocoGaleria slug="residencial-jardim-das-aguas" />);
+    const fachadas = [...container.querySelectorAll("svg")];
+    expect(fachadas.length).toBeGreaterThan(0);
+    for (const svg of fachadas) {
+      const fundo = svg.firstElementChild!;
+      expect(fundo.tagName.toLowerCase()).toBe("rect");
+      expect(fundo.getAttribute("class")).toBe("fill-preto");
+      expect(fundo.getAttribute("width")).toBe("400");
+      expect(fundo.getAttribute("height")).toBe("300");
+      expect(svg.querySelectorAll(".fill-laranja").length).toBeGreaterThan(0);
+    }
+    const laranjaForaDaFachada = [...container.querySelectorAll(".fill-laranja")].filter((el) => !el.closest("svg"));
+    expect(laranjaForaDaFachada).toEqual([]);
   });
 });
