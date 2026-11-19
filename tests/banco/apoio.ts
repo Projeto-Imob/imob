@@ -1,6 +1,6 @@
 import pg from "pg";
 import { urlDoPapel } from "../../scripts/db/config";
-import { uid } from "@/seed/seed";
+import { CASOS_BUSCA, uid } from "@/seed/seed";
 
 export const URL_BANCO = {
   admin: urlDoPapel("admin", "teste"),
@@ -22,13 +22,13 @@ export const CONTAS = {
   compradorInativo: "00000000-0000-4000-8009-000000000004",
 } as const;
 
-/** Registros que só existem no banco de testes. */
+/** Registros do banco de testes: o tenant é só dele; as torres vêm do seed. */
 export const FIXTURES = {
   tenantSemVitrine: "00000000-0000-4000-8009-000000000010",
-  /** Segunda torre de vila-menino-deus, com lançamento em 2031 (pré-lançamento desligado). */
-  torreFutura: "00000000-0000-4000-8009-000000000101",
-  tipologiaDaTorreFutura: "00000000-0000-4000-8009-000000000102",
-  unidadeDaTorreFutura: "00000000-0000-4000-8009-000000000103",
+  /** Segunda torre de vila-menino-deus, com lançamento em 2031 (vem do seed; pré-lançamento desligado). */
+  torreFutura: CASOS_BUSCA.torreFutura,
+  tipologiaDaTorreFutura: CASOS_BUSCA.tipologiaDaTorreFutura,
+  unidadeDaTorreFutura: CASOS_BUSCA.unidadeDaTorreFutura,
 } as const;
 
 export async function comCliente<T>(url: string, fn: (c: pg.Client) => Promise<T>): Promise<T> {

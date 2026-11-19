@@ -258,9 +258,96 @@ export type Seed = {
   comodidades: Comodidade[];
 } & ReturnType<typeof construir>;
 
+// ---------- Casos da busca (fatia 0.5a) ----------
+// Bloco só de acréscimo: torres fora da vitrine (futura e sem data) e tipologias que a busca precisa recusar.
+// Não muda a base: continuam 6 elegíveis e 11 empreendimentos.
+
+/** Ids fixos dos casos da busca, para os testes de banco. */
+export const CASOS_BUSCA = {
+  /** Torre B de Vila Menino Deus, com lançamento em 2031 (pré-lançamento desligado). */
+  torreFutura: uid(P.sub, 901),
+  tipologiaDaTorreFutura: uid(P.tip, 901),
+  unidadeDaTorreFutura: uid(P.uni, 900001),
+  /** Torre sem data de lançamento em Mirante Petrópolis, com um Garden de 3 dormitórios. */
+  torreSemDataMirante: uid(P.sub, 902),
+  /** Torre sem data de lançamento em Três Figueiras. */
+  torreSemDataTresFigueiras: uid(P.sub, 903),
+} as const;
+
+type TorreExtra = { id: string; empreendimentoN: number; nome: string; dataLancamento: string | null; dataEntrega: string | null };
+type TipologiaExtra = { n: number; empreendimentoN: number; subN: number; nome: string; tipo: Tipologia["tipo"]; dormitorios: number; area: number; preco: number; identificador: string; finalidade?: Tipologia["finalidade"] };
+
+const TORRES_EXTRAS: TorreExtra[] = [
+  { id: CASOS_BUSCA.torreFutura, empreendimentoN: 3, nome: "Torre B (futura)", dataLancamento: "2031-01-01", dataEntrega: "2034-01-01" },
+  { id: CASOS_BUSCA.torreSemDataMirante, empreendimentoN: 2, nome: "Torre Garden (sem data)", dataLancamento: null, dataEntrega: null },
+  { id: CASOS_BUSCA.torreSemDataTresFigueiras, empreendimentoN: 9, nome: "Torre Anexa (sem data)", dataLancamento: null, dataEntrega: null },
+];
+
+const TIPOLOGIAS_EXTRAS: TipologiaExtra[] = [
+  { n: 901, empreendimentoN: 3, subN: 901, nome: "Cobertura da Torre B", tipo: "Cobertura", dormitorios: 4, area: 180, preco: 2100000, identificador: "B-1501" },
+  { n: 902, empreendimentoN: 2, subN: 902, nome: "Garden de 3 dormitórios", tipo: "Garden", dormitorios: 3, area: 95, preco: 780000, identificador: "G-01" },
+  { n: 903, empreendimentoN: 9, subN: 903, nome: "2 dormitórios da torre anexa", tipo: "Apartamento", dormitorios: 2, area: 70, preco: 800000, identificador: "A-201" },
+  // Loft é studio: aparece só na opção Studio, nunca em "1" (A2).
+  { n: 904, empreendimentoN: 4, subN: 41, nome: "Loft de 1 dormitório", tipo: "Loft", dormitorios: 1, area: 48, preco: 560000, identificador: "L-101" },
+  // Loja é comercial: nunca entra na busca (A2).
+  { n: 905, empreendimentoN: 6, subN: 61, nome: "Loja térrea", tipo: "Loja", dormitorios: 0, area: 40, preco: 420000, identificador: "T-01" },
+];
+
+function comCasosDaBusca(base: ReturnType<typeof construir>) {
+  const subcondominios = [...base.subcondominios];
+  const tipologias = [...base.tipologias];
+  const unidades = [...base.unidades];
+  for (const t of TORRES_EXTRAS) {
+    const emp = base.empreendimentos.find((e) => e.id === uid(P.emp, t.empreendimentoN))!;
+    const modelo = base.subcondominios.find((s) => s.empreendimentoId === emp.id)!;
+    subcondominios.push({
+      ...modelo,
+      id: t.id,
+      nome: t.nome,
+      status: "na_planta",
+      dataLancamento: t.dataLancamento,
+      dataEntrega: t.dataEntrega,
+      endereco: { ...modelo.endereco, numero: String(Number(modelo.endereco.numero) + 200) },
+    });
+  }
+  for (const x of TIPOLOGIAS_EXTRAS) {
+    const empreendimentoId = uid(P.emp, x.empreendimentoN);
+    const subcondominioId = uid(P.sub, x.subN);
+    const id = uid(P.tip, x.n);
+    tipologias.push({
+      id,
+      empreendimentoId,
+      nome: x.nome,
+      tipo: x.tipo,
+      finalidade: x.finalidade ?? "venda",
+      plantaPath: null,
+      dormitorios: x.dormitorios,
+      suites: 0,
+      suitesMaster: 0,
+      banheiros: 1,
+      lavabos: 0,
+      vagas: 1,
+      subcondominioIds: [subcondominioId],
+      exemplo: true,
+    });
+    unidades.push({
+      id: uid(P.uni, 900000 + (x.n - 900)),
+      empreendimentoId,
+      tipologiaId: id,
+      subcondominioId,
+      identificador: x.identificador,
+      areaPrivativa: x.area,
+      preco: x.preco,
+      status: "disponivel",
+      exemplo: true,
+    });
+  }
+  return { ...base, subcondominios, tipologias, unidades };
+}
+
 /** Gera o seed. Função pura: duas chamadas devolvem dados iguais. */
 export function gerarSeed(): Seed {
-  return { incorporadoras, contas, comodidades, ...construir() };
+  return { incorporadoras, contas, comodidades, ...comCasosDaBusca(construir()) };
 }
 
 /** Slugs dos casos de exclusão, para testes. */

@@ -49,6 +49,7 @@ describe("config/scoring.config.ts", () => {
     expect(p.divisorTipologia).toBe(6);
     expect(p.localizacao).toEqual({ notaBairroVizinho: 0.6, divisorPontosMetros: 2000, pesoRegiao: 0.6, pesoPontos: 0.4 });
     expect(p.comportamento).toEqual({ multiplicadorFavoritos: 2, divisor: 4 });
+    expect(p.arredondamentoNota).toBe("meio_para_cima");
     expect(p.notaMinima).toBe(50);
     expect(p.janelaTerceiraOpcao).toBe(15);
     expect(p.prazoProtecaoLeadDias).toBeNull();

@@ -5,7 +5,14 @@
 import { scoringConfig, type ScoringConfig } from "@config/scoring.config";
 import type { Coordenadas } from "@/lib/esquemas";
 import { distanciaM } from "@/lib/geo";
-import type { EmpreendimentoCompleto, Subcondominio, Tipologia, Unidade } from "@/modulos/catalogo";
+import {
+  TIPOS_TIPOLOGIA,
+  subcondominioVisivel,
+  type EmpreendimentoCompleto,
+  type Subcondominio,
+  type Tipologia,
+  type Unidade,
+} from "@/modulos/catalogo";
 import { melhorExigencia, type Exigencia } from "./exigencia";
 import type { OpcaoQuartos, Perfil } from "./tipos";
 
@@ -27,9 +34,18 @@ export function prontoParaMorar(sub: Subcondominio, hoje: string): boolean {
   return sub.status === "pronto" || (sub.dataEntrega !== null && sub.dataEntrega <= hoje);
 }
 
+/** Só tipologia residencial à venda entra na busca (finalidade venda ou venda_ou_aluguel). */
+export function tipologiaDeVenda(t: Tipologia): boolean {
+  return (
+    (TIPOS_TIPOLOGIA.residencial as readonly string[]).includes(t.tipo) &&
+    (t.finalidade === "venda" || t.finalidade === "venda_ou_aluguel")
+  );
+}
+
+/** Studio é só o tipo Studio ou Loft; Kitnet e outras sem dormitório só entram sem filtro de quartos (Proposta). */
 export function tipologiaAtende(t: Tipologia, opcoes: OpcaoQuartos[]): boolean {
   if (opcoes.length === 0) return true;
-  const studio = t.tipo === "Studio" || t.dormitorios === 0;
+  const studio = t.tipo === "Studio" || t.tipo === "Loft";
   return opcoes.some((o) => {
     if (o === "studio") return studio;
     if (studio) return false;
@@ -38,18 +54,17 @@ export function tipologiaAtende(t: Tipologia, opcoes: OpcaoQuartos[]): boolean {
   });
 }
 
-/** Unidade compatível: disponível, com os quartos escolhidos e, em "agora", em subcondomínio pronto. */
+/** Unidade compatível: disponível, de torre visível, tipologia de venda, com os quartos escolhidos e, em "agora", em torre pronta. */
 export function unidadesCompativeis(e: EmpreendimentoCompleto, perfil: Perfil, hoje: string): Unidade[] {
   const tipologias = new Map(e.tipologias.map((t) => [t.id, t]));
   const subs = new Map(e.subcondominios.map((s) => [s.id, s]));
   return e.unidades.filter((u) => {
     if (u.status !== "disponivel") return false;
     const t = tipologias.get(u.tipologiaId);
-    if (!t || !tipologiaAtende(t, perfil.quartos)) return false;
-    if (perfil.prazo === "agora") {
-      const s = subs.get(u.subcondominioId);
-      if (!s || !prontoParaMorar(s, hoje)) return false;
-    }
+    if (!t || !tipologiaDeVenda(t) || !tipologiaAtende(t, perfil.quartos)) return false;
+    const s = subs.get(u.subcondominioId);
+    if (!s || !subcondominioVisivel(s, e, hoje)) return false;
+    if (perfil.prazo === "agora" && !prontoParaMorar(s, hoje)) return false;
     return true;
   });
 }

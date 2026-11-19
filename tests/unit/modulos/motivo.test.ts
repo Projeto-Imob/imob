@@ -98,6 +98,73 @@ describe("motivo por template (2.9)", () => {
   });
 });
 
+describe("motivo fiel ao que a pessoa informou (A4)", () => {
+  const motivoDe = (slug: string, perfil: Perfil, extra: Partial<ContextoNota> = {}) => {
+    const e = porSlug(base, slug);
+    const av = avaliar(e, perfil, { ...ctx, ...extra })!;
+    return { m: motivoPorTemplate(av, e), av, e };
+  };
+  const SEM_ENTRADA = { formas: [] as Perfil["pagamento"]["formas"], entrada: null, parcelaMaxima: null };
+
+  it("financeiro: entrada informada usa o modelo da entrada", () => {
+    const { m } = motivoDe("vila-menino-deus", perfilCom({ pagamento: { formas: ["direto_construtora"], entrada: 200000, parcelaMaxima: null } }));
+    expect(m.texto.startsWith("A entrada de R")).toBe(true);
+  });
+
+  it("financeiro: só a parcela informada usa o modelo da parcela, nunca o da entrada", () => {
+    const { m, av } = motivoDe("vila-menino-deus", perfilCom({ pagamento: { formas: ["direto_construtora"], entrada: null, parcelaMaxima: 8000 } }));
+    expect(av.componentes.find((c) => c.chave === "financeiro")!.valor).not.toBeNull();
+    expect(m.texto.startsWith("A parcela de R")).toBe(true);
+    expect(m.texto).not.toMatch(/entrada/i);
+  });
+
+  it("localização: escolhido, vizinho e perto de mim usam cada um o seu modelo", () => {
+    const regiao = (bairros: string[], vizinhos: string[], perto = false) =>
+      perfilCom({ pagamento: { ...SEM_ENTRADA }, regiao: { bairros, bairrosVizinhos: vizinhos, pertoDeMim: perto } });
+    const escolhido = motivoDe("bela-vista-prime", regiao(["Bela Vista"], []));
+    expect(escolhido.av.componentes.find((c) => c.chave === "localizacao")!.detalhe.origemRegiao).toBe("escolhido");
+    expect(escolhido.m.texto).toBe("Fica em Bela Vista, na região que você escolheu.");
+    expect(motivoDe("bela-vista-prime", regiao(["Petrópolis"], ["Bela Vista"])).m.texto).toBe(
+      "Fica em Bela Vista, vizinho aos bairros que você escolheu.",
+    );
+    const perto = motivoDe("recanto-da-tristeza", regiao([], [], true), { posicao: { lat: -30.1095, lng: -51.254 } });
+    expect(perto.m.texto).toContain("Fica em Tristeza, perto de você.");
+  });
+
+  it("comportamento: favoritou, só viu e o modelo sem histórico", () => {
+    const e = porSlug(base, "vila-menino-deus");
+    const id = e.empreendimento.id;
+    const perfil = perfilCom({ pagamento: { ...SEM_ENTRADA } });
+    const texto = (historico: ContextoNota["historico"]) => {
+      const av = avaliar(e, perfil, { ...ctx, historico })!;
+      return motivoPorTemplate(av, e).texto;
+    };
+    expect(texto({ aberturas: {}, favoritos: [id] })).toContain("Você favoritou este empreendimento.");
+    expect(texto({ aberturas: { [id]: 2 }, favoritos: [] })).toContain("Você já viu este empreendimento.");
+    expect(texto({ aberturas: { [id]: 2 }, favoritos: [id] })).toContain("Você favoritou este empreendimento.");
+    expect(texto(undefined)).not.toMatch(/viu|favoritou/);
+  });
+
+  it("varredura: sem entrada informada, o modelo da entrada nunca aparece", () => {
+    const semEntrada = [
+      perfilCom({}),
+      perfilCom({ quartos: ["2"] }),
+      perfilCom({ pagamento: { formas: ["direto_construtora"], entrada: null, parcelaMaxima: 8000 } }),
+      perfilCom({ pagamento: { formas: ["a_vista"], entrada: 0, parcelaMaxima: 5000 }, permuta: "sim" }),
+      perfilCom({ regiao: { bairros: ["Tristeza"], bairrosVizinhos: ["Bela Vista"], pertoDeMim: false } }),
+    ];
+    let n = 0;
+    for (const perfil of semEntrada) {
+      for (const av of avaliarBase(base, perfil, ctx)) {
+        const e = base.find((x) => x.empreendimento.id === av.empreendimentoId)!;
+        expect(motivoPorTemplate(av, e).texto, perfil.pagamento.formas.join()).not.toMatch(/A entrada de/);
+        n++;
+      }
+    }
+    expect(n).toBeGreaterThan(10);
+  });
+});
+
 describe("requisitos por palavras-chave (IA desligada)", () => {
   it("reconhece itens do catálogo no texto livre", () => {
     expect(extrairRequisitos("quero varanda gourmet e pet place", seed.comodidades)).toEqual(["pet_place", "varanda_gourmet"]);

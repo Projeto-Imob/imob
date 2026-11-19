@@ -93,6 +93,11 @@ Escolha: só entram opções com nota ≥ 50 (Proposta). Vão as 2 melhores; a t
 
 Motivo: até 140 caracteres. Sem IA, vem de templates: usa o componente de maior peso × nota e junta o segundo, se couber. Marcador sem valor tira a frase inteira. Sem componente com dado: "{nome} fica em {bairro} e tem unidade disponível no seu perfil."
 
+Propostas da fatia 0.5a (esperam a validação de Matheus [NEEDS CLARIFICATION: C14]):
+- Kitnet e outras tipologias residenciais sem dormitório que não sejam Studio ou Loft só entram quando a pessoa não filtra quartos.
+- O meio ponto da nota arredonda para cima (57,5 vira 58; 49,5 vira 50 e entra no corte). A conta é em inteiros: pesos × 100 e componentes em 4 casas (`arredondamentoNota` em `config/scoring.config.ts`).
+- Textos novos do motivo, conforme o que a pessoa informou: "A parcela de {parcela} cabe no que você informou." (só parcela máxima); "Fica em {bairro}, vizinho aos bairros que você escolheu."; "Fica em {bairro}, perto de você."; "Você já viu este empreendimento."; "Você favoritou este empreendimento.".
+
 IA (Claude): chamada só por rota de servidor, com a chave em .env.local. Faz duas coisas: (a) transforma o texto livre numa lista de requisitos em JSON; (b) escreve o motivo de cada opção, recebendo só campos do cadastro, com marcadores no lugar dos números. Se falhar ou passar de 5 s, vale o template. O motivo fica em cache por perfil + empreendimento + data de atualização do empreendimento. Fica desligada até Matheus escolher o modelo [NEEDS CLARIFICATION: C2].
 
 O resultado é gravado, com nota, componentes e motivo, para auditoria e para "Por que estou vendo isso?".

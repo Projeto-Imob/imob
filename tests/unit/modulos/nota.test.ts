@@ -34,6 +34,46 @@ describe("nota (2.7)", () => {
     expect(n).toBe(Math.round(100 * (0.35 + 0.125 + 0.2 + 0 + 0.1)));
   });
 
+  it("meio ponto sobe: 57,5 vira 58 e 49,5 vira 50 e entra no corte", () => {
+    expect(notaFinal([comp("financeiro", 0.35, 0.575)])).toBe(58);
+    expect(notaFinal([comp("tipologia", 0.25, 0.495)])).toBe(50);
+    const a = { empreendimentoId: "a", nota: notaFinal([comp("tipologia", 0.25, 0.495)]), componentes: [], exigencia: null, unidadesCompativeis: 1, sorteio: 0 };
+    expect(escolher([a]).opcoes).toHaveLength(1);
+    expect(notaFinal([comp("financeiro", 0.35, 0.4949)])).toBe(49);
+  });
+
+  it("grade de centésimos: igual a uma referência em inteiros, em várias combinações de pesos", () => {
+    const referencia = (itens: Array<[number, number]>) => {
+      // peso em centésimos, valor em centésimos; nota = soma ÷ pesos, com o meio para cima.
+      const soma = itens.reduce((s, [p, v]) => s + p * v, 0);
+      const pesos = itens.reduce((s, [p]) => s + p, 0);
+      return Math.floor((2 * soma + pesos) / (2 * pesos));
+    };
+    const pesos: Array<[Componente["chave"], number, number]> = [
+      ["financeiro", 0.35, 35],
+      ["tipologia", 0.25, 25],
+      ["localizacao", 0.2, 20],
+      ["requisitos", 0.1, 10],
+      ["comportamento", 0.1, 10],
+    ];
+    for (let v1 = 0; v1 <= 100; v1++) {
+      for (let v2 = 0; v2 <= 100; v2 += 3) {
+        const esperado = referencia([
+          [35, v1],
+          [25, v2],
+          [20, (v1 + v2) % 101],
+        ]);
+        const obtido = notaFinal([
+          comp(pesos[0]![0], pesos[0]![1], v1 / 100),
+          comp(pesos[1]![0], pesos[1]![1], v2 / 100),
+          comp(pesos[2]![0], pesos[2]![1], ((v1 + v2) % 101) / 100),
+          comp(pesos[3]![0], pesos[3]![1], null),
+        ]);
+        expect(obtido, `${v1}/${v2}`).toBe(esperado);
+      }
+    }
+  });
+
   it("componente sem dado fica fora e os pesos são reponderados", () => {
     expect(notaFinal([comp("financeiro", 0.35, null), comp("tipologia", 0.25, 1), comp("localizacao", 0.2, 0.5)])).toBe(
       Math.round((100 * (0.25 + 0.1)) / 0.45),

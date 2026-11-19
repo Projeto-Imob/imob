@@ -15,6 +15,9 @@ import type { Perfil } from "./tipos";
 
 export type ChaveComponente = "financeiro" | "tipologia" | "localizacao" | "requisitos" | "comportamento";
 
+/** De onde veio a nota da região: bairro escolhido, bairro vizinho ou "Perto de mim". */
+export type OrigemRegiao = "escolhido" | "vizinho" | "perto_de_mim";
+
 export type Componente = {
   chave: ChaveComponente;
   peso: number;
@@ -91,15 +94,17 @@ function tipologia(perfil: Perfil, compativeis: number, cfg: ScoringConfig): Com
 function localizacao(e: EmpreendimentoCompleto, perfil: Perfil, ctx: ContextoBusca, cfg: ScoringConfig): Componente {
   const { bairro, localizacao: pos, pontosProximos } = e.empreendimento;
   const loc = cfg.proposta.localizacao;
-  const notasRegiao: number[] = [];
-  if (perfil.regiao.bairros.includes(bairro)) notasRegiao.push(1);
-  if (perfil.regiao.bairrosVizinhos.includes(bairro)) notasRegiao.push(loc.notaBairroVizinho);
+  const notasRegiao: Array<{ origem: OrigemRegiao; nota: number }> = [];
+  if (perfil.regiao.bairros.includes(bairro)) notasRegiao.push({ origem: "escolhido", nota: 1 });
+  if (perfil.regiao.bairrosVizinhos.includes(bairro)) notasRegiao.push({ origem: "vizinho", nota: loc.notaBairroVizinho });
   let distanciaPertoM: number | null = null;
   if (pertoDeMimAtivo(perfil, ctx)) {
     distanciaPertoM = Math.round(distanciaM(ctx.posicao, pos));
-    notasRegiao.push(limitar(1 - distanciaPertoM / (cfg.proposta.raioPertoDeMimKm * 1000)));
+    notasRegiao.push({ origem: "perto_de_mim", nota: limitar(1 - distanciaPertoM / (cfg.proposta.raioPertoDeMimKm * 1000)) });
   }
-  const regiao = notasRegiao.length ? Math.max(...notasRegiao) : null;
+  // A origem é a da melhor nota; no empate vale a ordem de preferência: escolhido, vizinho, perto de mim.
+  const melhor = notasRegiao.reduce<(typeof notasRegiao)[number] | null>((m, r) => (m === null || r.nota > m.nota ? r : m), null);
+  const regiao = melhor?.nota ?? null;
 
   const maisPerto = CATEGORIAS_PONTOS_NOTA.flatMap((cat) => {
     const ds = pontosProximos.filter((p) => p.categoria === cat).map((p) => p.distanciaM);
@@ -113,7 +118,7 @@ function localizacao(e: EmpreendimentoCompleto, perfil: Perfil, ctx: ContextoBus
     chave: "localizacao",
     peso: cfg.pesos.localizacao,
     valor,
-    detalhe: { bairro, regiao, pontos, distanciaPertoDeMimM: distanciaPertoM },
+    detalhe: { bairro, regiao, origemRegiao: melhor?.origem ?? null, pontos, distanciaPertoDeMimM: distanciaPertoM },
   };
 }
 
@@ -142,12 +147,25 @@ function comportamento(e: EmpreendimentoCompleto, historico: Historico, cfg: Sco
   };
 }
 
-/** Nota final: média ponderada dos componentes com dado, reponderada, em 0 a 100 (inteiro). */
+/**
+ * Nota final: média ponderada dos componentes com dado, reponderada, em 0 a 100 (inteiro).
+ * A conta é toda em inteiros (pesos × 100, valores em 4 casas) para o ponto e meio não depender de ponto flutuante.
+ * O meio ponto arredonda para cima (Proposta, `arredondamentoNota` em config/scoring.config.ts).
+ */
 export function notaFinal(componentes: Componente[]): number | null {
-  const comDado = componentes.filter((c): c is Componente & { valor: number } => c.valor !== null);
-  const somaPesos = comDado.reduce((s, c) => s + c.peso, 0);
-  if (somaPesos === 0) return null;
-  return Math.round((100 * comDado.reduce((s, c) => s + c.peso * c.valor, 0)) / somaPesos);
+  let soma = 0;
+  let pesos = 0;
+  for (const c of componentes) {
+    if (c.valor === null) continue;
+    const peso = Math.round(c.peso * 100);
+    soma += peso * Math.round(c.valor * 10000);
+    pesos += peso;
+  }
+  if (pesos === 0) return null;
+  // nota = soma ÷ (pesos × 100); com o meio ponto para cima: (2 × soma + divisor) ÷ (2 × divisor), truncado.
+  const divisor = pesos * 100;
+  const numerador = 2 * soma + divisor;
+  return (numerador - (numerador % (2 * divisor))) / (2 * divisor);
 }
 
 export function avaliar(e: EmpreendimentoCompleto, perfil: Perfil, ctx: ContextoNota): Avaliacao | null {

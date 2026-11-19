@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { baseElegivel, elegivel, faseVenda, motivosExclusao } from "@/modulos/catalogo";
+import { baseElegivel, elegivel, emStandBy, esgotado, faseVenda, motivosExclusao, subcondominioVisivel } from "@/modulos/catalogo";
 import { CASOS_EXCLUSAO } from "@/seed/seed";
 import { HOJE, comEmpreendimento, completos, porSlug } from "./apoio";
 
@@ -62,5 +62,57 @@ describe("elegibilidade da base (2.3)", () => {
   it("pré-lançamento ativado (com consentimento) sai do stand-by", () => {
     const pre = comEmpreendimento(porSlug(todos, CASOS_EXCLUSAO.preLancamento), { preLancamentoAtivo: true });
     expect(motivosExclusao(pre, ctx)).toEqual([]);
+  });
+
+  describe("paridade com o banco (A1, regra 11)", () => {
+    const comTorreSemData = (e: typeof elegivelBase) => {
+      const c = structuredClone(e);
+      c.subcondominios = c.subcondominios.map((s) => ({ ...s, dataLancamento: null }));
+      return c;
+    };
+
+    it("torre sem data de lançamento continua em stand-by, não conta como lançada", () => {
+      const e = comTorreSemData(elegivelBase);
+      expect(emStandBy(e, HOJE)).toBe(true);
+      expect(faseVenda(e, HOJE)).toBe("pre_lancamento");
+      expect(motivosExclusao(e, ctx)).toEqual(["pre_lancamento"]);
+      expect(subcondominioVisivel(e.subcondominios[0]!, e, HOJE)).toBe(false);
+    });
+
+    it("torre sem data ao lado de torre lançada não tira o empreendimento do ar", () => {
+      const e = porSlug(todos, "edificio-mirante-petropolis");
+      expect(e.subcondominios.some((s) => s.dataLancamento === null)).toBe(true);
+      expect(emStandBy(e, HOJE)).toBe(false);
+      expect(elegivel(e, ctx)).toBe(true);
+    });
+
+    it("esgotado olha só as torres visíveis: lançada vendida e torre futura livre é esgotado", () => {
+      const e = structuredClone(porSlug(todos, "vila-menino-deus"));
+      const futura = e.subcondominios.find((s) => s.dataLancamento !== null && s.dataLancamento > HOJE)!;
+      for (const u of e.unidades) if (u.subcondominioId !== futura.id) u.status = "vendida";
+      expect(esgotado(e, HOJE)).toBe(true);
+      expect(motivosExclusao(e, ctx)).toEqual(["esgotado"]);
+    });
+
+    it("com o pré-lançamento ligado e tudo vendido, também é esgotado", () => {
+      const e = structuredClone(porSlug(todos, CASOS_EXCLUSAO.preLancamento));
+      e.empreendimento.preLancamentoAtivo = true;
+      for (const u of e.unidades) u.status = "vendida";
+      expect(esgotado(e, HOJE)).toBe(true);
+      expect(motivosExclusao(e, ctx)).toEqual(["esgotado"]);
+    });
+
+    it("com o pré-lançamento ligado e a torre futura livre, a torre conta e não é esgotado", () => {
+      const e = structuredClone(porSlug(todos, "vila-menino-deus"));
+      e.empreendimento.preLancamentoAtivo = true;
+      const futura = e.subcondominios.find((s) => s.dataLancamento !== null && s.dataLancamento > HOJE)!;
+      for (const u of e.unidades) if (u.subcondominioId !== futura.id) u.status = "vendida";
+      expect(subcondominioVisivel(futura, e, HOJE)).toBe(true);
+      expect(esgotado(e, HOJE)).toBe(false);
+    });
+
+    it("sem torre visível não é esgotado", () => {
+      expect(esgotado(porSlug(todos, CASOS_EXCLUSAO.preLancamento), HOJE)).toBe(false);
+    });
   });
 });

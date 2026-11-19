@@ -29,30 +29,6 @@ export default async function preparar() {
       `insert into tenants (id, tipo, nome_comercial, razao_social, situacao, exemplo) values
          ('00000000-0000-4000-8009-000000000010', 'incorporadora', 'Sem Vitrine', 'Sem Vitrine Ltda. (exemplo)', 'ativo', true)`,
     );
-    // Segunda torre de um empreendimento já à venda, com lançamento futuro (pré-lançamento desligado).
-    await c.query(
-      `with emp as (select id from empreendimentos where slug = 'vila-menino-deus')
-       insert into subcondominios (id, empreendimento_id, nome, status, data_lancamento, data_entrega,
-         logradouro, numero, bairro, cidade, uf, latitude, longitude, exemplo)
-       select '00000000-0000-4000-8009-000000000101', emp.id, 'Torre B (futura)', 'na_planta', '2031-01-01', '2034-01-01',
-         'Rua Exemplo do Menino Deus', '300', 'Menino Deus', 'Porto Alegre', 'RS', -30.0525, -51.2244, true from emp`,
-    );
-    await c.query(
-      `with emp as (select id from empreendimentos where slug = 'vila-menino-deus')
-       insert into tipologias (id, empreendimento_id, nome, tipo, dormitorios, exemplo)
-       select '00000000-0000-4000-8009-000000000102', emp.id, 'Cobertura da Torre B', 'Cobertura', 4, true from emp`,
-    );
-    await c.query(
-      `with emp as (select id from empreendimentos where slug = 'vila-menino-deus')
-       insert into tipologia_subcondominios (empreendimento_id, tipologia_id, subcondominio_id)
-       select emp.id, '00000000-0000-4000-8009-000000000102', '00000000-0000-4000-8009-000000000101' from emp`,
-    );
-    await c.query(
-      `with emp as (select id from empreendimentos where slug = 'vila-menino-deus')
-       insert into unidades (id, empreendimento_id, tipologia_id, subcondominio_id, identificador, area_privativa, preco, status, exemplo)
-       select '00000000-0000-4000-8009-000000000103', emp.id, '00000000-0000-4000-8009-000000000102',
-         '00000000-0000-4000-8009-000000000101', 'B-1501', 180, 2100000, 'disponivel', true from emp`,
-    );
   } finally {
     await c.end();
   }
