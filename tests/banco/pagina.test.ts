@@ -15,7 +15,7 @@ describe("pontos_proximos e escritorios_vendas: leitura", () => {
       cartao: (await c.query("select o.nome, o.cargo, o.whatsapp from escritorios_vendas o join empreendimentos e on e.id = o.empreendimento_id where e.slug = $1", [ELEGIVEL])).rows,
     }));
     expect(r.pontos).toHaveLength(6);
-    expect(r.cartao).toEqual([{ nome: "Helena Exemplo", cargo: "Gerente de contas", whatsapp: "+5551900000003" }]);
+    expect(r.cartao).toEqual([{ nome: "Helena Exemplo", cargo: "Gerente de contas", whatsapp: "+5551900000100" }]);
   });
 
   it("o visitante não lê pontos nem cartão de empreendimento fora da vitrine", async () => {
@@ -25,6 +25,13 @@ describe("pontos_proximos e escritorios_vendas: leitura", () => {
       cartao: (await c.query("select 1 from escritorios_vendas o join empreendimentos e on e.id = o.empreendimento_id where e.slug = any($1)", [slugs])).rowCount,
     }));
     expect(r).toEqual({ pontos: 0, cartao: 0 });
+  });
+
+  it("nenhum e-mail de escritório é igual ao e-mail de login de uma conta", async () => {
+    const repetidos = await comCliente(URL_BANCO.admin, async (c) =>
+      (await c.query("select o.email from escritorios_vendas o join contas k on lower(k.email) = lower(o.email)")).rows,
+    );
+    expect(repetidos).toEqual([]);
   });
 
   it("o Studio Cidade Baixa tem pontos e não tem cartão", async () => {
@@ -46,7 +53,7 @@ describe("pontos_proximos e escritorios_vendas: escrita", () => {
   const novoPonto = `insert into pontos_proximos (empreendimento_id, categoria, nome, distancia_m) values ('${empreendimentoId}', 'escola', 'Escola Nova', 100)`;
 
   it("visitante, comprador e incorporadora não escrevem", async () => {
-    for (const contaId of [undefined, CONTAS.comprador, CONTAS.horizonteSuperadmin]) {
+    for (const contaId of [undefined, CONTAS.comprador, CONTAS.horizonteSuperadmin, CONTAS.houseGerenteDeContas, CONTAS.godMode]) {
       const e1 = await comoApp({ contaId }, (c) => erroDe(c.query(novoPonto)));
       expect(e1.code, `insert ${contaId}`).toBeDefined();
       const e2 = await comoApp({ contaId }, async (c) => {

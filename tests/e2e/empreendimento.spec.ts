@@ -123,7 +123,7 @@ test.describe("conteúdo da página", () => {
     await page.goto(`/empreendimento/${ELEGIVEL.slug}`);
     const escritorio = page.getByRole("region", { name: TITULOS.escritorio });
     await expect(escritorio.getByText("Helena Exemplo")).toBeVisible();
-    await expect(escritorio.getByRole("link", { name: ptBR["empreendimento.escritorio.whatsapp"] })).toHaveAttribute("href", /^https:\/\/wa\.me\/5551900000003\?text=/);
+    await expect(escritorio.getByRole("link", { name: ptBR["empreendimento.escritorio.whatsapp"] })).toHaveAttribute("href", /^https:\/\/wa\.me\/5551900000100\?text=/);
     await expect(escritorio.getByRole("link", { name: ptBR["empreendimento.escritorio.email"] })).toHaveAttribute("href", /^mailto:/);
     // Decisão de 18/11/2026: só WhatsApp e e-mail ficam públicos; o telefone sai do cartão (flag desligada).
     await expect(escritorio.getByRole("link", { name: ptBR["empreendimento.escritorio.telefone"] })).toHaveCount(0);

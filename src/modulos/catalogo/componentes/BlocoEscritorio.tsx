@@ -47,7 +47,7 @@ export function BlocoEscritorio({
               ) : null}
             </p>
           </div>
-          {e.exemplo && o ? <SeloExemplo /> : null}
+          {o?.exemplo ? <SeloExemplo /> : null}
         </div>
         <p className="mt-3 text-sm text-preto">
           <span className="text-texto-secundario">

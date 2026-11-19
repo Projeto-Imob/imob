@@ -3,7 +3,7 @@
  * vizinhança e contatos. Sem React, sem banco e com o relógio injetado.
  */
 import { minutosAPe } from "@/lib/geo";
-import type { CategoriaPonto, EmpreendimentoPublico, EscritorioVendas, Plano, PontoProximo, StatusUnidade, Tipologia, Unidade } from "./tipos";
+import { TIPOS_TIPOLOGIA, type CategoriaPonto, EmpreendimentoPublico, EscritorioVendas, Plano, PontoProximo, StatusUnidade, Tipologia, Unidade } from "./tipos";
 
 export type Modo = "morar" | "investir";
 
@@ -40,7 +40,8 @@ export type PlanoPublico = Pick<
   | "saldoPercentual"
   | "financiamento"
 >;
-export type EscritorioPublico = Omit<EscritorioVendas, "empreendimentoId" | "exemplo">;
+/** O `exemplo` do cartão vem do próprio cartão: o selo não depende do empreendimento. */
+export type EscritorioPublico = Omit<EscritorioVendas, "empreendimentoId" | "exemplo"> & { exemplo: boolean };
 
 export type PaginaEmpreendimento = EmpreendimentoPublico & {
   exemplo: boolean;
@@ -78,6 +79,13 @@ export function restamPorTipologia(
   const contagem: Record<string, number> = {};
   for (const u of unidades) if (u.status === "disponivel") contagem[u.tipologiaId] = (contagem[u.tipologiaId] ?? 0) + 1;
   return Object.fromEntries(Object.entries(contagem).filter(([, n]) => n >= 1 && n <= LIMITE_RESTAM));
+}
+
+/** Proposta: o resumo mostra "Resta/Restam {x} unidades" com o mesmo limite do "Restam {x}" por tipologia: só de 1 a 5, e só com o espelho fresco. */
+export function totalRestam(unidades: Array<{ status: StatusUnidade }>, espelhoAtualizadoEm: string | null, agora: Date): number | null {
+  if (!escassezVisivel(espelhoAtualizadoEm, agora)) return null;
+  const n = unidades.filter((u) => u.status === "disponivel").length;
+  return n >= 1 && n <= LIMITE_RESTAM ? n : null;
 }
 
 // ---------- Custos ----------
@@ -118,6 +126,21 @@ export function fluxoDoPlano(unidade: Pick<Unidade, "preco">, plano: Percentuais
     saldo: parte(plano.saldoPercentual),
     entrada: sinal,
   };
+}
+
+const TIPOS_RESIDENCIAIS: readonly string[] = TIPOS_TIPOLOGIA.residencial;
+
+/** Mesma regra da busca: tipologia residencial à venda (venda ou venda_ou_aluguel). Loja, sala e terreno ficam de fora. */
+export const tipologiaDeVenda = (t: Pick<TipologiaPublica, "tipo" | "finalidade">): boolean =>
+  TIPOS_RESIDENCIAIS.includes(t.tipo) && t.finalidade !== "aluguel";
+
+/** Unidades das tipologias residenciais de venda: base do "a partir de", da entrada mínima e da unidade padrão. */
+export function unidadesDeVenda<U extends Pick<UnidadePublica, "tipologiaId">>(
+  unidades: U[],
+  tipologias: Array<Pick<TipologiaPublica, "id" | "tipo" | "finalidade">>,
+): U[] {
+  const ids = new Set(tipologias.filter(tipologiaDeVenda).map((t) => t.id));
+  return unidades.filter((u) => ids.has(u.tipologiaId));
 }
 
 /** Proposta: a unidade escolhida de partida é a disponível de menor preço. */

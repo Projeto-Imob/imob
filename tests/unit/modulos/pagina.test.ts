@@ -11,7 +11,10 @@ import {
   ordemDosBlocos,
   pontosPorCategoria,
   restamPorTipologia,
+  tipologiaDeVenda,
+  totalRestam,
   unidadePadrao,
+  unidadesDeVenda,
   type PontoProximo,
 } from "@/modulos/catalogo";
 import { exigenciaDoPlano } from "@/modulos/busca";
@@ -70,6 +73,59 @@ describe("escassez (regra 10)", () => {
     expect(restamPorTipologia(unidades, horasAtras(23), AGORA)).toEqual({ a: 1, b: 2 });
     expect(restamPorTipologia(unidades, horasAtras(24), AGORA)).toEqual({});
     expect(restamPorTipologia(unidades, null, AGORA)).toEqual({});
+  });
+});
+
+describe("total do Restam no resumo", () => {
+  const livres = (n: number) => Array.from({ length: n }, () => ({ status: "disponivel" as const }));
+
+  it("só aparece de 1 a 5 disponíveis (a reservada não conta), como o Restam por tipologia", () => {
+    expect(totalRestam(livres(1), horasAtras(1), AGORA)).toBe(1);
+    expect(totalRestam(livres(5), horasAtras(1), AGORA)).toBe(5);
+    expect(totalRestam(livres(6), horasAtras(1), AGORA)).toBeNull();
+    expect(totalRestam([], horasAtras(1), AGORA)).toBeNull();
+    expect(totalRestam([{ status: "reservada" }, { status: "vendida" }], horasAtras(1), AGORA)).toBeNull();
+    expect(totalRestam([...livres(2), { status: "reservada" }], horasAtras(1), AGORA)).toBe(2);
+  });
+
+  it("sem espelho fresco, nunca aparece", () => {
+    expect(totalRestam(livres(3), horasAtras(24), AGORA)).toBeNull();
+    expect(totalRestam(livres(3), null, AGORA)).toBeNull();
+  });
+
+  it("o plural vem do catálogo", () => {
+    expect(ptBR["empreendimento.resta_resumo"]).toBe("Resta {n} unidade");
+    expect(ptBR["empreendimento.restam_resumo"]).toBe("Restam {n} unidades");
+  });
+});
+
+describe("unidades de venda: só tipologia residencial à venda", () => {
+  const tipologias: Array<{ id: string; tipo: string; finalidade: "venda" | "aluguel" | "venda_ou_aluguel" }> = [
+    { id: "ap", tipo: "Apartamento", finalidade: "venda" },
+    { id: "ap-alug", tipo: "Apartamento", finalidade: "aluguel" },
+    { id: "ap-ambos", tipo: "Apartamento", finalidade: "venda_ou_aluguel" },
+    { id: "loja", tipo: "Loja", finalidade: "venda" },
+    { id: "lote", tipo: "Lote", finalidade: "venda" },
+  ];
+  const unidades = [
+    { tipologiaId: "ap", status: "disponivel" as const, preco: 600000, identificador: "101" },
+    { tipologiaId: "ap-alug", status: "disponivel" as const, preco: 1000, identificador: "102" },
+    { tipologiaId: "ap-ambos", status: "disponivel" as const, preco: 650000, identificador: "103" },
+    { tipologiaId: "loja", status: "disponivel" as const, preco: 420000, identificador: "L1" },
+    { tipologiaId: "lote", status: "disponivel" as const, preco: 300000, identificador: "T1" },
+  ];
+
+  it("tipologiaDeVenda recusa comercial, terreno e só aluguel", () => {
+    expect(tipologias.filter(tipologiaDeVenda).map((t) => t.id)).toEqual(["ap", "ap-ambos"]);
+  });
+
+  it("a loja barata não vira unidade padrão nem puxa a entrada mínima", () => {
+    const deVenda = unidadesDeVenda(unidades, tipologias);
+    expect(deVenda.map((u) => u.identificador)).toEqual(["101", "103"]);
+    expect(unidadePadrao(unidades)?.identificador).toBe("102");
+    expect(unidadePadrao(deVenda)?.identificador).toBe("101");
+    expect(entradaMinima(unidades, [{ sinalPercentual: 15 }])).toBe(150);
+    expect(entradaMinima(deVenda, [{ sinalPercentual: 15 }])).toBe(90000);
   });
 });
 
@@ -150,9 +206,9 @@ describe("vizinhança", () => {
 
 describe("contato do escritório", () => {
   it("monta wa.me com a mensagem pronta, mailto e tel", () => {
-    expect(linkWhatsapp("+55 51 90000-0003", "Olá! Vi o Edifício X.")).toBe("https://wa.me/5551900000003?text=Ol%C3%A1!%20Vi%20o%20Edif%C3%ADcio%20X.");
+    expect(linkWhatsapp("+55 51 90000-0100", "Olá! Vi o Edifício X.")).toBe("https://wa.me/5551900000100?text=Ol%C3%A1!%20Vi%20o%20Edif%C3%ADcio%20X.");
     expect(linkEmail("a@exemplo.invalid")).toBe("mailto:a@exemplo.invalid");
-    expect(linkTelefone("+555130000003")).toBe("tel:+555130000003");
+    expect(linkTelefone("+555130000100")).toBe("tel:+555130000100");
   });
 });
 

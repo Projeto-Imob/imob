@@ -1,13 +1,14 @@
 import { T } from "@/components/T";
 import type { ChaveTexto } from "@/i18n/pt-BR";
 import { mesAno, moeda } from "@/lib/formato";
-import { entradaMinima, precoPorM2, unidadePadrao, type Modo, type PaginaEmpreendimento } from "../pagina";
+import { entradaMinima, precoPorM2, unidadePadrao, unidadesDeVenda, type Modo, type PaginaEmpreendimento } from "../pagina";
 import { Secao } from "./Secao";
 
 /** Números do cadastro: sem indicador de mercado (regra 3). */
 export function BlocoNumeros({ e, modo }: { e: PaginaEmpreendimento; modo: Modo }) {
-  const padrao = unidadePadrao(e.unidades);
-  const entrada = entradaMinima(e.unidades, e.planos);
+  const deVenda = unidadesDeVenda(e.unidades, e.tipologias);
+  const padrao = unidadePadrao(deVenda);
+  const entrada = entradaMinima(deVenda, e.planos);
   const destaque = modo === "investir" ? "text-apoio-investir" : "text-apoio-morar";
   return (
     <Secao id="bloco-numeros" titulo={modo === "investir" ? "empreendimento.numeros.titulo_investir" : "empreendimento.numeros.titulo"} sub="empreendimento.numeros.sub" modo={modo}>

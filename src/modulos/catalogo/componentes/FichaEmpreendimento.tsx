@@ -42,7 +42,7 @@ export function FichaEmpreendimento({ empreendimento: e, restam }: Props) {
       </svg>
       {restam !== null ? (
         <p className="mt-4 flex flex-wrap items-center gap-2 font-semibold text-preto">
-          <T k="empreendimento.restam_resumo" vars={{ n: restam }} />
+          <T k={restam === 1 ? "empreendimento.resta_resumo" : "empreendimento.restam_resumo"} vars={{ n: restam }} />
           <span className="text-sm font-normal text-texto-secundario">
             <T k="empreendimento.espelho_fresco" />
           </span>

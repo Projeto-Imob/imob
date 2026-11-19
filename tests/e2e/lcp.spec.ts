@@ -40,5 +40,7 @@ test("LCP no celular com rede lenta: mediana de 3 cargas abaixo de 2,5 s", async
   }
   const mediana = [...medidas].sort((a, b) => a - b)[1]!;
   console.log(`LCP (ms): ${medidas.map((m) => Math.round(m)).join(", ")}; mediana ${Math.round(mediana)}`);
+  for (const m of medidas) expect(m, "sem entrada de LCP a medida vira 0").toBeGreaterThan(0);
+  expect(mediana).toBeGreaterThan(0);
   expect(mediana).toBeLessThan(2500);
 });

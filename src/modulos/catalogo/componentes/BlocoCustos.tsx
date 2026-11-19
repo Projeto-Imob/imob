@@ -4,7 +4,7 @@ import { useState } from "react";
 import { T } from "@/components/T";
 import { texto, type ChaveTexto } from "@/i18n/pt-BR";
 import { moeda, numero } from "@/lib/formato";
-import { fluxoDoPlano, unidadePadrao, type Modo, type PlanoPublico, type TipologiaPublica, type UnidadePublica } from "../pagina";
+import { fluxoDoPlano, unidadePadrao, unidadesDeVenda, type Modo, type PlanoPublico, type TipologiaPublica, type UnidadePublica } from "../pagina";
 import { Secao } from "./Secao";
 
 type Props = { unidades: UnidadePublica[]; tipologias: TipologiaPublica[]; planos: PlanoPublico[]; modo: Modo };
@@ -18,9 +18,10 @@ const CORES_AMOSTRA = ["bg-preto", "bg-apoio-investir", "bg-apoio-morar", "bg-te
  */
 export function BlocoCustos({ unidades, tipologias, planos, modo }: Props) {
   const disponiveis = unidades.filter((u) => u.status === "disponivel");
-  const [unidadeId, setUnidadeId] = useState(() => unidadePadrao(unidades)?.id ?? "");
+  const padrao = unidadePadrao(unidadesDeVenda(unidades, tipologias)) ?? unidadePadrao(unidades);
+  const [unidadeId, setUnidadeId] = useState(() => padrao?.id ?? "");
   const [planoId, setPlanoId] = useState(() => planos[0]?.id ?? "");
-  const unidade = disponiveis.find((u) => u.id === unidadeId) ?? null;
+  const unidade = disponiveis.find((u) => u.id === unidadeId) ?? padrao;
   const plano = planos.find((p) => p.id === planoId) ?? null;
 
   return (
@@ -30,7 +31,7 @@ export function BlocoCustos({ unidades, tipologias, planos, modo }: Props) {
       </p>
       {!unidade || !plano ? (
         <p className="text-preto">
-          <T k="empreendimento.custos.sem_unidade" />
+          <T k={unidade ? "empreendimento.custos.sem_plano" : "empreendimento.custos.sem_unidade"} />
         </p>
       ) : (
         <Calculo

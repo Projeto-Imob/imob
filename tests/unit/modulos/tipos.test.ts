@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { evento } from "@/modulos/analytics";
 import { lead, leadContato } from "@/modulos/atendimento";
 import { PERFIL_VAZIO, perfil } from "@/modulos/busca";
-import { empreendimento, plano, tipologia, unidade } from "@/modulos/catalogo";
+import { empreendimento, escritorioVendas, plano, tipologia, unidade } from "@/modulos/catalogo";
 
 const ID = (n: number) => `00000000-0000-4000-8000-${String(n).padStart(12, "0")}`;
 
@@ -35,6 +35,23 @@ const empreendimentoValido = {
   atualizadoEm: "2026-11-12T10:00:00-03:00",
   exemplo: true,
 };
+
+describe("escritório de vendas: telefones", () => {
+  const cartao = {
+    empreendimentoId: ID(1), origem: "house", nome: "Atendimento", cargo: null, experiencia: null, fotoPath: null,
+    whatsapp: "+5551900000100", email: "atendimento.house@exemplo.invalid", telefone: "+555130000100", exemplo: true,
+  };
+
+  it("aceita WhatsApp e telefone internacionais, ou nulos", () => {
+    expect(escritorioVendas.safeParse(cartao).success).toBe(true);
+    expect(escritorioVendas.safeParse({ ...cartao, whatsapp: null, telefone: null }).success).toBe(true);
+  });
+
+  it.each(["51900000100", "+0551900000100", "+55 51 90000-0100", "+5551", "+5551900000100123456", "tel:+5551900000100"])("recusa %s", (valor) => {
+    expect(escritorioVendas.safeParse({ ...cartao, whatsapp: valor }).success).toBe(false);
+    expect(escritorioVendas.safeParse({ ...cartao, telefone: valor }).success).toBe(false);
+  });
+});
 
 describe("schemas de domínio", () => {
   it("aceita um empreendimento válido", () => {

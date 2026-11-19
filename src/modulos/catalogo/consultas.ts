@@ -91,7 +91,7 @@ export async function lerEmpreendimentoPublico(slug: string): Promise<PaginaEmpr
       tx
         .select({
           origem: escritoriosVendas.origem, nome: escritoriosVendas.nome, cargo: escritoriosVendas.cargo, experiencia: escritoriosVendas.experiencia,
-          fotoPath: escritoriosVendas.fotoPath, whatsapp: escritoriosVendas.whatsapp, email: escritoriosVendas.email, telefone: escritoriosVendas.telefone,
+          fotoPath: escritoriosVendas.fotoPath, whatsapp: escritoriosVendas.whatsapp, email: escritoriosVendas.email, telefone: escritoriosVendas.telefone, exemplo: escritoriosVendas.exemplo,
         })
         .from(escritoriosVendas)
         .where(eq(escritoriosVendas.empreendimentoId, e.id))

@@ -23,7 +23,7 @@ function paginaDe(slug: string, ajuste: Partial<PaginaEmpreendimento> = {}): Pag
     unidades: seed.unidades.filter((u) => u.empreendimentoId === e.id),
     planos: seed.planos.filter((p) => p.empreendimentoId === e.id),
     pontos: e.pontosProximos,
-    escritorio: cartao ? { origem: cartao.origem, nome: cartao.nome, cargo: cartao.cargo, experiencia: cartao.experiencia, fotoPath: cartao.fotoPath, whatsapp: cartao.whatsapp, email: cartao.email, telefone: cartao.telefone } : null,
+    escritorio: cartao ? { origem: cartao.origem, nome: cartao.nome, cargo: cartao.cargo, experiencia: cartao.experiencia, fotoPath: cartao.fotoPath, whatsapp: cartao.whatsapp, email: cartao.email, telefone: cartao.telefone, exemplo: cartao.exemplo } : null,
     ...ajuste,
   };
 }
@@ -39,15 +39,28 @@ describe("campo vazio vira Não informado", () => {
     const { container } = render(<BlocoEscritorio e={paginaDe("residencial-jardim-das-aguas")} modo="morar" />);
     const hrefs = [...container.querySelectorAll("a")].map((a) => a.getAttribute("href"));
     expect(hrefs).toHaveLength(2);
-    expect(hrefs[0]).toMatch(/^https:\/\/wa\.me\/5551900000003\?text=Ol%C3%A1!%20Vi%20o%20Residencial/);
-    expect(hrefs[1]).toBe("mailto:helena.contas@exemplo.invalid");
+    expect(hrefs[0]).toMatch(/^https:\/\/wa\.me\/5551900000100\?text=Ol%C3%A1!%20Vi%20o%20Residencial/);
+    expect(hrefs[1]).toBe("mailto:atendimento.house@exemplo.invalid");
     expect(container.textContent).not.toContain("Telefone");
   });
 
   it("com a flag contato_telefone_publico ligada, o telefone volta como link (regra 20)", () => {
     const { container } = render(<BlocoEscritorio e={paginaDe("residencial-jardim-das-aguas")} modo="morar" telefonePublico />);
     const hrefs = [...container.querySelectorAll("a")].map((a) => a.getAttribute("href"));
-    expect(hrefs[2]).toBe("tel:+555130000003");
+    expect(hrefs[2]).toBe("tel:+555130000100");
+  });
+
+  it("o selo Exemplo segue o exemplo do próprio cartão, não o do empreendimento", () => {
+    const base = paginaDe("residencial-jardim-das-aguas");
+    const { container, rerender } = render(<BlocoEscritorio e={{ ...base, exemplo: false }} modo="morar" />);
+    expect(container.querySelector(".etiqueta")).not.toBeNull();
+    rerender(<BlocoEscritorio e={{ ...base, exemplo: true, escritorio: { ...base.escritorio!, exemplo: false } }} modo="morar" />);
+    expect(container.querySelector(".etiqueta")).toBeNull();
+  });
+
+  it("o cartão da house não usa o e-mail nem os telefones de uma conta interna", () => {
+    const cartao = seed.escritorios.find((o) => o.origem === "house")!;
+    for (const conta of seed.contas) expect(conta.email).not.toBe(cartao.email);
   });
 
   it("patrimônio de afetação sem dado, comodidades sem dado e vizinhança sem ponto", () => {
@@ -88,6 +101,23 @@ describe("BlocoCustos", () => {
     const { container } = render(<BlocoCustos unidades={vendidas} tipologias={e.tipologias} planos={e.planos} modo="investir" />);
     expect(container.querySelector("select")).toBeNull();
     expect(container.textContent).toContain("Não há unidade disponível");
+  });
+});
+
+describe("BlocoCustos: casos de borda", () => {
+  it("com unidade disponível e sem plano, mostra a mensagem própria", () => {
+    const e = paginaDe("edificio-mirante-petropolis");
+    const { container } = render(<BlocoCustos unidades={e.unidades} tipologias={e.tipologias} planos={[]} modo="morar" />);
+    expect(container.textContent).toContain("Ainda não há plano de pagamento");
+    expect(container.textContent).not.toContain("Não há unidade disponível");
+  });
+
+  it("se a unidade escolhida some do dado, cai na unidade padrão", () => {
+    const e = paginaDe("edificio-mirante-petropolis");
+    const { container, rerender } = render(<BlocoCustos unidades={e.unidades} tipologias={e.tipologias} planos={e.planos} modo="morar" />);
+    const escolhida = container.querySelector("select")!.value;
+    rerender(<BlocoCustos unidades={e.unidades.filter((u) => u.id !== escolhida)} tipologias={e.tipologias} planos={e.planos} modo="morar" />);
+    expect(container.querySelector("select")!.value).not.toBe(escolhida);
   });
 });
 

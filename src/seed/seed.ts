@@ -183,7 +183,7 @@ function construir() {
       exemplo: true,
     });
     comerciais.push({ empreendimentoId: empId, comissaoPercentual: d.comissao, escritorio: "house", exemplo: true });
-    // Cartão fictício da house (decisão 11): é a Helena Exemplo, a gerente de contas do seed.
+    // Cartão fictício da house (decisão 11), com canal próprio: não reaproveita o login nem os telefones de nenhuma conta interna.
     if (!d.semEscritorio) {
       escritorios.push({
         empreendimentoId: empId,
@@ -192,9 +192,9 @@ function construir() {
         cargo: "Gerente de contas",
         experiencia: "Dez anos em lançamentos de Porto Alegre (exemplo)",
         fotoPath: null,
-        whatsapp: "+5551900000003",
-        email: "helena.contas@exemplo.invalid",
-        telefone: "+555130000003",
+        whatsapp: "+5551900000100",
+        email: "atendimento.house@exemplo.invalid",
+        telefone: "+555130000100",
         exemplo: true,
       });
     }

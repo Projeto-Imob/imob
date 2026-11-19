@@ -16,10 +16,11 @@ import {
   FichaEmpreendimentoCarregando,
   SeletorModo,
   entradaMinima,
-  escassezVisivel,
   lerModo,
   ordemDosBlocos,
   restamPorTipologia,
+  totalRestam,
+  unidadesDeVenda,
   type Bloco,
   type Modo,
   type PaginaEmpreendimento,
@@ -38,12 +39,12 @@ async function empreendimentoDaVitrine(slug: string) {
   return lerEmpreendimentoPublico(slug);
 }
 
-function blocoDaPagina(bloco: Bloco, e: PaginaEmpreendimento, modo: Modo, restam: Record<string, number>, totalRestam: number | null): ReactNode {
+function blocoDaPagina(bloco: Bloco, e: PaginaEmpreendimento, modo: Modo, restam: Record<string, number>, total: number | null): ReactNode {
   switch (bloco) {
     case "galeria":
       return <BlocoGaleria slug={e.slug} />;
     case "resumo":
-      return <FichaEmpreendimento empreendimento={e} restam={totalRestam} />;
+      return <FichaEmpreendimento empreendimento={e} restam={total} />;
     case "numeros":
       return <BlocoNumeros e={e} modo={modo} />;
     case "custos":
@@ -73,9 +74,7 @@ async function Conteudo({ params, searchParams }: Pick<PageProps<"/empreendiment
   await io();
   const agora = new Date();
   const restam = restamPorTipologia(empreendimento.unidades, empreendimento.espelhoAtualizadoEm, agora);
-  const totalRestam = escassezVisivel(empreendimento.espelhoAtualizadoEm, agora)
-    ? empreendimento.unidades.filter((u) => u.status === "disponivel").length
-    : null;
+  const total = totalRestam(empreendimento.unidades, empreendimento.espelhoAtualizadoEm, agora);
 
   const modo = lerModo(modoDaUrl);
   return (
@@ -83,10 +82,10 @@ async function Conteudo({ params, searchParams }: Pick<PageProps<"/empreendiment
       <SeletorModo slug={empreendimento.slug} modo={modo} />
       <div className="mt-6 flex flex-col gap-10">
         {ordemDosBlocos(modo).map((bloco) => (
-          <div key={bloco}>{blocoDaPagina(bloco, empreendimento, modo, restam, totalRestam)}</div>
+          <div key={bloco}>{blocoDaPagina(bloco, empreendimento, modo, restam, total)}</div>
         ))}
       </div>
-      <BarraFixa entrada={entradaMinima(empreendimento.unidades, empreendimento.planos)} slug={empreendimento.slug} agendarVisita={FLAGS_PADRAO.agendar_visita} />
+      <BarraFixa entrada={entradaMinima(unidadesDeVenda(empreendimento.unidades, empreendimento.tipologias), empreendimento.planos)} slug={empreendimento.slug} agendarVisita={FLAGS_PADRAO.agendar_visita} />
     </div>
   );
 }
