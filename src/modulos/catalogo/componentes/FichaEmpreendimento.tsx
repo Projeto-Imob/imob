@@ -8,10 +8,12 @@ type Props = {
   empreendimento: PaginaEmpreendimento;
   /** Regra 10: decidida fora do cache. Total de unidades disponíveis, só com o espelho atualizado há menos de 24 h. */
   restam: number | null;
+  /** Espelho atualizado há menos de 24 h: com ou sem o total do Restam, o aviso de confirmar não vale. */
+  fresco?: boolean;
 };
 
 /** Bloco de resumo da página do empreendimento (fatias 0.3 e 1.1). */
-export function FichaEmpreendimento({ empreendimento: e, restam }: Props) {
+export function FichaEmpreendimento({ empreendimento: e, restam, fresco = restam !== null }: Props) {
   return (
     <section aria-labelledby="bloco-resumo">
       <div className="flex flex-wrap items-center gap-2">
@@ -40,9 +42,9 @@ export function FichaEmpreendimento({ empreendimento: e, restam }: Props) {
         <rect width="100" height="4" className="fill-borda-controle" />
         <rect width={Math.max(0, Math.min(100, e.percentualObra))} height="4" className="fill-preto" />
       </svg>
-      {restam !== null ? (
+      {fresco ? (
         <p className="mt-4 flex flex-wrap items-center gap-2 font-semibold text-preto">
-          <T k={restam === 1 ? "empreendimento.resta_resumo" : "empreendimento.restam_resumo"} vars={{ n: restam }} />
+          {restam !== null ? <T k={restam === 1 ? "empreendimento.resta_resumo" : "empreendimento.restam_resumo"} vars={{ n: restam }} /> : null}
           <span className="text-sm font-normal text-texto-secundario">
             <T k="empreendimento.espelho_fresco" />
           </span>

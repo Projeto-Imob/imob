@@ -18,6 +18,7 @@ import {
   entradaMinima,
   lerModo,
   ordemDosBlocos,
+  escassezVisivel,
   restamPorTipologia,
   totalRestam,
   unidadesDeVenda,
@@ -39,12 +40,12 @@ async function empreendimentoDaVitrine(slug: string) {
   return lerEmpreendimentoPublico(slug);
 }
 
-function blocoDaPagina(bloco: Bloco, e: PaginaEmpreendimento, modo: Modo, restam: Record<string, number>, total: number | null): ReactNode {
+function blocoDaPagina(bloco: Bloco, e: PaginaEmpreendimento, modo: Modo, restam: Record<string, number>, total: number | null, fresco: boolean): ReactNode {
   switch (bloco) {
     case "galeria":
       return <BlocoGaleria slug={e.slug} />;
     case "resumo":
-      return <FichaEmpreendimento empreendimento={e} restam={total} />;
+      return <FichaEmpreendimento empreendimento={e} restam={total} fresco={fresco} />;
     case "numeros":
       return <BlocoNumeros e={e} modo={modo} />;
     case "custos":
@@ -74,6 +75,7 @@ async function Conteudo({ params, searchParams }: Pick<PageProps<"/empreendiment
   await io();
   const agora = new Date();
   const restam = restamPorTipologia(empreendimento.unidades, empreendimento.espelhoAtualizadoEm, agora);
+  const fresco = escassezVisivel(empreendimento.espelhoAtualizadoEm, agora);
   const total = totalRestam(empreendimento.unidades, empreendimento.espelhoAtualizadoEm, agora);
 
   const modo = lerModo(modoDaUrl);
@@ -82,7 +84,7 @@ async function Conteudo({ params, searchParams }: Pick<PageProps<"/empreendiment
       <SeletorModo slug={empreendimento.slug} modo={modo} />
       <div className="mt-6 flex flex-col gap-10">
         {ordemDosBlocos(modo).map((bloco) => (
-          <div key={bloco}>{blocoDaPagina(bloco, empreendimento, modo, restam, total)}</div>
+          <div key={bloco}>{blocoDaPagina(bloco, empreendimento, modo, restam, total, fresco)}</div>
         ))}
       </div>
       <BarraFixa entrada={entradaMinima(unidadesDeVenda(empreendimento.unidades, empreendimento.tipologias), empreendimento.planos)} slug={empreendimento.slug} agendarVisita={FLAGS_PADRAO.agendar_visita} />
