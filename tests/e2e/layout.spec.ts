@@ -5,8 +5,6 @@ import { esperarSemViolacoesAxe } from "./axe";
 const AREAS = [
   [ptBR["nav.inicio"], "/"],
   [ptBR["nav.buscar"], "/buscar-imoveis"],
-  [ptBR["nav.mapa"], "/mapa"],
-  [ptBR["nav.favoritos"], "/favoritos"],
   [ptBR["nav.conta"], "/conta"],
 ] as const;
 
@@ -14,7 +12,7 @@ for (const largura of [390, 1024, 1440]) {
   test.describe(`layout em ${largura} px`, () => {
     test.use({ viewport: { width: largura, height: 900 } });
 
-    test("navegação de cinco áreas, rodapé sem CRECI, dados de exemplo e axe", async ({ page }) => {
+    test("navegação de três áreas (Mapa e Favoritos atrás das flags), rodapé sem CRECI, dados de exemplo e axe", async ({ page }) => {
       await page.goto("/");
 
       const nav = page.getByRole("navigation", { name: ptBR["nav.rotulo"] });

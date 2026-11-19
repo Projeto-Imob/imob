@@ -1,27 +1,63 @@
 import { T } from "@/components/T";
 import { texto, type ChaveTexto } from "@/i18n/pt-BR";
 import { mesAno, numero } from "@/lib/formato";
-import type { EmpreendimentoPublico } from "../tipos";
+import type { PaginaEmpreendimento } from "../pagina";
+import { SeloExemplo, SeloIncorporacao } from "./SeloIncorporacao";
 
-/** Resumo do empreendimento na página pública (fatia 0.3). Os demais blocos da página chegam na 1.1. */
-export function FichaEmpreendimento({ empreendimento: e }: { empreendimento: EmpreendimentoPublico }) {
+type Props = {
+  empreendimento: PaginaEmpreendimento;
+  /** Regra 10: decidida fora do cache. Total de unidades disponíveis, só com o espelho atualizado há menos de 24 h. */
+  restam: number | null;
+  /** Espelho atualizado há menos de 24 h: com ou sem o total do Restam, o aviso de confirmar não vale. */
+  fresco?: boolean;
+};
+
+/** Bloco de resumo da página do empreendimento (fatias 0.3 e 1.1). */
+export function FichaEmpreendimento({ empreendimento: e, restam, fresco = restam !== null }: Props) {
   return (
-    <article className="max-w-3xl">
-      <p className="etiqueta inline-flex items-center gap-1.5 border border-preto px-2 py-1 text-xs text-preto">
-        <IconeSelo />
-        <T k="empreendimento.selo_ri" />
-      </p>
-      <h1 className="mt-4 text-3xl font-bold text-preto md:text-4xl">{e.nome}</h1>
+    <section aria-labelledby="bloco-resumo">
+      <div className="flex flex-wrap items-center gap-2">
+        <SeloIncorporacao />
+        {e.exemplo ? <SeloExemplo /> : null}
+      </div>
+      <h1 id="bloco-resumo" className="mt-4 text-3xl font-bold text-preto md:text-4xl">
+        {e.nome}
+      </h1>
       <p className="mt-2 text-texto-secundario">
         <T k="empreendimento.local" vars={{ bairro: e.bairro, cidade: e.cidade, uf: e.uf }} />
       </p>
       <dl aria-label={texto("empreendimento.resumo")} className="mt-6 grid gap-4 sm:grid-cols-3">
         <Fato rotulo="empreendimento.construtora" valor={e.construtora} />
         <Fato rotulo="empreendimento.entrega" valor={e.entrega ? mesAno(e.entrega) : null} />
-        <Fato rotulo="empreendimento.obra" valor={texto("empreendimento.obra_valor", { n: numero(e.percentualObra) })} />
+        <div className="border-t border-borda-controle pt-3">
+          <dt className="text-sm text-texto-secundario">
+            <T k="empreendimento.obra" />
+          </dt>
+          <dd className="mt-1 font-semibold text-preto">
+            <T k="empreendimento.obra_valor" vars={{ n: numero(e.percentualObra) }} />
+          </dd>
+        </div>
       </dl>
+      <svg viewBox="0 0 100 4" preserveAspectRatio="none" role="img" aria-label={texto("empreendimento.obra_valor", { n: numero(e.percentualObra) })} className="mt-3 h-1.5 w-full max-w-sm">
+        <rect width="100" height="4" className="fill-borda-controle" />
+        <rect width={Math.max(0, Math.min(100, e.percentualObra))} height="4" className="fill-preto" />
+      </svg>
+      {fresco ? (
+        <p className="mt-4 flex flex-wrap items-center gap-2 font-semibold text-preto">
+          {restam !== null ? <T k={restam === 1 ? "empreendimento.resta_resumo" : "empreendimento.restam_resumo"} vars={{ n: restam }} /> : null}
+          <span className="text-sm font-normal text-texto-secundario">
+            <T k="empreendimento.espelho_fresco" />
+          </span>
+        </p>
+      ) : (
+        <p className="mt-4 text-sm text-texto-secundario">
+          <T k="empreendimento.disponibilidade_confirmar" />
+        </p>
+      )}
+      {/* Espaço do botão de favoritar: a fatia 1.3c põe o botão aqui (flag favoritos). */}
+      <div data-espaco="favoritar" />
       {e.descricao ? <p className="mt-6 whitespace-pre-line text-preto">{e.descricao}</p> : null}
-    </article>
+    </section>
   );
 }
 
@@ -47,13 +83,5 @@ function Fato({ rotulo, valor }: { rotulo: ChaveTexto; valor: string | null }) {
       </dt>
       <dd className="mt-1 font-semibold text-preto">{valor ?? <T k="empreendimento.nao_informado" />}</dd>
     </div>
-  );
-}
-
-function IconeSelo() {
-  return (
-    <svg aria-hidden="true" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2">
-      <path d="M3 8.5l3 3 7-7" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
   );
 }

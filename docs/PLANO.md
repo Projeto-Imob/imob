@@ -185,7 +185,7 @@ Fatias grandes ou incertas ganham uma spec própria em `docs/specs/<fatia>.md` a
 
 ## Fase 1 — Piloto (v1)
 
-- [ ] **1.1 Página do empreendimento completa (F1).**
+- [x] **1.1 Página do empreendimento completa (F1).** PR da branch `fatia/1.1-pagina` (17/11/2026).
   - Entrega:
     - blocos por modo, custos estimados, plantas e unidades;
     - vizinhança com tempo a pé;
@@ -194,6 +194,13 @@ Fatias grandes ou incertas ganham uma spec própria em `docs/specs/<fatia>.md` a
     - não listado só com login;
     - navegação da v1 (F12) com Início, Buscar e Minha conta.
   - Verificar: e2e por modo; espelho com 23 h e com 30 h; axe; LCP medido.
+  - Feito (plano aprovado em 17/11/2026, decisões 2, 4, 5, 9 e 11):
+    - tabelas `pontos_proximos` e `escritorios_vendas` (migrations 0003 e 0004, RLS como a do empreendimento) e regras puras em `src/modulos/catalogo/pagina.ts`;
+    - Morar e Investir pela URL (`?modo=`); galeria com fachadas ilustradas em SVG marcadas como exemplo (decisão 5), com as janelas e o sol em laranja sobre o fundo preto (escolha do Matheus em 18/11, depois do comparativo); custos por unidade e plano, com "corrigidas pelo índice do contrato" (decisão 4); cartão da house com contato liberado (decisões 2 e 11), só com WhatsApp e e-mail (o telefone fica atrás da flag `contato_telefone_publico`, desligada por decisão de 18/11); barra fixa no celular;
+    - Mapa e Favoritos atrás das flags `mapa_publico` e `favoritos`, desligadas até a 1.3c; `agendar_visita` desligada até a 1.5. A página só deixa o espaço do botão de favoritar;
+    - não listado continua "não encontrado" para todos até a 1.4 (login).
+  - Propostas novas (ajuste no `docs/PLANO.md` quando o Matheus decidir): sem `?modo=`, Morar; Investir abre com resumo, números, custos, vizinhança e galeria; unidade de partida = a disponível de menor preço; "Restam {x}" só com x de 1 a 5 e a reservada não conta; centavos arredondados, intercaladas pelo total, chaves no mês da entrega; entrada da barra fixa = menor sinal ("a partir de"); frase da vizinhança com as 2 primeiras categorias com dado; mensagem pronta do WhatsApp "Olá! Vi o {empreendimento} e quero saber mais."; janelas e sol das fachadas em off-white (o guarda do laranja barra o laranja como preenchimento de gráfico, mesmo sobre o preto).
+  - Fora desta fatia: "Interesse" (C4, flag desligada), "Parecidos", favoritar, proposta, imagem das plantas e fotos reais (1.8), evento `manager_contact` (1.9).
 - [ ] **1.2 Questionário com contagem ao vivo (F2).**
   - Entrega:
     - schema declarativo e uma pergunta por tela;

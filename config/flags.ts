@@ -28,8 +28,19 @@ export const FLAGS_PADRAO = {
   login_google: false,
   /** C3: "Falar com o gerente" exige login, consentimento e cria lead "Contato direto". */
   contato_exige_login: false,
+  /** Mapa público (fatia 1.3c liga e faz a página). Desligada: a navegação não mostra o Mapa. */
+  mapa_publico: false,
+  /** Favoritos (fatia 1.3c liga e faz a página). Desligada: a navegação não mostra Favoritos. */
+  favoritos: false,
+  /** Agendar visita (fatia 1.5). Desligada: a página só oferece "Falar com o gerente". */
+  agendar_visita: false,
   /** Envio real de e-mail (depende de provedor aprovado). Desligada: e-mails simulados (D10). */
   email_real: false,
+  /**
+   * Telefone da house no cartão de vendas da página. Desligada por decisão do Matheus (18/11/2026): só WhatsApp e
+   * e-mail ficam públicos. O telefone continua cadastrado; ligar a flag volta a mostrá-lo.
+   */
+  contato_telefone_publico: false,
 } as const satisfies Record<string, boolean>;
 
 export type Flag = keyof typeof FLAGS_PADRAO;

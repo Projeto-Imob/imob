@@ -9,6 +9,7 @@ import type {
   Comodidade,
   Empreendimento,
   EmpreendimentoComercial,
+  EscritorioVendas,
   Plano,
   PontoProximo,
   Subcondominio,
@@ -100,6 +101,8 @@ type Definicao = {
   planos: Array<Pick<Plano, "nome" | "sinalPercentual" | "mensaisPercentual" | "numeroParcelas" | "intercaladasPercentual" | "chavesPercentual" | "saldoPercentual">>;
   pontos: PontoProximo[];
   comissao: number | null;
+  /** Sem cartão de escritório: serve de caso de "Não informado" (fatia 1.1). */
+  semEscritorio?: boolean;
 };
 
 const pontosPadrao = (bairro: string, base: number): PontoProximo[] => [
@@ -121,7 +124,7 @@ const DEFINICOES: Definicao[] = [
   { n: 2, tenantId: HORIZONTE, nome: "Edifício Mirante Petrópolis", slug: "edificio-mirante-petropolis", bairro: "Petrópolis", lat: -30.0425, lng: -51.1846, ri: true, percentualObra: 55, aceitaPermuta: false, comodidades: ["garagem", "portaria_24h", "churrasqueira", "playground"], status: "em_obra", dataLancamento: "2025-02-01", dataEntrega: "2027-10-30", tipologias: [[1, 0, 1, 42, 420000, 5], [2, 1, 1, 63, 560000, 6]], planos: [planoDireto, planoFinanciado], pontos: pontosPadrao("Petrópolis", 150), comissao: 4.5 },
   { n: 3, tenantId: VALE, nome: "Vila Menino Deus", slug: "vila-menino-deus", bairro: "Menino Deus", lat: -30.0525, lng: -51.2244, ri: true, percentualObra: 30, aceitaPermuta: true, comodidades: ["piscina", "garagem", "churrasqueira", "pet_place"], status: "na_planta", dataLancamento: "2026-03-01", dataEntrega: "2028-12-20", tipologias: [[2, 1, 1, 70, 610000, 6], [3, 2, 2, 102, 890000, 3]], planos: [planoDireto, planoSemParcelas], pontos: pontosPadrao("Menino Deus", 80), comissao: 5 },
   { n: 4, tenantId: VALE, nome: "Bela Vista Prime", slug: "bela-vista-prime", bairro: "Bela Vista", lat: -30.0405, lng: -51.1985, ri: true, percentualObra: 80, aceitaPermuta: false, comodidades: ["piscina", "garagem", "portaria_24h", "academia", "coworking"], status: "em_obra", dataLancamento: "2024-06-01", dataEntrega: "2026-12-10", tipologias: [[3, 3, 2, 128, 1450000, 4], [4, 3, 3, 165, 1980000, 2]], planos: [planoFinanciado], pontos: pontosPadrao("Bela Vista", 220), comissao: 3.5 },
-  { n: 5, tenantId: PEDRA, nome: "Studio Cidade Baixa", slug: "studio-cidade-baixa", bairro: "Cidade Baixa", lat: -30.042, lng: -51.219, ri: true, percentualObra: 45, aceitaPermuta: false, comodidades: null, status: "em_obra", dataLancamento: "2025-08-01", dataEntrega: "2027-08-15", tipologias: [[0, 0, 0, 34, 360000, 8]], planos: [planoDireto], pontos: pontosPadrao("Cidade Baixa", 60), comissao: 5 },
+  { n: 5, tenantId: PEDRA, nome: "Studio Cidade Baixa", slug: "studio-cidade-baixa", bairro: "Cidade Baixa", lat: -30.042, lng: -51.219, ri: true, percentualObra: 45, aceitaPermuta: false, comodidades: null, status: "em_obra", dataLancamento: "2025-08-01", dataEntrega: "2027-08-15", tipologias: [[0, 0, 0, 34, 360000, 8]], planos: [planoDireto], pontos: pontosPadrao("Cidade Baixa", 60), comissao: 5, semEscritorio: true },
   { n: 6, tenantId: PEDRA, nome: "Recanto da Tristeza", slug: "recanto-da-tristeza", bairro: "Tristeza", lat: -30.1095, lng: -51.254, ri: true, percentualObra: 100, aceitaPermuta: true, comodidades: ["piscina", "garagem", "churrasqueira", "playground", "pet_place"], status: "pronto", dataLancamento: "2022-05-01", dataEntrega: "2024-11-30", tipologias: [[3, 1, 2, 110, 820000, 4], [4, 2, 2, 140, 1100000, 2]], planos: [planoFinanciado, planoSemParcelas], pontos: pontosPadrao("Tristeza", 400), comissao: 4 },
 
   // ---- Casos de exclusão ----
@@ -135,6 +138,7 @@ const DEFINICOES: Definicao[] = [
 function construir() {
   const empreendimentos: Empreendimento[] = [];
   const comerciais: EmpreendimentoComercial[] = [];
+  const escritorios: EscritorioVendas[] = [];
   const subcondominios: Subcondominio[] = [];
   const tipologias: Tipologia[] = [];
   const unidades: Unidade[] = [];
@@ -179,6 +183,21 @@ function construir() {
       exemplo: true,
     });
     comerciais.push({ empreendimentoId: empId, comissaoPercentual: d.comissao, escritorio: "house", exemplo: true });
+    // Cartão fictício da house (decisão 11), com canal próprio: não reaproveita o login nem os telefones de nenhuma conta interna.
+    if (!d.semEscritorio) {
+      escritorios.push({
+        empreendimentoId: empId,
+        origem: "house",
+        nome: "Helena Exemplo",
+        cargo: "Gerente de contas",
+        experiencia: "Dez anos em lançamentos de Porto Alegre (exemplo)",
+        fotoPath: null,
+        whatsapp: "+5551900000100",
+        email: "atendimento.house@exemplo.invalid",
+        telefone: "+555130000100",
+        exemplo: true,
+      });
+    }
     subcondominios.push({
       id: subId,
       empreendimentoId: empId,
@@ -249,7 +268,7 @@ function construir() {
       }
     });
   }
-  return { empreendimentos, comerciais, subcondominios, tipologias, unidades, planos };
+  return { empreendimentos, comerciais, escritorios, subcondominios, tipologias, unidades, planos };
 }
 
 export type Seed = {

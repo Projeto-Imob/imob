@@ -199,6 +199,23 @@ export async function semear(urlMigrator: string): Promise<void> {
           })),
         )
         .onConflictDoNothing();
+      await tx
+        .insert(s.pontosProximos)
+        .values(
+          seed.empreendimentos.flatMap((e) =>
+            e.pontosProximos.map((p) => ({ empreendimentoId: e.id, categoria: p.categoria, nome: p.nome, distanciaM: p.distanciaM, exemplo: true })),
+          ),
+        )
+        .onConflictDoNothing();
+      await tx
+        .insert(s.escritoriosVendas)
+        .values(
+          seed.escritorios.map((o) => ({
+            empreendimentoId: o.empreendimentoId, origem: o.origem, nome: o.nome, cargo: o.cargo, experiencia: o.experiencia,
+            fotoPath: o.fotoPath, whatsapp: o.whatsapp, email: o.email, telefone: o.telefone, exemplo: true,
+          })),
+        )
+        .onConflictDoNothing();
     });
   } finally {
     await pool.end();
