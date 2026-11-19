@@ -19,6 +19,11 @@
 #   bootstrap.env  DATABASE_URL_ADMIN e DB_SENHA_* (só para preparar)
 set -euo pipefail
 
+# Rodado pelo root no terminal, troca para o deploy: os arquivos e a trava do ambiente são dele.
+if [[ $EUID -eq 0 ]]; then
+  exec sudo -u deploy -H -- "$0" "$@"
+fi
+
 readonly BASE=/opt/imob
 readonly IMAGEM=ghcr.io/projeto-imob/imob
 readonly IMAGEM_MIGRACAO=ghcr.io/projeto-imob/imob-migracao
@@ -55,6 +60,8 @@ set -a
 source "$PASTA/deploy.env"
 set +a
 export IMOB_AMBIENTE="$ambiente" IMOB_PASTA="$PASTA"
+# O docker stack deploy lê a pasta atual; a de quem chamou pode não ser legível pelo deploy (ex.: /root).
+cd "$PASTA"
 
 # Um deploy por ambiente de cada vez.
 exec 9>"$PASTA/deploy.lock"
