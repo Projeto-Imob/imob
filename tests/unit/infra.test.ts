@@ -135,3 +135,22 @@ describe.skipIf(!temBash)("deploy.sh: pedido pela chave do Actions", () => {
     expect(r.erro).toContain("faltou /opt/imob/hml/deploy.env");
   });
 });
+
+describe("Dependabot (0.5a, A6)", () => {
+  const DEPENDABOT = ler(".github/dependabot.yml");
+  const UPDATE_TYPES = 'update-types: ["minor", "patch"]';
+
+  it("os dois grupos agrupam só versão menor e de correção", () => {
+    for (const nome of ["dependencias-npm", "github-actions"]) {
+      const inicio = DEPENDABOT.indexOf(`      ${nome}:`);
+      expect(inicio, nome).toBeGreaterThan(-1);
+      const proximaChave = DEPENDABOT.slice(inicio).search(/\n {0,4}\S/);
+      expect(DEPENDABOT.slice(inicio, inicio + proximaChave), nome).toContain(UPDATE_TYPES);
+    }
+    expect(DEPENDABOT).not.toContain('"major"');
+  });
+
+  it("ignora a versão maior do @types/node", () => {
+    expect(DEPENDABOT).toMatch(/dependency-name: "@types\/node"\s+update-types: \["version-update:semver-major"\]/);
+  });
+});

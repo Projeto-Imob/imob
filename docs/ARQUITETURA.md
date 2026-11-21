@@ -163,8 +163,8 @@ O modelo da 1.0 está mantido; detalhes em `docs/specs/acesso-e-visibilidade.md`
 Fica para a fatia 1.4 (com o login): contexto por token de sessão validado no banco, tabela de impersonate, `audit_logs` e lint contra SQL dinâmico.
 
 Acrescentado na 2.0:
-- **Cabeçalhos HTTP, definidos no próprio Next (`headers()` e `proxy.ts`)** para não depender do Traefik compartilhado:
-  - CSP com nonce, com `frame-src` só para `youtube-nocookie.com` quando a flag estiver ligada;
+- **Cabeçalhos HTTP, definidos no próprio Next (`headers()` em `next.config.ts`, montados por `config/cabecalhos.ts`)** para não depender do Traefik compartilhado; o `proxy.ts` fica livre para o login:
+  - CSP sem nonce (decisão de 16/11/2026), para manter o cache das páginas públicas: `script-src 'self' 'unsafe-inline'` (e `'unsafe-eval'` só em desenvolvimento), `connect-src` com o host do Sentry só quando há DSN e `frame-src 'none'`. A lista de origens extras fica em `ORIGENS_EXTRAS` (o mapa da 1.3c libera ali os tiles do OpenFreeMap; o vídeo do YouTube libera `youtube-nocookie.com` quando a flag estiver ligada);
   - `X-Content-Type-Options: nosniff`, `frame-ancestors 'none'`, `Referrer-Policy` e HSTS;
   - `Permissions-Policy: geolocation=(self)`.
 - **Limite de tentativas** em login, cadastro, recuperação de senha, contato e contagem do questionário.
