@@ -1,6 +1,6 @@
 import { defineConfig, devices } from "@playwright/test";
 
-const PORTA = 3100;
+const PORTA = Number(process.env.E2E_PORTA ?? 3100);
 
 // E2E contra o build de produção, para medir o que vai ao ar.
 export default defineConfig({

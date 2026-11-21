@@ -185,7 +185,7 @@ Fatias grandes ou incertas ganham uma spec própria em `docs/specs/<fatia>.md` a
 
 ## Fase 1 — Piloto (v1)
 
-- [ ] **1.1 Página do empreendimento completa (F1).**
+- [x] **1.1 Página do empreendimento completa (F1).** PR da branch `fatia/1.1-pagina` (17/11/2026).
   - Entrega:
     - blocos por modo, custos estimados, plantas e unidades;
     - vizinhança com tempo a pé;
@@ -194,6 +194,13 @@ Fatias grandes ou incertas ganham uma spec própria em `docs/specs/<fatia>.md` a
     - não listado só com login;
     - navegação da v1 (F12) com Início, Buscar e Minha conta.
   - Verificar: e2e por modo; espelho com 23 h e com 30 h; axe; LCP medido.
+  - Feito (plano aprovado em 17/11/2026, decisões 2, 4, 5, 9 e 11):
+    - tabelas `pontos_proximos` e `escritorios_vendas` (migrations 0003 e 0004, RLS como a do empreendimento) e regras puras em `src/modulos/catalogo/pagina.ts`;
+    - Morar e Investir pela URL (`?modo=`); galeria com fachadas ilustradas em SVG marcadas como exemplo (decisão 5); custos por unidade e plano, com "corrigidas pelo índice do contrato" (decisão 4); cartão da house com contato liberado (decisões 2 e 11); barra fixa no celular;
+    - Mapa e Favoritos atrás das flags `mapa_publico` e `favoritos`, desligadas até a 1.3c; `agendar_visita` desligada até a 1.5. A página só deixa o espaço do botão de favoritar;
+    - não listado continua "não encontrado" para todos até a 1.4 (login).
+  - Propostas novas (ajuste no `docs/PLANO.md` quando o Matheus decidir): sem `?modo=`, Morar; Investir abre com resumo, números, custos, vizinhança e galeria; unidade de partida = a disponível de menor preço; "Restam {x}" só com x de 1 a 5 e a reservada não conta; centavos arredondados, intercaladas pelo total, chaves no mês da entrega; entrada da barra fixa = menor sinal ("a partir de"); frase da vizinhança com as 2 primeiras categorias com dado; mensagem pronta do WhatsApp "Olá! Vi o {empreendimento} e quero saber mais."; janelas e sol das fachadas em off-white (o guarda do laranja barra o laranja como preenchimento de gráfico, mesmo sobre o preto).
+  - Fora desta fatia: "Interesse" (C4, flag desligada), "Parecidos", favoritar, proposta, imagem das plantas e fotos reais (1.8), evento `manager_contact` (1.9).
 - [ ] **1.2 Questionário com contagem ao vivo (F2).**
   - Entrega:
     - schema declarativo e uma pergunta por tela;
@@ -226,11 +233,12 @@ Fatias grandes ou incertas ganham uma spec própria em `docs/specs/<fatia>.md` a
     - um teste garante que o pré-lançamento não aparece para o comprador;
     - axe e capturas em 390 e 1440 px.
   - Depende de: protótipo visual de 20/11 e lista de funcionalidades aprovada pelo Matheus.
+  - Plano aprovado em 18/11/2026 (3 PRs; ver Decisões). PR 1, o contexto do visitante (`exigirContexto()`, cookie de 90 dias, `app.current_visitante_id()` e `app.grava_como_comprador()`), na branch `fatia/1.3b-contexto`. Linha de corte: sem a PR 3 começada até 27/11, login e área da incorporadora entram com cadeado em 01/12.
 - [ ] **1.3c Mapa e Favoritos no MVP** (decisão de 17/11/2026, que muda a D2).
   - Entrega:
     - para o comprador, o mapa dos empreendimentos elegíveis e os favoritos;
     - para a incorporadora, o mapa dos próprios empreendimentos, para gestão.
-  - Plano em Opus em andamento, junto com o da 1.3b. Usa o OpenFreeMap, já aprovado, e não usa PostGIS (D5).
+  - Plano aprovado em 18/11/2026. Favoritos sem login no MVP: ficam pelo cookie de visitante de 90 dias e passam para a conta na 1.4. Mapa e favoritos do comprador garantidos para 01/12 (a linha de corte da 1.3b não os atinge). Usa o OpenFreeMap, já aprovado, e não usa PostGIS (D5).
 - [ ] **1.4 Contas e login rápido (F10, F5).**
   - Entrega:
     - Better Auth (e-mail e senha, recuperação);
@@ -362,6 +370,10 @@ Fatiadas quando a v1 estiver no ar, nesta ordem de valor:
   - A 1.3 entrega o lead gravado e o e-mail.
   - O webhook para o n8n fica com a flag `lead_webhook` desligada, até ele pedir.
 - 2026-11-17, à noite: **Mapa e Favoritos entram no MVP, sem cadeado** (ressalva do Matheus). Eles são o ponto de vitrine, de gestão dos empreendimentos e de procura, para o comprador e para a incorporadora. **Muda a D2,** que os deixava para a fase 2, e cria a fatia 1.3c.
+- 2026-11-18: **planos da 1.3b e da 1.3c aprovados pelo Matheus,** com estas decisões:
+  - **favoritos sem login no MVP:** ficam pelo cookie de visitante de 90 dias (httpOnly, SameSite=Lax) e passam para a conta na 1.4 (ajusta a regra de `docs/specs/comprador.md`, que pedia login para favoritar);
+  - o login da homologação usa o segredo e as 3 senhas gerados no servidor, sem exibição; o Matheus copia as senhas para o Bitwarden;
+  - **linha de corte:** se a PR 3 da 1.3b (login e área da incorporadora) não começar até 27/11, o login, a área da incorporadora e o mapa dela entram com cadeado em 01/12 e chegam na 1ª semana de dezembro. O mapa e os favoritos do comprador ficam garantidos para 01/12.
 - 2026-11-17: **MVP de 01/12 com a interface completa.**
   - Todas as funcionalidades do comprador e da incorporadora aparecem.
   - As que ficam para depois de 01/12 vêm com cadeado, bloqueadas para todos, menos para o superadmin do Imob e o god mode, como amostra do que vem.

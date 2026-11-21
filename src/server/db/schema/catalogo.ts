@@ -275,3 +275,44 @@ export const planos = pgTable(
     ),
   ],
 );
+
+export const categoriaPonto = pgEnum("categoria_ponto", ["escola", "parque", "hospital", "academia", "mercado", "transporte"]);
+
+/** Vizinhança com distância (fatia 1.1): o tempo a pé é calculado na leitura (80 m/min), nunca guardado. */
+export const pontosProximos = pgTable(
+  "pontos_proximos",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    empreendimentoId: uuid("empreendimento_id")
+      .notNull()
+      .references(() => empreendimentos.id),
+    categoria: categoriaPonto("categoria").notNull(),
+    nome: text("nome").notNull(),
+    distanciaM: integer("distancia_m").notNull(),
+    exemplo: boolean("exemplo").notNull().default(false),
+  },
+  (t) => [
+    index("pontos_proximos_empreendimento_id_idx").on(t.empreendimentoId),
+    unique("pontos_proximos_unico").on(t.empreendimentoId, t.categoria, t.nome),
+    check("pontos_proximos_distancia", sql`distancia_m >= 0`),
+  ],
+);
+
+/**
+ * Cartão do escritório de vendas: um por empreendimento (fatia 1.1). Só a house por enquanto (decisão 11);
+ * a leitura pública não passa por `contas`, que o visitante não lê.
+ */
+export const escritoriosVendas = pgTable("escritorios_vendas", {
+  empreendimentoId: uuid("empreendimento_id")
+    .primaryKey()
+    .references(() => empreendimentos.id),
+  origem: escritorio("origem").notNull().default("house"),
+  nome: text("nome").notNull(),
+  cargo: text("cargo"),
+  experiencia: text("experiencia"),
+  fotoPath: text("foto_path"),
+  whatsapp: text("whatsapp"),
+  email: text("email"),
+  telefone: text("telefone"),
+  exemplo: boolean("exemplo").notNull().default(false),
+});

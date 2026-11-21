@@ -16,6 +16,9 @@ const FLAGS_D6 = [
   "login_google",
   "contato_exige_login",
   "email_real",
+  "mapa_publico",
+  "favoritos",
+  "agendar_visita",
 ];
 
 describe("config/flags.ts", () => {

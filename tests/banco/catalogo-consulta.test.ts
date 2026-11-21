@@ -37,10 +37,33 @@ describe("lerEmpreendimentoPublico (vitrine pública, fatia 0.3)", () => {
     expect((await lerEmpreendimentoPublico("vila-menino-deus"))?.entrega).toBe("2028-12-20");
   });
 
-  it("devolve só o resumo público, sem dado comercial", async () => {
+  it("devolve só dado público, sem dado comercial (regra 7)", async () => {
     const e = await lerEmpreendimentoPublico("edificio-mirante-petropolis");
     expect(Object.keys(e ?? {}).sort()).toEqual(
-      ["bairro", "cidade", "construtora", "descricao", "entrega", "nome", "percentualObra", "ri", "slug", "uf"].sort(),
+      [
+        "bairro", "cidade", "comodidades", "construtora", "descricao", "entrega", "escritorio", "espelhoAtualizadoEm", "exemplo",
+        "nome", "percentualObra", "planos", "pontos", "ri", "slug", "tipologias", "uf", "unidades",
+      ].sort(),
     );
+    const json = JSON.stringify(e);
+    for (const proibido of ["comissao", "tenant", "tenantId", "escritorio\":\"house", "indiceCorrecao", "INCC"]) {
+      expect(json, proibido).not.toContain(proibido);
+    }
+  });
+
+  it("traz tipologias, unidades, planos, pontos e o cartão do escritório", async () => {
+    const e = await lerEmpreendimentoPublico("edificio-mirante-petropolis");
+    expect(e?.tipologias).toHaveLength(2);
+    expect(e?.unidades).toHaveLength(11);
+    expect(e?.planos).toHaveLength(2);
+    expect(e?.pontos).toHaveLength(6);
+    expect(e?.escritorio).toMatchObject({ origem: "house", nome: "Helena Exemplo", cargo: "Gerente de contas" });
+    expect(e?.planos[0]?.financiamento).toHaveProperty("aceita");
+  });
+
+  it("o Studio Cidade Baixa não tem cartão nem comodidades cadastradas", async () => {
+    const e = await lerEmpreendimentoPublico("studio-cidade-baixa");
+    expect(e?.escritorio).toBeNull();
+    expect(e?.comodidades).toBeNull();
   });
 });

@@ -22,6 +22,27 @@
       "when": 1794871625887,
       "tag": "0002_vitrine",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1794961413270,
+      "tag": "0003_pagina_tabelas",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1794961456993,
+      "tag": "0004_pagina_seguranca",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1795050000000,
+      "tag": "0005_contexto_visitante",
+      "breakpoints": true
     }
   ]
 }

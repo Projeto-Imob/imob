@@ -332,7 +332,7 @@ O GHCR não precisa de token no servidor: o pacote é público e não contém se
 **Como chegar lá:**
 - **Server Components e streaming.**
 - **Cache das páginas públicas:**
-  - `use cache` com `cacheTag` por empreendimento, invalidado na publicação e nas mudanças de cadastro. Desde a 0.3, a página do empreendimento lê o dado em `use cache` com `cacheLife("hours")` e as tags `vitrine` e `empreendimento:{slug}`; a invalidação chega com a escrita do catálogo. Sem `generateStaticParams`, a página renderiza a cada requisição e só o dado fica em cache;
+  - `use cache` com `cacheTag` por empreendimento, invalidado na publicação e nas mudanças de cadastro. Desde a 0.3, a página do empreendimento lê o dado em `use cache` com `cacheLife("hours")` e as tags `vitrine` e `empreendimento:{slug}`; a invalidação chega com a escrita do catálogo. Sem `generateStaticParams`, a página renderiza a cada requisição e só o dado fica em cache. Desde a 1.1, o modo (`?modo=`) e a escassez ficam **fora do cache**: a regra 10 ("menos de 24 h") roda em `Conteudo`, depois de `await io()` (`next/cache`), com o relógio do pedido sobre o `espelhoAtualizadoEm` que vem do cache. Se a conta ficasse dentro do `use cache`, a decisão congelaria por horas;
   - base elegível em cache por hash dos filtros.
 - **Imagens:** gerar os tamanhos no upload e servir do R2 com cache longo, para não gastar CPU do servidor compartilhado.
 - **Fontes locais** (já feito).

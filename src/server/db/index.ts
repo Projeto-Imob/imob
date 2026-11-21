@@ -2,7 +2,7 @@
  * Acesso ao banco (fatia 0.2; design D4). Só código de servidor importa este módulo (server-only
  * e lista permitida do lint). Toda consulta roda numa transação com o contexto gravado por
  * set_config(…, true), válido só naquela transação: o contexto nunca vaza entre requisições
- * que dividem o pool. A partir da fatia 1.4, exigirContexto() é quem chama comContexto().
+ * que dividem o pool. exigirContexto() (src/server/contexto.ts) entrega o Contexto que as ações passam ao comContexto().
  */
 import "server-only";
 import { drizzle, type NodePgDatabase } from "drizzle-orm/node-postgres";
@@ -15,6 +15,8 @@ export type Contexto = {
   contaId: string | null;
   /** Sessão de impersonate (só leitura, design D4). */
   impersonacaoId?: string | null;
+  /** Visitante anônimo (cookie de 90 dias); dono das gravações de comprador sem conta (fatia 1.3b). */
+  visitanteId?: string | null;
 };
 
 type Banco = NodePgDatabase<typeof schema> & { $client: PoolClient };
@@ -88,14 +90,15 @@ async function emTransacao<T>(
 ): Promise<T> {
   const contaId = idOpcional.parse(contexto.contaId);
   const impersonacaoId = idOpcional.parse(contexto.impersonacaoId ?? null);
+  const visitanteId = idOpcional.parse(contexto.visitanteId ?? null);
   const conexao = await obterPool().connect();
   let quebrada: Error | undefined;
   try {
     await conexao.query(acesso === "só leitura" ? "begin read only" : "begin");
-    await conexao.query("select set_config('app.conta_id', $1, true), set_config('app.impersonacao_id', $2, true)", [
-      contaId ?? "",
-      impersonacaoId ?? "",
-    ]);
+    await conexao.query(
+      "select set_config('app.conta_id', $1, true), set_config('app.impersonacao_id', $2, true), set_config('app.visitante_id', $3, true)",
+      [contaId ?? "", impersonacaoId ?? "", visitanteId ?? ""],
+    );
     const resultado = await fn(bancoDa(conexao));
     await conexao.query("commit");
     return resultado;

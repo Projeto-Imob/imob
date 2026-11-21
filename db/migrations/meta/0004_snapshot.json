@@ -1,0 +1,1696 @@
+{
+  "id": "8085c2f2-348a-490c-8fdf-d5a173a31ad2",
+  "prevId": "70442115-9b59-467a-b785-be6cc5ae7cc7",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.contas": {
+      "name": "contas",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "auth_user_id": {
+          "name": "auth_user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "nome": {
+          "name": "nome",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "papel": {
+          "name": "papel",
+          "type": "papel",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tenant_id": {
+          "name": "tenant_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cargo": {
+          "name": "cargo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "whatsapp": {
+          "name": "whatsapp",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "telefone": {
+          "name": "telefone",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ativa": {
+          "name": "ativa",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "exemplo": {
+          "name": "exemplo",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "criado_em": {
+          "name": "criado_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "contas_tenant_id_idx": {
+          "name": "contas_tenant_id_idx",
+          "columns": [
+            {
+              "expression": "tenant_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        }
+      },
+      "foreignKeys": {
+        "contas_tenant_id_tenants_id_fk": {
+          "name": "contas_tenant_id_tenants_id_fk",
+          "tableFrom": "contas",
+          "columnsFrom": [
+            "tenant_id"
+          ],
+          "tableTo": "tenants",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "contas_auth_user_id_unique": {
+          "name": "contas_auth_user_id_unique",
+          "columns": [
+            "auth_user_id"
+          ],
+          "nullsNotDistinct": false
+        },
+        "contas_email_unique": {
+          "name": "contas_email_unique",
+          "columns": [
+            "email"
+          ],
+          "nullsNotDistinct": false
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "contas_papel_e_tenant": {
+          "name": "contas_papel_e_tenant",
+          "value": "(papel in ('client_superadmin', 'client_manager', 'sales_member')) = (tenant_id is not null)"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.tenants": {
+      "name": "tenants",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "tipo": {
+          "name": "tipo",
+          "type": "tipo_tenant",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "nome_comercial": {
+          "name": "nome_comercial",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "razao_social": {
+          "name": "razao_social",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "situacao": {
+          "name": "situacao",
+          "type": "situacao_tenant",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'implantacao'"
+        },
+        "exemplo": {
+          "name": "exemplo",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "criado_em": {
+          "name": "criado_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.empreendimentos": {
+      "name": "empreendimentos",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "tenant_id": {
+          "name": "tenant_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "slug": {
+          "name": "slug",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "nome": {
+          "name": "nome",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cnpj": {
+          "name": "cnpj",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ri_numero": {
+          "name": "ri_numero",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ri_cartorio": {
+          "name": "ri_cartorio",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ri_data_registro": {
+          "name": "ri_data_registro",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ri_patrimonio_afetacao": {
+          "name": "ri_patrimonio_afetacao",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tipo": {
+          "name": "tipo",
+          "type": "tipo_empreendimento",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'novo'"
+        },
+        "visibilidade": {
+          "name": "visibilidade",
+          "type": "visibilidade",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'ativo'"
+        },
+        "publicacao": {
+          "name": "publicacao",
+          "type": "publicacao",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'rascunho'"
+        },
+        "curadoria_aprovada": {
+          "name": "curadoria_aprovada",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "pre_lancamento_ativo": {
+          "name": "pre_lancamento_ativo",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "descricao": {
+          "name": "descricao",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "''"
+        },
+        "videos": {
+          "name": "videos",
+          "type": "text[]",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'::text[]"
+        },
+        "capa_path": {
+          "name": "capa_path",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "mapa_interativo_url": {
+          "name": "mapa_interativo_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "percentual_obra": {
+          "name": "percentual_obra",
+          "type": "numeric(5, 2)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "aceita_permuta": {
+          "name": "aceita_permuta",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "comodidades": {
+          "name": "comodidades",
+          "type": "text[]",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "latitude": {
+          "name": "latitude",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "longitude": {
+          "name": "longitude",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "bairro": {
+          "name": "bairro",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cidade": {
+          "name": "cidade",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "uf": {
+          "name": "uf",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "espelho_atualizado_em": {
+          "name": "espelho_atualizado_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "atualizado_em": {
+          "name": "atualizado_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "exemplo": {
+          "name": "exemplo",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        }
+      },
+      "indexes": {
+        "empreendimentos_tenant_id_idx": {
+          "name": "empreendimentos_tenant_id_idx",
+          "columns": [
+            {
+              "expression": "tenant_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        },
+        "empreendimentos_vitrine_idx": {
+          "name": "empreendimentos_vitrine_idx",
+          "columns": [
+            {
+              "expression": "publicacao",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "visibilidade",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        },
+        "empreendimentos_posicao_idx": {
+          "name": "empreendimentos_posicao_idx",
+          "columns": [
+            {
+              "expression": "latitude",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "longitude",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        }
+      },
+      "foreignKeys": {
+        "empreendimentos_tenant_id_tenants_id_fk": {
+          "name": "empreendimentos_tenant_id_tenants_id_fk",
+          "tableFrom": "empreendimentos",
+          "columnsFrom": [
+            "tenant_id"
+          ],
+          "tableTo": "tenants",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "empreendimentos_slug_unique": {
+          "name": "empreendimentos_slug_unique",
+          "columns": [
+            "slug"
+          ],
+          "nullsNotDistinct": false
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "empreendimentos_nome_minimo": {
+          "name": "empreendimentos_nome_minimo",
+          "value": "char_length(btrim(nome)) >= 4"
+        },
+        "empreendimentos_cnpj_formato": {
+          "name": "empreendimentos_cnpj_formato",
+          "value": "cnpj is null or cnpj ~ '^[0-9]{2}\\.[0-9]{3}\\.[0-9]{3}/[0-9]{4}-[0-9]{2}$'"
+        },
+        "empreendimentos_uf": {
+          "name": "empreendimentos_uf",
+          "value": "char_length(uf) = 2"
+        },
+        "empreendimentos_percentual_obra": {
+          "name": "empreendimentos_percentual_obra",
+          "value": "percentual_obra between 0 and 100"
+        },
+        "empreendimentos_posicao": {
+          "name": "empreendimentos_posicao",
+          "value": "latitude between -90 and 90 and longitude between -180 and 180"
+        },
+        "empreendimentos_publicacao_exige_ri": {
+          "name": "empreendimentos_publicacao_exige_ri",
+          "value": "publicacao <> 'publicado' or (ri_numero is not null and btrim(ri_numero) <> '' and ri_cartorio is not null and btrim(ri_cartorio) <> '' and ri_data_registro is not null)"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.empreendimentos_comercial": {
+      "name": "empreendimentos_comercial",
+      "schema": "",
+      "columns": {
+        "empreendimento_id": {
+          "name": "empreendimento_id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "comissao_percentual": {
+          "name": "comissao_percentual",
+          "type": "numeric(5, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "escritorio": {
+          "name": "escritorio",
+          "type": "escritorio",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'house'"
+        },
+        "exemplo": {
+          "name": "exemplo",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "empreendimentos_comercial_empreendimento_id_empreendimentos_id_fk": {
+          "name": "empreendimentos_comercial_empreendimento_id_empreendimentos_id_fk",
+          "tableFrom": "empreendimentos_comercial",
+          "columnsFrom": [
+            "empreendimento_id"
+          ],
+          "tableTo": "empreendimentos",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "comercial_comissao": {
+          "name": "comercial_comissao",
+          "value": "comissao_percentual is null or comissao_percentual between 0 and 100"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.escritorios_vendas": {
+      "name": "escritorios_vendas",
+      "schema": "",
+      "columns": {
+        "empreendimento_id": {
+          "name": "empreendimento_id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "origem": {
+          "name": "origem",
+          "type": "escritorio",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'house'"
+        },
+        "nome": {
+          "name": "nome",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cargo": {
+          "name": "cargo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "experiencia": {
+          "name": "experiencia",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "foto_path": {
+          "name": "foto_path",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "whatsapp": {
+          "name": "whatsapp",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "telefone": {
+          "name": "telefone",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "exemplo": {
+          "name": "exemplo",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "escritorios_vendas_empreendimento_id_empreendimentos_id_fk": {
+          "name": "escritorios_vendas_empreendimento_id_empreendimentos_id_fk",
+          "tableFrom": "escritorios_vendas",
+          "columnsFrom": [
+            "empreendimento_id"
+          ],
+          "tableTo": "empreendimentos",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.planos": {
+      "name": "planos",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "empreendimento_id": {
+          "name": "empreendimento_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "nome": {
+          "name": "nome",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "sinal_percentual": {
+          "name": "sinal_percentual",
+          "type": "numeric(5, 2)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "mensais_percentual": {
+          "name": "mensais_percentual",
+          "type": "numeric(5, 2)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "numero_parcelas": {
+          "name": "numero_parcelas",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "intercaladas_percentual": {
+          "name": "intercaladas_percentual",
+          "type": "numeric(5, 2)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "chaves_percentual": {
+          "name": "chaves_percentual",
+          "type": "numeric(5, 2)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "saldo_percentual": {
+          "name": "saldo_percentual",
+          "type": "numeric(5, 2)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "indice_correcao": {
+          "name": "indice_correcao",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "financiamento_aceita": {
+          "name": "financiamento_aceita",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "financiamento_momento": {
+          "name": "financiamento_momento",
+          "type": "momento_financiamento",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "financiamento_percentual_maximo": {
+          "name": "financiamento_percentual_maximo",
+          "type": "numeric(5, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fgts": {
+          "name": "fgts",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "dacao": {
+          "name": "dacao",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "parcelamento_direto": {
+          "name": "parcelamento_direto",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "exemplo": {
+          "name": "exemplo",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        }
+      },
+      "indexes": {
+        "planos_empreendimento_id_idx": {
+          "name": "planos_empreendimento_id_idx",
+          "columns": [
+            {
+              "expression": "empreendimento_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        }
+      },
+      "foreignKeys": {
+        "planos_empreendimento_id_empreendimentos_id_fk": {
+          "name": "planos_empreendimento_id_empreendimentos_id_fk",
+          "tableFrom": "planos",
+          "columnsFrom": [
+            "empreendimento_id"
+          ],
+          "tableTo": "empreendimentos",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "planos_parcelas": {
+          "name": "planos_parcelas",
+          "value": "numero_parcelas is null or numero_parcelas > 0"
+        },
+        "planos_percentuais": {
+          "name": "planos_percentuais",
+          "value": "sinal_percentual between 0 and 100 and mensais_percentual between 0 and 100 and intercaladas_percentual between 0 and 100 and chaves_percentual between 0 and 100 and saldo_percentual between 0 and 100"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.pontos_proximos": {
+      "name": "pontos_proximos",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "empreendimento_id": {
+          "name": "empreendimento_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "categoria": {
+          "name": "categoria",
+          "type": "categoria_ponto",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "nome": {
+          "name": "nome",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "distancia_m": {
+          "name": "distancia_m",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "exemplo": {
+          "name": "exemplo",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        }
+      },
+      "indexes": {
+        "pontos_proximos_empreendimento_id_idx": {
+          "name": "pontos_proximos_empreendimento_id_idx",
+          "columns": [
+            {
+              "expression": "empreendimento_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        }
+      },
+      "foreignKeys": {
+        "pontos_proximos_empreendimento_id_empreendimentos_id_fk": {
+          "name": "pontos_proximos_empreendimento_id_empreendimentos_id_fk",
+          "tableFrom": "pontos_proximos",
+          "columnsFrom": [
+            "empreendimento_id"
+          ],
+          "tableTo": "empreendimentos",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "pontos_proximos_unico": {
+          "name": "pontos_proximos_unico",
+          "columns": [
+            "empreendimento_id",
+            "categoria",
+            "nome"
+          ],
+          "nullsNotDistinct": false
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "pontos_proximos_distancia": {
+          "name": "pontos_proximos_distancia",
+          "value": "distancia_m >= 0"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.subcondominios": {
+      "name": "subcondominios",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "empreendimento_id": {
+          "name": "empreendimento_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "nome": {
+          "name": "nome",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "status_subcondominio",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'na_planta'"
+        },
+        "grupo": {
+          "name": "grupo",
+          "type": "grupo_subcondominio",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'residencial'"
+        },
+        "pavimentos": {
+          "name": "pavimentos",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "elevadores": {
+          "name": "elevadores",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "data_lancamento": {
+          "name": "data_lancamento",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "data_entrega": {
+          "name": "data_entrega",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cep": {
+          "name": "cep",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "logradouro": {
+          "name": "logradouro",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "numero": {
+          "name": "numero",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "complemento": {
+          "name": "complemento",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "bairro": {
+          "name": "bairro",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cidade": {
+          "name": "cidade",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "uf": {
+          "name": "uf",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "latitude": {
+          "name": "latitude",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "longitude": {
+          "name": "longitude",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "infraestrutura": {
+          "name": "infraestrutura",
+          "type": "text[]",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'::text[]"
+        },
+        "outros_itens": {
+          "name": "outros_itens",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "exemplo": {
+          "name": "exemplo",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        }
+      },
+      "indexes": {
+        "subcondominios_empreendimento_id_idx": {
+          "name": "subcondominios_empreendimento_id_idx",
+          "columns": [
+            {
+              "expression": "empreendimento_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        }
+      },
+      "foreignKeys": {
+        "subcondominios_empreendimento_id_empreendimentos_id_fk": {
+          "name": "subcondominios_empreendimento_id_empreendimentos_id_fk",
+          "tableFrom": "subcondominios",
+          "columnsFrom": [
+            "empreendimento_id"
+          ],
+          "tableTo": "empreendimentos",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "subcondominios_id_empreendimento": {
+          "name": "subcondominios_id_empreendimento",
+          "columns": [
+            "id",
+            "empreendimento_id"
+          ],
+          "nullsNotDistinct": false
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "subcondominios_pavimentos": {
+          "name": "subcondominios_pavimentos",
+          "value": "pavimentos is null or pavimentos >= 0"
+        },
+        "subcondominios_elevadores": {
+          "name": "subcondominios_elevadores",
+          "value": "elevadores is null or elevadores >= 0"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.tipologia_subcondominios": {
+      "name": "tipologia_subcondominios",
+      "schema": "",
+      "columns": {
+        "empreendimento_id": {
+          "name": "empreendimento_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tipologia_id": {
+          "name": "tipologia_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "subcondominio_id": {
+          "name": "subcondominio_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "tipologia_subcondominios_empreendimento_id_idx": {
+          "name": "tipologia_subcondominios_empreendimento_id_idx",
+          "columns": [
+            {
+              "expression": "empreendimento_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        },
+        "tipologia_subcondominios_subcondominio_id_idx": {
+          "name": "tipologia_subcondominios_subcondominio_id_idx",
+          "columns": [
+            {
+              "expression": "subcondominio_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        }
+      },
+      "foreignKeys": {
+        "tipologia_subcondominios_empreendimento_id_empreendimentos_id_fk": {
+          "name": "tipologia_subcondominios_empreendimento_id_empreendimentos_id_fk",
+          "tableFrom": "tipologia_subcondominios",
+          "columnsFrom": [
+            "empreendimento_id"
+          ],
+          "tableTo": "empreendimentos",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        },
+        "tipologia_subcondominios_tipologia_mesmo_empreendimento": {
+          "name": "tipologia_subcondominios_tipologia_mesmo_empreendimento",
+          "tableFrom": "tipologia_subcondominios",
+          "columnsFrom": [
+            "tipologia_id",
+            "empreendimento_id"
+          ],
+          "tableTo": "tipologias",
+          "columnsTo": [
+            "id",
+            "empreendimento_id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        },
+        "tipologia_subcondominios_subcondominio_mesmo_empreendimento": {
+          "name": "tipologia_subcondominios_subcondominio_mesmo_empreendimento",
+          "tableFrom": "tipologia_subcondominios",
+          "columnsFrom": [
+            "subcondominio_id",
+            "empreendimento_id"
+          ],
+          "tableTo": "subcondominios",
+          "columnsTo": [
+            "id",
+            "empreendimento_id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "tipologia_subcondominios_tipologia_id_subcondominio_id_pk": {
+          "name": "tipologia_subcondominios_tipologia_id_subcondominio_id_pk",
+          "columns": [
+            "tipologia_id",
+            "subcondominio_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.tipologias": {
+      "name": "tipologias",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "empreendimento_id": {
+          "name": "empreendimento_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "nome": {
+          "name": "nome",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tipo": {
+          "name": "tipo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "finalidade": {
+          "name": "finalidade",
+          "type": "finalidade",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'venda'"
+        },
+        "planta_path": {
+          "name": "planta_path",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "dormitorios": {
+          "name": "dormitorios",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "suites": {
+          "name": "suites",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "suites_master": {
+          "name": "suites_master",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "banheiros": {
+          "name": "banheiros",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "lavabos": {
+          "name": "lavabos",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "vagas": {
+          "name": "vagas",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "exemplo": {
+          "name": "exemplo",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        }
+      },
+      "indexes": {
+        "tipologias_empreendimento_id_idx": {
+          "name": "tipologias_empreendimento_id_idx",
+          "columns": [
+            {
+              "expression": "empreendimento_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        }
+      },
+      "foreignKeys": {
+        "tipologias_empreendimento_id_empreendimentos_id_fk": {
+          "name": "tipologias_empreendimento_id_empreendimentos_id_fk",
+          "tableFrom": "tipologias",
+          "columnsFrom": [
+            "empreendimento_id"
+          ],
+          "tableTo": "empreendimentos",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "tipologias_id_empreendimento": {
+          "name": "tipologias_id_empreendimento",
+          "columns": [
+            "id",
+            "empreendimento_id"
+          ],
+          "nullsNotDistinct": false
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "tipologias_contagens": {
+          "name": "tipologias_contagens",
+          "value": "dormitorios >= 0 and suites >= 0 and suites_master >= 0 and banheiros >= 0 and lavabos >= 0 and vagas >= 0"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.unidades": {
+      "name": "unidades",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "empreendimento_id": {
+          "name": "empreendimento_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tipologia_id": {
+          "name": "tipologia_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "subcondominio_id": {
+          "name": "subcondominio_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "identificador": {
+          "name": "identificador",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "area_privativa": {
+          "name": "area_privativa",
+          "type": "numeric(10, 2)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "preco": {
+          "name": "preco",
+          "type": "numeric(14, 2)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "status_unidade",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'disponivel'"
+        },
+        "exemplo": {
+          "name": "exemplo",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        }
+      },
+      "indexes": {
+        "unidades_empreendimento_id_idx": {
+          "name": "unidades_empreendimento_id_idx",
+          "columns": [
+            {
+              "expression": "empreendimento_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        },
+        "unidades_tipologia_id_idx": {
+          "name": "unidades_tipologia_id_idx",
+          "columns": [
+            {
+              "expression": "tipologia_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        },
+        "unidades_subcondominio_id_idx": {
+          "name": "unidades_subcondominio_id_idx",
+          "columns": [
+            {
+              "expression": "subcondominio_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        }
+      },
+      "foreignKeys": {
+        "unidades_empreendimento_id_empreendimentos_id_fk": {
+          "name": "unidades_empreendimento_id_empreendimentos_id_fk",
+          "tableFrom": "unidades",
+          "columnsFrom": [
+            "empreendimento_id"
+          ],
+          "tableTo": "empreendimentos",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        },
+        "unidades_tipologia_mesmo_empreendimento": {
+          "name": "unidades_tipologia_mesmo_empreendimento",
+          "tableFrom": "unidades",
+          "columnsFrom": [
+            "tipologia_id",
+            "empreendimento_id"
+          ],
+          "tableTo": "tipologias",
+          "columnsTo": [
+            "id",
+            "empreendimento_id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        },
+        "unidades_subcondominio_mesmo_empreendimento": {
+          "name": "unidades_subcondominio_mesmo_empreendimento",
+          "tableFrom": "unidades",
+          "columnsFrom": [
+            "subcondominio_id",
+            "empreendimento_id"
+          ],
+          "tableTo": "subcondominios",
+          "columnsTo": [
+            "id",
+            "empreendimento_id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "unidades_identificador_por_subcondominio": {
+          "name": "unidades_identificador_por_subcondominio",
+          "columns": [
+            "subcondominio_id",
+            "identificador"
+          ],
+          "nullsNotDistinct": false
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "unidades_valores": {
+          "name": "unidades_valores",
+          "value": "area_privativa > 0 and preco > 0"
+        }
+      },
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {
+    "public.papel": {
+      "name": "papel",
+      "schema": "public",
+      "values": [
+        "buyer",
+        "client_superadmin",
+        "client_manager",
+        "sales_member",
+        "internal_seller",
+        "internal_account_manager",
+        "internal_admin",
+        "internal_superadmin",
+        "god_mode"
+      ]
+    },
+    "public.situacao_tenant": {
+      "name": "situacao_tenant",
+      "schema": "public",
+      "values": [
+        "implantacao",
+        "ativo",
+        "suspenso",
+        "encerrado"
+      ]
+    },
+    "public.tipo_tenant": {
+      "name": "tipo_tenant",
+      "schema": "public",
+      "values": [
+        "incorporadora",
+        "plataforma"
+      ]
+    },
+    "public.categoria_ponto": {
+      "name": "categoria_ponto",
+      "schema": "public",
+      "values": [
+        "escola",
+        "parque",
+        "hospital",
+        "academia",
+        "mercado",
+        "transporte"
+      ]
+    },
+    "public.escritorio": {
+      "name": "escritorio",
+      "schema": "public",
+      "values": [
+        "house",
+        "plantao"
+      ]
+    },
+    "public.finalidade": {
+      "name": "finalidade",
+      "schema": "public",
+      "values": [
+        "venda",
+        "aluguel",
+        "venda_ou_aluguel"
+      ]
+    },
+    "public.grupo_subcondominio": {
+      "name": "grupo_subcondominio",
+      "schema": "public",
+      "values": [
+        "residencial",
+        "loteamento_horizontal",
+        "comercial",
+        "residencial_comercial"
+      ]
+    },
+    "public.momento_financiamento": {
+      "name": "momento_financiamento",
+      "schema": "public",
+      "values": [
+        "chaves",
+        "assinatura"
+      ]
+    },
+    "public.publicacao": {
+      "name": "publicacao",
+      "schema": "public",
+      "values": [
+        "rascunho",
+        "publicado"
+      ]
+    },
+    "public.status_subcondominio": {
+      "name": "status_subcondominio",
+      "schema": "public",
+      "values": [
+        "na_planta",
+        "em_obra",
+        "pronto",
+        "vendido_100"
+      ]
+    },
+    "public.status_unidade": {
+      "name": "status_unidade",
+      "schema": "public",
+      "values": [
+        "disponivel",
+        "reservada",
+        "vendida"
+      ]
+    },
+    "public.tipo_empreendimento": {
+      "name": "tipo_empreendimento",
+      "schema": "public",
+      "values": [
+        "novo",
+        "terceiro"
+      ]
+    },
+    "public.visibilidade": {
+      "name": "visibilidade",
+      "schema": "public",
+      "values": [
+        "ativo",
+        "nao_listado",
+        "exclusivo"
+      ]
+    }
+  },
+  "schemas": {},
+  "views": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}
